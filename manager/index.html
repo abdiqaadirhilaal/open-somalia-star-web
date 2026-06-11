@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard - SOMSTAR Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <script>
+        const user = JSON.parse(localStorage.getItem('somstar_user') || '{}');
+        if (!user || user.role !== 'manager') window.location.href = '../login.html';
+        if(localStorage.getItem('somstar_dark')==='true')document.body.classList.add('dark-mode');
+    </script>
+
+    <div class="flex">
+        <aside id="sidebar" class="sidebar fixed md:relative z-50">
+            <div class="p-5 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">S</span>
+                    </div>
+                    <div>
+                        <div class="text-white font-bold">SOMSTAR</div>
+                        <div class="text-blue-300 text-xs">Manager Panel</div>
+                    </div>
+                </div>
+            </div>
+            <nav class="p-3 space-y-1 mt-2">
+                <a href="#" onclick="showSection('overview')" class="sidebar-link active" data-section="overview"><i class="fas fa-home"></i> <span>Overview</span></a>
+                <a href="#" onclick="showSection('students')" class="sidebar-link" data-section="students"><i class="fas fa-user-graduate"></i> <span>Students</span></a>
+                <a href="#" onclick="showSection('teachers')" class="sidebar-link" data-section="teachers"><i class="fas fa-chalkboard-teacher"></i> <span>Teachers</span></a>
+                <a href="#" onclick="showSection('classes')" class="sidebar-link" data-section="classes"><i class="fas fa-door-open"></i> <span>Classes</span></a>
+                <a href="accounts.html" class="sidebar-link"><i class="fas fa-users-cog"></i> <span>User Accounts</span></a>
+                <a href="#" onclick="showSection('credentials')" class="sidebar-link" data-section="credentials"><i class="fas fa-key"></i> <span>Credentials</span></a>
+                <a href="#" onclick="showSection('register')" class="sidebar-link" data-section="register"><i class="fas fa-user-plus"></i> <span>Register Student</span></a>
+                <a href="#" onclick="showSection('reports')" class="sidebar-link" data-section="reports"><i class="fas fa-chart-bar"></i> <span>Reports</span></a>
+                <a href="#" onclick="showSection('announcements')" class="sidebar-link" data-section="announcements"><i class="fas fa-bullhorn"></i> <span>Announcements</span></a>
+                <a href="#" onclick="showSection('attendance')" class="sidebar-link" data-section="attendance"><i class="fas fa-calendar-check"></i> <span>Attendance</span></a>
+                <a href="#" onclick="showSection('teacheratt')" class="sidebar-link" data-section="teacheratt"><i class="fas fa-user-clock"></i> <span>Teacher Attendance</span></a>
+                <a href="#" onclick="showSection('finance')" class="sidebar-link" data-section="finance"><i class="fas fa-coins"></i> <span>Finance</span></a>
+            </nav>
+            <div class="p-3 mt-auto border-t border-white/10">
+                <a href="#" onclick="AUTH.logout()" class="sidebar-link logout-btn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+            </div>
+        </aside>
+
+        <main class="flex-1 min-h-screen bg-gray-50 dark:bg-gray-900 transition-all">
+            <div class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 py-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button id="sidebarToggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <h1 class="text-lg font-semibold text-gray-900 dark:text-white" id="pageTitle">Overview</h1>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="SOMSTAR.toggleDarkMode()" id="darkModeToggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <i class="fas fa-moon text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <i class="fas fa-user-circle text-xl"></i>
+                            <span class="hidden sm:inline">Manager</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 md:p-6 space-y-6">
+                <div id="section-overview" class="section-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="dashboard-card bg-gradient-to-br from-blue-500 to-blue-700 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-blue-100 text-sm">Total Students</p>
+                                    <h3 class="text-3xl font-bold mt-1" id="totalStudents">0</h3>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-users text-xl"></i></div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-green-500 to-green-700 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-green-100 text-sm">Total Teachers</p>
+                                    <h3 class="text-3xl font-bold mt-1" id="totalTeachers">3</h3>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-chalkboard-teacher text-xl"></i></div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-purple-500 to-purple-700 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-purple-100 text-sm">Classes</p>
+                                    <h3 class="text-3xl font-bold mt-1" id="totalClasses">9</h3>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-door-open text-xl"></i></div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-yellow-500 to-yellow-700 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-yellow-100 text-sm">Active IDs</p>
+                                    <h3 class="text-3xl font-bold mt-1" id="totalActive">0</h3>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-check-circle text-xl"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
+                            <div id="recentActivity" class="space-y-3">
+                                <p class="text-gray-400 text-sm">Loading activity...</p>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Attendance Overview (Today)</h3>
+                            <div id="attendanceOverview" class="space-y-3">
+                                <p class="text-gray-400 text-sm">Loading attendance...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-students" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">All Students</h3>
+                            <div class="flex gap-2">
+                                <input type="text" id="studentSearch" placeholder="Search students..." class="form-input text-sm py-2 px-3">
+                                <button onclick="exportStudentsPDF()" class="px-4 py-2 bg-red-600 text-white rounded-xl text-sm hover:bg-red-700"><i class="fas fa-file-pdf mr-1"></i> PDF</button>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table" id="studentsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th><th>Name</th><th>Class</th><th>Phone</th><th>Status</th><th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentsTableBody">
+                                    <tr><td colspan="6" class="text-center text-gray-400 py-8">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-teachers" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Manage Teachers</h3>
+                            <button onclick="showAddTeacherModal()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm"><i class="fas fa-plus mr-1"></i> Add Teacher</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>ID</th><th>Name</th><th>Subject</th><th>Contact</th><th>Actions</th></tr></thead>
+                                <tbody id="teachersTableBody"><tr><td colspan="5" class="text-center text-gray-400 py-8">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-classes" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-6">Manage Classes</h3>
+                        <div class="grid md:grid-cols-3 gap-4" id="classesGrid">
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-700 border border-blue-200 dark:border-gray-600">
+                                <div class="text-center"><i class="fas fa-chalkboard-teacher text-2xl text-blue-600 mb-1"></i><h4 class="font-semibold text-sm text-gray-900 dark:text-white">TRY 2:00</h4></div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-700 border border-green-200 dark:border-gray-600">
+                                <div class="text-center"><i class="fas fa-chalkboard-teacher text-2xl text-green-600 mb-1"></i><h4 class="font-semibold text-sm text-gray-900 dark:text-white">Abdishakuur 2:00</h4></div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-gray-700 dark:to-gray-700 border border-yellow-200 dark:border-gray-600">
+                                <div class="text-center"><i class="fas fa-chalkboard-teacher text-2xl text-yellow-600 mb-1"></i><h4 class="font-semibold text-sm text-gray-900 dark:text-white">Muktar 2:00</h4></div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-700 border border-blue-200 dark:border-gray-600">
+                                <div class="text-center"><i class="fas fa-chalkboard-teacher text-2xl text-blue-600 mb-1"></i><h4 class="font-semibold text-sm text-gray-900 dark:text-white">TRY 3:00</h4></div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-700 border border-green-200 dark:border-gray-600">
+                                <div class="text-center"><i class="fas fa-chalkboard-teacher text-2xl text-green-600 mb-1"></i><h4 class="font-semibold text-sm text-gray-900 dark:text-white">Abdishakuur 3:00</h4></div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-gray-700 dark:to-gray-700 border border-yellow-200 dark:border-gray-600">
+                                <div class="text-center"><i class="fas fa-chalkboard-teacher text-2xl text-yellow-600 mb-1"></i><h4 class="font-semibold text-sm text-gray-900 dark:text-white">Muktar 3:00</h4></div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-700 border border-blue-200 dark:border-gray-600">
+                                <div class="text-center"><i class="fas fa-chalkboard-teacher text-2xl text-blue-600 mb-1"></i><h4 class="font-semibold text-sm text-gray-900 dark:text-white">TRY 4:00</h4></div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-700 border border-green-200 dark:border-gray-600">
+                                <div class="text-center"><i class="fas fa-chalkboard-teacher text-2xl text-green-600 mb-1"></i><h4 class="font-semibold text-sm text-gray-900 dark:text-white">Abdishakuur 4:00</h4></div>
+                            </div>
+                            <div class="p-4 rounded-xl bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-gray-700 dark:to-gray-700 border border-yellow-200 dark:border-gray-600">
+                                <div class="text-center"><i class="fas fa-chalkboard-teacher text-2xl text-yellow-600 mb-1"></i><h4 class="font-semibold text-sm text-gray-900 dark:text-white">Muktar 4:00</h4></div>
+                            </div>
+                        </div>
+                        <div class="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-200 dark:border-yellow-800">
+                            <p class="text-sm text-yellow-800 dark:text-yellow-200"><i class="fas fa-info-circle mr-1"></i> 9 classes — TRY, Abdishakuur, and Muktar each teach at 2:00, 3:00, and 4:00.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-credentials" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Login Credentials</h3>
+                            <button onclick="generateBulkIDs()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm"><i class="fas fa-key mr-1"></i> Generate IDs</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table" id="credentialsTable">
+                                <thead><tr><th>Student ID</th><th>Password</th><th>Class</th><th>Status</th><th>Actions</th></tr></thead>
+                                <tbody id="credentialsTableBody"><tr><td colspan="5" class="text-center text-gray-400 py-8">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-register" class="section-content hidden">
+                    <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-6 text-lg">Register New Student</h3>
+                        <form id="registerForm" onsubmit="registerStudent(event)">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+                                    <input type="text" id="regName" class="form-input" placeholder="Enter full name" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Class</label>
+                                    <select id="regClass" class="form-input" required>
+                                        <option value="">Select class</option>
+                                        <option value="TRY 2:00">TRY 2:00</option>
+                                        <option value="Abdishakuur 2:00">Abdishakuur 2:00</option>
+                                        <option value="Muktar 2:00">Muktar 2:00</option>
+                                        <option value="TRY 3:00">TRY 3:00</option>
+                                        <option value="Abdishakuur 3:00">Abdishakuur 3:00</option>
+                                        <option value="Muktar 3:00">Muktar 3:00</option>
+                                        <option value="TRY 4:00">TRY 4:00</option>
+                                        <option value="Abdishakuur 4:00">Abdishakuur 4:00</option>
+                                        <option value="Muktar 4:00">Muktar 4:00</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone</label>
+                                    <input type="tel" id="regPhone" class="form-input" placeholder="Phone number">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Student ID</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="regStudentId" class="form-input" placeholder="Auto-generated" readonly>
+                                        <button type="button" onclick="generateStudentId()" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-xl text-sm hover:bg-gray-300">Generate</button>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="regPassword" class="form-input" value="@som1234" required>
+                                        <button type="button" onclick="document.getElementById('regPassword').value='@som1234'" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-xl text-sm hover:bg-gray-300">Reset</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary w-full py-3 rounded-xl text-white font-semibold mt-6"><i class="fas fa-user-plus mr-2"></i> Register Student</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="section-reports" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Reports</h3>
+                            <button onclick="SOMSTAR.exportToPDF('reportContent','SOMSTAR-Report.pdf')" class="px-4 py-2 bg-red-600 text-white rounded-xl text-sm hover:bg-red-700"><i class="fas fa-file-pdf mr-1"></i> Export PDF</button>
+                        </div>
+                        <div id="reportContent">
+                            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <h4 class="font-medium text-gray-900 dark:text-white mb-3">Students per Class</h4>
+                                    <canvas id="classChart" height="200"></canvas>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-900 dark:text-white mb-3">Attendance Rate</h4>
+                                    <canvas id="attendanceChart" height="200"></canvas>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead><tr><th>Class</th><th>Total Students</th><th>Present Today</th><th>Rate</th></tr></thead>
+                                    <tbody id="reportTableBody"><tr><td colspan="4" class="text-center text-gray-400">Loading...</td></tr></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-announcements" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-6">Send Announcement</h3>
+                        <form id="announceForm" onsubmit="sendAnnouncement(event)" class="space-y-4">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Send To</label>
+                                    <select id="annRecipientType" class="form-input" onchange="toggleAnnRecipient()">
+                                        <option value="all-students">All Students</option>
+                                        <option value="all-teachers">All Teachers</option>
+                                        <option value="class">Specific Class</option>
+                                        <option value="teacher">Specific Teacher</option>
+                                        <option value="student">Specific Student</option>
+                                    </select>
+                                </div>
+                                <div id="annRecipientValueWrap">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select</label>
+                                    <select id="annRecipientValue" class="form-input hidden"></select>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>
+                                    <input type="text" id="annTitle" class="form-input" placeholder="Announcement title" required>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Message</label>
+                                    <textarea id="annMessage" class="form-input" rows="4" placeholder="Write your announcement..." required></textarea>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Voice Message <span class="text-xs text-gray-400">(record or upload)</span></label>
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" id="recordBtn" onclick="toggleRecording()" class="px-4 py-2 rounded-xl text-sm bg-red-500 hover:bg-red-600 text-white"><i class="fas fa-microphone mr-1"></i> <span id="recordLabel">Record</span></button>
+                                        <span id="recordingStatus" class="text-xs text-gray-400 hidden">Recording... <span id="recordingTimer">0s</span></span>
+                                        <input type="file" id="annAudio" accept="audio/*" class="form-input text-sm flex-1" onchange="handleAudioFile(this)">
+                                    </div>
+                                    <div id="audioPreview" class="mt-2 hidden"></div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary px-6 py-2.5 rounded-xl text-white"><i class="fas fa-paper-plane mr-1"></i> Send Announcement</button>
+                        </form>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm mt-6">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Sent Announcements</h3>
+                        <div id="announcementsList"><p class="text-gray-400 text-sm">No announcements sent yet</p></div>
+                    </div>
+                </div>
+
+                <div id="section-attendance" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-6">Attendance Records</h3>
+                        <div class="flex gap-2 mb-4">
+                            <input type="date" id="attendanceDate" class="form-input text-sm w-auto">
+                            <button onclick="loadAttendanceRecords()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm"><i class="fas fa-search mr-1"></i> Search</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Student ID</th><th>Name</th><th>Class</th><th>Date</th><th>Status</th></tr></thead>
+                                <tbody id="attendanceRecordsBody"><tr><td colspan="5" class="text-center text-gray-400 py-8">Select date to view</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-teacheratt" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Teacher Attendance</h3>
+                            <div class="flex items-center gap-2">
+                                <input type="date" id="teacherAttDate" class="form-input text-sm w-auto">
+                                <button onclick="loadTeacherAttendance()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm"><i class="fas fa-search"></i></button>
+                                <button onclick="SOMSTAR.exportToPDF('teacherAttSection','Teacher-Attendance.pdf')" class="px-3 py-2 bg-red-600 text-white rounded-xl text-sm"><i class="fas fa-file-pdf mr-1"></i> PDF</button>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Teacher</th><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th></tr></thead>
+                                <tbody id="teacherAttBody"><tr><td colspan="5" class="text-center text-gray-400 py-8">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-finance" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Finance Management</h3>
+                            <button onclick="SOMSTAR.showNotification('Finance module ready','success')" class="btn-primary px-4 py-2 rounded-xl text-white text-sm"><i class="fas fa-plus mr-1"></i> Add Record</button>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-4 mb-6">
+                            <div class="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Total Revenue</p>
+                                <p class="text-2xl font-bold text-green-600">$0.00</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Expenses</p>
+                                <p class="text-2xl font-bold text-red-600">$0.00</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Balance</p>
+                                <p class="text-2xl font-bold text-blue-600">$0.00</p>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Amount</th></tr></thead>
+                                <tbody><tr><td colspan="4" class="text-center text-gray-400 py-8">No records yet</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="addTeacherModal" class="fixed inset-0 bg-black/50 z-[200] hidden flex items-center justify-center p-4" onclick="if(event.target===this)closeAddTeacherModal()">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full">
+            <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Add Teacher</h3>
+            <form id="teacherForm" onsubmit="addTeacher(event)">
+                <div class="space-y-4">
+                    <div><label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Name</label><input type="text" id="teacherName" class="form-input" required></div>
+                    <div><label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Subject</label><input type="text" id="teacherSubject" class="form-input" required></div>
+                    <div><label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Contact</label><input type="text" id="teacherContact" class="form-input"></div>
+                    <div><label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Password</label><input type="text" id="teacherPassword" class="form-input" value="@som1234" required></div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="addTeacher()" class="btn-primary flex-1 py-2.5 rounded-xl text-white text-sm">Add Teacher</button>
+                    <button type="button" onclick="closeAddTeacherModal()" class="flex-1 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        SOMSTAR.loadSidebar();
+        SOMSTAR.setupLogout();
+        SOMSTAR.initDarkMode();
+        document.getElementById('attendanceDate').value = SOMSTAR.getToday();
+        document.getElementById('teacherAttDate').value = SOMSTAR.getToday();
+
+        function showSection(section) {
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+            const el = document.getElementById('section-' + section);
+            if (el) el.classList.remove('hidden');
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            const link = document.querySelector(`[data-section="${section}"]`);
+            if (link) link.classList.add('active');
+            const titles = { overview:'Overview', students:'Students', teachers:'Teachers', classes:'Classes',
+                credentials:'Credentials', register:'Register Student', reports:'Reports', announcements:'Announcements', attendance:'Attendance Records', teacheratt:'Teacher Attendance', finance:'Finance' };
+            document.getElementById('pageTitle').textContent = titles[section] || section;
+
+            if (section === 'students') loadStudents();
+            if (section === 'teachers') loadTeachers();
+            if (section === 'credentials') loadCredentials();
+            if (section === 'reports') loadReports();
+            if (section === 'announcements') { loadAnnouncements(); setupAnnRecipient(); }
+            if (section === 'attendance') loadAttendanceRecords();
+            if (section === 'teacheratt') loadTeacherAttendance();
+            if (section === 'overview') loadOverview();
+        }
+
+        async function loadOverview() {
+            try {
+                const students = await SOMSTAR.getStudents();
+                const teachers = await SOMSTAR.getTeachers();
+                document.getElementById('totalStudents').textContent = students.length;
+                document.getElementById('totalTeachers').textContent = teachers.length;
+                document.getElementById('totalActive').textContent = students.filter(s => s.status !== 'disabled').length;
+
+                const today = SOMSTAR.getToday();
+                const attSnap = await db.ref('attendance').orderByChild('date').equalTo(today).once('value');
+                const attData = attSnap.val();
+                const attRecords = attData ? Object.values(attData) : [];
+                const present = attRecords.filter(a => a.status === 'present').length;
+                const absent = attRecords.filter(a => a.status === 'absent').length;
+                const vacation = attRecords.filter(a => a.status === 'vacation').length;
+
+                document.getElementById('attendanceOverview').innerHTML = `
+                    <div class="flex justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Present</span>
+                        <span class="text-sm font-semibold text-green-600">${present}</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Absent</span>
+                        <span class="text-sm font-semibold text-red-600">${absent}</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Vacation</span>
+                        <span class="text-sm font-semibold text-yellow-600">${vacation}</span>
+                    </div>
+                `;
+
+                document.getElementById('recentActivity').innerHTML = `
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center"><i class="fas fa-users text-blue-600 text-sm"></i></div>
+                        <div><p class="text-sm text-gray-700 dark:text-gray-300">${students.length} students enrolled</p><p class="text-xs text-gray-400">Current total</p></div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                        <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center"><i class="fas fa-chalkboard-teacher text-green-600 text-sm"></i></div>
+                        <div><p class="text-sm text-gray-700 dark:text-gray-300">${teachers.length} teachers active</p><p class="text-xs text-gray-400">Teaching staff</p></div>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center"><i class="fas fa-calendar-check text-purple-600 text-sm"></i></div>
+                        <div><p class="text-sm text-gray-700 dark:text-gray-300">${attRecords.length} attendance records today</p><p class="text-xs text-gray-400">${today}</p></div>
+                    </div>
+                `;
+            } catch(e) { console.error('Overview error:', e); }
+        }
+
+        async function loadStudents() {
+            try {
+                const students = await SOMSTAR.getStudents();
+                const tbody = document.getElementById('studentsTableBody');
+                if (students.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-8">No students found</td></tr>'; return; }
+                tbody.innerHTML = students.map(s => `
+                    <tr data-uid="${s.uid}" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="font-medium text-gray-900 dark:text-white">${s.studentId || 'N/A'}</td>
+                        <td>${s.fullName || 'N/A'}</td>
+                        <td>${s.class || 'N/A'}</td>
+                        <td>${s.phone || '-'}</td>
+                        <td class="status-cell"><span class="px-2 py-1 rounded-full text-xs font-medium ${s.status === 'disabled' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">${s.status || 'active'}</span></td>
+                        <td>
+                            <div class="flex gap-1">
+                                <button class="p-1.5 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 text-xs" onclick="editStudent('${s.uid}')"><i class="fas fa-edit"></i></button>
+                                <button class="p-1.5 rounded-lg text-xs toggle-status-btn ${s.status === 'disabled' ? 'bg-green-100 text-green-600 hover:bg-green-200' : 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200'}" data-uid="${s.uid}" data-status="${s.status || 'active'}"><i class="fas ${s.status === 'disabled' ? 'fa-check' : 'fa-ban'}"></i></button>
+                                <button class="p-1.5 rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200 text-xs" onclick="resetPassword('${s.uid}')"><i class="fas fa-key"></i></button>
+                                <button class="p-1.5 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 text-xs" onclick="deleteStudent('${s.uid}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+                SOMSTAR.searchTable('studentSearch', 'studentsTable');
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadTeachers() {
+            const tbody = document.getElementById('teachersTableBody');
+            if (!tbody) return;
+            try {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</td></tr>';
+                const teachers = await SOMSTAR.getTeachers();
+                if (teachers.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 py-8">No teachers found</td></tr>'; return; }
+                tbody.innerHTML = teachers.map(t => `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="font-medium text-gray-900 dark:text-white">${t.teacherId || 'N/A'}</td>
+                        <td>${t.name || 'N/A'}</td>
+                        <td>${t.subject || 'N/A'}</td>
+                        <td>${t.contact || '-'}</td>
+                        <td><button onclick="deleteTeacher('${t.uid}')" class="p-1.5 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 text-xs"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                `).join('');
+            } catch(e) { console.error('loadTeachers error:', e); SOMSTAR.showNotification('Error loading teachers', 'error'); }
+        }
+
+        async function loadCredentials() {
+            try {
+                const students = await SOMSTAR.getStudents();
+                const tbody = document.getElementById('credentialsTableBody');
+                if (students.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 py-8">No students found</td></tr>'; return; }
+                tbody.innerHTML = students.map(s => `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50" data-uid="${s.uid}">
+                        <td class="font-mono font-medium text-gray-900 dark:text-white">${s.studentId || 'N/A'}</td>
+                        <td class="font-mono text-gray-500">${s.password || '@som1234'}</td>
+                        <td>${s.class || 'N/A'}</td>
+                        <td class="status-cell"><span class="px-2 py-1 rounded-full text-xs font-medium ${s.status === 'disabled' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">${s.status || 'active'}</span></td>
+                        <td>
+                            <div class="flex gap-1">
+                                <button onclick="changePassword('${s.uid}')" class="p-1.5 rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200 text-xs" title="Change Password"><i class="fas fa-key"></i></button>
+                                <button onclick="editStudentId('${s.uid}')" class="p-1.5 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 text-xs" title="Edit ID"><i class="fas fa-id-card"></i></button>
+                                <button class="p-1.5 rounded-lg text-xs toggle-status-btn ${s.status === 'disabled' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}" data-uid="${s.uid}" data-status="${s.status || 'active'}">${s.status === 'disabled' ? '<i class="fas fa-check"></i>' : '<i class="fas fa-ban"></i>'}</button>
+                                <button onclick="deleteStudent('${s.uid}')" class="p-1.5 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 text-xs"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadReports() {
+            try {
+                const students = await SOMSTAR.getStudents();
+                const today = SOMSTAR.getToday();
+                const attSnap = await db.ref('attendance').orderByChild('date').equalTo(today).once('value');
+                const attData = attSnap.val();
+                const attRecords = attData ? Object.values(attData) : [];
+
+                const rooms = ['TRY 2:00', 'Abdishakuur 2:00', 'Muktar 2:00', 'TRY 3:00', 'Abdishakuur 3:00', 'Muktar 3:00', 'TRY 4:00', 'Abdishakuur 4:00', 'Muktar 4:00'];
+                const tbody = document.getElementById('reportTableBody');
+                tbody.innerHTML = rooms.map(room => {
+                    const roomStudents = students.filter(s => s.class === room);
+                    const roomAtt = attRecords.filter(a => roomStudents.some(s => s.studentId === a.studentId));
+                    const present = roomAtt.filter(a => a.status === 'present').length;
+                    const rate = roomStudents.length ? Math.round((present / roomStudents.length) * 100) : 0;
+                    return `<tr><td class="font-medium">${room}</td><td>${roomStudents.length}</td><td>${present}</td><td>${rate}%</td></tr>`;
+                }).join('');
+
+                if (window.classChart) window.classChart.destroy();
+                if (window.attendanceChart) window.attendanceChart.destroy();
+
+                const ctx1 = document.getElementById('classChart').getContext('2d');
+                window.classChart = new Chart(ctx1, {
+                    type: 'doughnut',
+                    data: {
+                        labels: rooms,
+                        datasets: [{
+                            data: rooms.map(r => students.filter(s => s.class === r).length),
+                            backgroundColor: ['#3b82f6','#10b981','#f59e0b','#6366f1','#ef4444','#ec4899','#14b8a6','#f97316','#8b5cf6']
+                        }]
+                    },
+                    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                });
+
+                const ctx2 = document.getElementById('attendanceChart').getContext('2d');
+                const present = attRecords.filter(a => a.status === 'present').length;
+                const absent = attRecords.filter(a => a.status === 'absent').length;
+                window.attendanceChart = new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Present', 'Absent', 'Vacation'],
+                        datasets: [{
+                            data: [
+                                present,
+                                absent,
+                                attRecords.filter(a => a.status === 'vacation').length
+                            ],
+                            backgroundColor: ['#10b981', '#ef4444', '#f59e0b']
+                        }]
+                    },
+                    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadAttendanceRecords() {
+            try {
+                const date = document.getElementById('attendanceDate').value || SOMSTAR.getToday();
+                const snap = await db.ref('attendance').orderByChild('date').equalTo(date).once('value');
+                const data = snap.val();
+                const records = data ? Object.values(data) : [];
+                const students = await SOMSTAR.getStudents();
+                const tbody = document.getElementById('attendanceRecordsBody');
+
+                if (records.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 py-8">No attendance records for this date</td></tr>'; return; }
+
+                tbody.innerHTML = records.map(r => {
+                    const student = students.find(s => s.studentId === r.studentId);
+                    const statusColors = { present: 'text-green-600 bg-green-100', absent: 'text-red-600 bg-red-100', vacation: 'text-yellow-600 bg-yellow-100' };
+                    return `<tr>
+                        <td class="font-medium">${r.studentId}</td>
+                        <td>${student ? student.fullName : 'N/A'}</td>
+                        <td>${r.class || '—'}</td>
+                        <td>${SOMSTAR.formatDate(r.date)}</td>
+                        <td><span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[r.status] || ''}">${r.status}</span></td>
+                    </tr>`;
+                }).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadTeacherAttendance() {
+            try {
+                const date = document.getElementById('teacherAttDate').value || SOMSTAR.getToday();
+                const snap = await db.ref('teacherAttendance').once('value');
+                const data = snap.val();
+                const tbody = document.getElementById('teacherAttBody');
+                if (!data) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 py-8">No records</td></tr>'; return; }
+
+                let records = Object.values(data);
+                if (date) records = records.filter(r => r.date === date);
+                records.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+                if (records.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 py-8">No teacher attendance for this date</td></tr>'; return; }
+
+                const seen = new Set();
+                const unique = records.filter(r => {
+                    const key = r.teacherName + r.date;
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+
+                tbody.innerHTML = unique.map(r => {
+                    const lateStatus = r.late ? ' (Late)' : '';
+                    const status = r.checkIn && r.checkOut ? ('Completed' + lateStatus) : r.checkIn ? ('Active' + lateStatus) : '—';
+                    const isLate = r.late && r.checkIn;
+                    const statusColor = isLate ? 'text-red-600 bg-red-100' : status.startsWith('Completed') ? 'text-green-600 bg-green-100' : status.startsWith('Active') ? 'text-yellow-600 bg-yellow-100' : 'text-gray-400 bg-gray-100';
+                    return `<tr>
+                        <td class="font-medium">${r.teacherName || r.teacherId}</td>
+                        <td>${SOMSTAR.formatDate(r.date)}</td>
+                        <td>${r.checkIn || '—'}</td>
+                        <td>${r.checkOut || '—'}</td>
+                        <td><span class="px-2 py-1 rounded-full text-xs font-medium ${statusColor}">${status}</span></td>
+                    </tr>`;
+                }).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        function setupAnnRecipient() {
+            toggleAnnRecipient();
+        }
+        function toggleAnnRecipient() {
+            const type = document.getElementById('annRecipientType').value;
+            const wrap = document.getElementById('annRecipientValueWrap');
+            const sel = document.getElementById('annRecipientValue');
+            sel.classList.remove('hidden');
+            if (type === 'class') {
+                sel.innerHTML = '<option value="">Select class</option>TRY 2:00,Abdishakuur 2:00,Muktar 2:00,TRY 3:00,Abdishakuur 3:00,Muktar 3:00,TRY 4:00,Abdishakuur 4:00,Muktar 4:00'.split(',').map(c => `<option value="${c}">${c}</option>`).join('');
+            } else if (type === 'teacher') {
+                sel.innerHTML = '<option value="">Select teacher</option>';
+                SOMSTAR.getTeachers().then(teachers => {
+                    teachers.forEach(t => sel.innerHTML += `<option value="${t.teacherId}">${t.name}</option>`);
+                });
+            } else if (type === 'student') {
+                sel.innerHTML = '<option value="">Select student</option>';
+                SOMSTAR.getStudents().then(students => {
+                    students.forEach(s => sel.innerHTML += `<option value="${s.studentId}">${s.studentId} - ${s.fullName}</option>`);
+                });
+            } else {
+                sel.classList.add('hidden');
+            }
+        }
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordingTimer = null;
+        let seconds = 0;
+        let recordedAudioUrl = '';
+
+        function toggleRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                clearInterval(recordingTimer);
+                document.getElementById('recordBtn').innerHTML = '<i class="fas fa-microphone mr-1"></i> <span id="recordLabel">Record</span>';
+                document.getElementById('recordBtn').className = 'px-4 py-2 rounded-xl text-sm bg-red-500 hover:bg-red-600 text-white';
+                document.getElementById('recordingStatus').classList.add('hidden');
+                return;
+            }
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                SOMSTAR.showNotification('Recording not supported in this browser', 'error');
+                return;
+            }
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                audioChunks = [];
+                seconds = 0;
+                recordedAudioUrl = '';
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    stream.getTracks().forEach(t => t.stop());
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    recordedAudioUrl = URL.createObjectURL(blob);
+                    const preview = document.getElementById('audioPreview');
+                    preview.innerHTML = `
+                        <audio src="${recordedAudioUrl}" controls class="w-full"></audio>
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="clearAudio()" class="text-xs text-red-600 hover:underline"><i class="fas fa-trash mr-1"></i> Remove</button>
+                            <button onclick="reRecord()" class="text-xs text-blue-600 hover:underline"><i class="fas fa-redo mr-1"></i> Re-record</button>
+                        </div>`;
+                    preview.classList.remove('hidden');
+                };
+                mediaRecorder.start();
+                document.getElementById('recordLabel').textContent = 'Stop';
+                document.getElementById('recordBtn').className = 'px-4 py-2 rounded-xl text-sm bg-gray-600 hover:bg-gray-700 text-white';
+                document.getElementById('recordingStatus').classList.remove('hidden');
+                document.getElementById('recordingTimer').textContent = '0s';
+                recordingTimer = setInterval(() => {
+                    seconds++;
+                    document.getElementById('recordingTimer').textContent = seconds + 's';
+                }, 1000);
+            }).catch(() => SOMSTAR.showNotification('Microphone access denied', 'error'));
+        }
+
+        function handleAudioFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            recordedAudioUrl = URL.createObjectURL(file);
+            const preview = document.getElementById('audioPreview');
+            preview.innerHTML = `
+                <audio src="${recordedAudioUrl}" controls class="w-full"></audio>
+                <div class="flex gap-2 mt-2">
+                    <button onclick="clearAudio()" class="text-xs text-red-600 hover:underline"><i class="fas fa-trash mr-1"></i> Remove</button>
+                </div>`;
+            preview.classList.remove('hidden');
+        }
+
+        function clearAudio() {
+            recordedAudioUrl = '';
+            document.getElementById('audioPreview').innerHTML = '';
+            document.getElementById('audioPreview').classList.add('hidden');
+            document.getElementById('annAudio').value = '';
+        }
+
+        function reRecord() {
+            clearAudio();
+            toggleRecording();
+        }
+
+        async function sendAnnouncement(e) {
+            e.preventDefault();
+            const title = document.getElementById('annTitle').value.trim();
+            const message = document.getElementById('annMessage').value.trim();
+            const type = document.getElementById('annRecipientType').value;
+            const sel = document.getElementById('annRecipientValue');
+            const value = sel.classList.contains('hidden') ? '' : sel.value;
+            const audioFile = document.getElementById('annAudio').files[0];
+
+            if (!title || !message) { SOMSTAR.showNotification('Fill title and message', 'error'); return; }
+            if ((type === 'class' || type === 'teacher' || type === 'student') && !value) {
+                SOMSTAR.showNotification('Select a recipient', 'error'); return;
+            }
+
+            try {
+                let audioUrl = '';
+                if (recordedAudioUrl) {
+                    audioUrl = await fetch(recordedAudioUrl).then(r => r.blob()).then(blob => new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onload = e => resolve(e.target.result);
+                        reader.readAsDataURL(blob);
+                    }));
+                }
+                await db.ref('announcements').push({
+                    title, message, recipientType: type, recipientValue: value,
+                    audioUrl, createdAt: new Date().toISOString()
+                });
+                SOMSTAR.showNotification('Announcement sent!', 'success');
+                document.getElementById('announceForm').reset();
+                clearAudio();
+                loadAnnouncements();
+            } catch(e2) { SOMSTAR.showNotification('Error: ' + e2.message, 'error'); }
+        }
+
+        async function loadAnnouncements() {
+            try {
+                const snap = await db.ref('announcements').once('value');
+                const data = snap.val();
+                const container = document.getElementById('announcementsList');
+                if (!data) { container.innerHTML = '<p class="text-gray-400 text-sm">No announcements sent yet</p>'; return; }
+
+                const items = Object.keys(data).map(k => ({ key: k, ...data[k] })).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+                const typeLabels = { 'all-students':'All Students', 'all-teachers':'All Teachers', 'class':'Class: ', 'teacher':'Teacher: ', 'student':'Student: ' };
+
+                container.innerHTML = items.map(a => `
+                    <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 mb-3">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h5 class="font-medium text-gray-900 dark:text-white">${a.title}</h5>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${a.message}</p>
+                                <p class="text-xs text-gray-400 mt-2"><i class="fas fa-users mr-1"></i> ${typeLabels[a.recipientType] || a.recipientType}${a.recipientValue || ''} &middot; ${new Date(a.createdAt).toLocaleDateString()}</p>
+                                ${a.audioUrl ? `<button onclick="playAudio('${a.audioUrl.replace(/'/g,"\\'")}')" class="text-xs text-blue-600 mt-2 hover:underline"><i class="fas fa-headphones mr-1"></i> Listen</button>` : ''}
+                            </div>
+                            <button onclick="deleteAnnouncement('${a.key}')" class="text-red-600 text-xs hover:underline ml-2"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function deleteAnnouncement(key) {
+            if (!confirm('Delete this announcement?')) return;
+            await db.ref('announcements/' + key).remove();
+            loadAnnouncements();
+        }
+
+        function playAudio(url) {
+            const html = `<div class="fixed inset-0 bg-black/50 z-[300] flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full text-center">
+                    <audio src="${url}" controls class="w-full" autoplay></audio>
+                    <button onclick="this.closest('.fixed').remove()" class="mt-3 text-gray-500 text-sm"><i class="fas fa-times mr-1"></i> Close</button>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        async function registerStudent(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value.trim();
+            const cls = document.getElementById('regClass').value;
+            const phone = document.getElementById('regPhone').value.trim();
+            const studentId = document.getElementById('regStudentId').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+
+            if (!studentId) { SOMSTAR.showNotification('Generate a Student ID first', 'error'); return; }
+
+            try {
+                const existing = await db.ref('students').orderByChild('studentId').equalTo(studentId).once('value');
+                if (existing.val()) { SOMSTAR.showNotification('Student ID already exists', 'error'); return; }
+
+                await db.ref('students').push({
+                    studentId,
+                    fullName: name,
+                    class: cls,
+                    phone: phone || '',
+                    password: password,
+                    status: 'active',
+                    createdAt: new Date().toISOString()
+                });
+
+                SOMSTAR.showNotification('Student registered successfully!', 'success');
+                document.getElementById('registerForm').reset();
+                document.getElementById('regPassword').value = '@som1234';
+                if (document.getElementById('section-students').classList.contains('hidden') === false) loadStudents();
+                if (document.getElementById('section-credentials').classList.contains('hidden') === false) loadCredentials();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        async function generateStudentId() {
+            const nextId = await SOMSTAR.getNextStudentId();
+            document.getElementById('regStudentId').value = nextId;
+        }
+
+        async function generateBulkIDs() {
+            if (!confirm('Generate batch of Student IDs?')) return;
+            const btn = document.querySelector('[onclick="generateBulkIDs()"]');
+            try {
+                if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+
+                const snap = await db.ref('students').once('value');
+                const existing = snap.val();
+                const existingStudents = existing ? Object.keys(existing) : [];
+
+                const usedIds = new Set();
+                for (const key of existingStudents) {
+                    const s = existing[key];
+                    if (s && s.studentId) usedIds.add(s.studentId);
+                }
+
+                let generated = 0;
+                for (let i = 100; i <= 300; i++) {
+                    const id = `SOMSTAR${i}`;
+                    if (usedIds.has(id)) continue;
+                    await db.ref('students').push({
+                        studentId: id, fullName: '', class: 'TRY 2:00', phone: '',
+                        password: '@som1234', status: 'active', createdAt: new Date().toISOString()
+                    });
+                    generated++;
+                    usedIds.add(id);
+                    if (generated >= 10) break;
+                }
+
+                SOMSTAR.showNotification(`${generated} IDs generated!`, 'success');
+                loadCredentials();
+            } catch(e) {
+                SOMSTAR.showNotification('Error: ' + e.message, 'error');
+                console.error('generateBulkIDs error:', e);
+            }
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync-alt"></i> Generate IDs'; }
+        }
+
+        async function resetPassword(uid) {
+            const newPwd = prompt('Enter new password (default: @som1234):', '@som1234');
+            if (!newPwd) return;
+            try {
+                await db.ref('students/' + uid + '/password').set(newPwd);
+                SOMSTAR.showNotification('Password reset successfully', 'success');
+                loadCredentials();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        async function changePassword(uid) {
+            await resetPassword(uid);
+        }
+
+        async function editStudentId(uid) {
+            const newId = prompt('Enter new Student ID:');
+            if (!newId) return;
+            try {
+                await db.ref('students/' + uid + '/studentId').set(newId);
+                SOMSTAR.showNotification('Student ID updated', 'success');
+                loadCredentials();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        async function toggleStatus(uid, currentStatus) {
+            const newStatus = currentStatus === 'disabled' ? 'active' : 'disabled';
+            if (newStatus === 'disabled' && !confirm('Disable this account?')) return;
+            try {
+                await db.ref('students/' + uid + '/status').set(newStatus);
+                SOMSTAR.showNotification('Account ' + (newStatus === 'active' ? 'enabled' : 'disabled'), 'success');
+                // Update UI immediately
+                document.querySelectorAll(`tr[data-uid="${uid}"]`).forEach(row => {
+                    const statusCell = row.querySelector('.status-cell span');
+                    if (statusCell) {
+                        const isActive = newStatus === 'active';
+                        statusCell.textContent = newStatus;
+                        statusCell.className = `px-2 py-1 rounded-full text-xs font-medium ${isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+                    }
+                    const toggleBtn = row.querySelector('.toggle-status-btn');
+                    if (toggleBtn) {
+                        toggleBtn.setAttribute('data-status', newStatus);
+                        toggleBtn.className = `p-1.5 rounded-lg text-xs toggle-status-btn ${isActive ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`;
+                        toggleBtn.innerHTML = isActive ? '<i class="fas fa-ban"></i>' : '<i class="fas fa-check"></i>';
+                    }
+                });
+                loadStudents(); loadCredentials();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.toggle-status-btn');
+            if (btn) {
+                const uid = btn.getAttribute('data-uid');
+                const status = btn.getAttribute('data-status');
+                toggleStatus(uid, status);
+            }
+        });
+
+        async function deleteStudent(uid) {
+            if (!confirm('Delete this student permanently?')) return;
+            try {
+                await db.ref('students/' + uid).remove();
+                SOMSTAR.showNotification('Student deleted', 'info');
+                loadStudents(); loadCredentials();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        async function editStudent(uid) {
+            const students = await SOMSTAR.getStudents();
+            const s = students.find(st => st.uid === uid);
+            if (!s) return;
+            const name = prompt('Enter new name:', s.fullName || '');
+            if (name === null) return;
+            const cls = prompt('Enter class (TRY 2:00, Abdishakuur 2:00, Muktar 2:00, TRY 3:00, etc.):', s.class || 'TRY 2:00');
+            if (cls === null) return;
+            try {
+                if (name.trim()) await db.ref('students/' + uid + '/fullName').set(name.trim());
+                if (cls.trim()) await db.ref('students/' + uid + '/class').set(cls.trim());
+                SOMSTAR.showNotification('Student updated', 'success');
+                loadStudents();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        function showAddTeacherModal() {
+            document.getElementById('addTeacherModal').classList.remove('hidden');
+        }
+        function closeAddTeacherModal() {
+            document.getElementById('addTeacherModal').classList.add('hidden');
+        }
+
+        async function addTeacher() {
+            const btn = document.querySelector('#addTeacherModal .btn-primary');
+            const name = document.getElementById('teacherName').value.trim();
+            const subject = document.getElementById('teacherSubject').value.trim();
+            const contact = document.getElementById('teacherContact').value.trim();
+            const pwd = document.getElementById('teacherPassword').value.trim();
+
+            if (!name || !subject) { SOMSTAR.showNotification('Fill Name and Subject', 'error'); return; }
+
+            try {
+                if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...'; }
+
+                const snap = await db.ref('teachers').once('value');
+                const existing = snap.val();
+                const count = existing ? Object.keys(existing).length : 0;
+                const num = String(count + 1).padStart(3, '0');
+                const teacherId = `TCH${num}`;
+
+                await db.ref('teachers').push({
+                    teacherId, name, subject, contact: contact || '', password: pwd,
+                    createdAt: new Date().toISOString()
+                });
+
+                SOMSTAR.showNotification('Teacher added: ' + teacherId, 'success');
+                closeAddTeacherModal();
+                document.getElementById('teacherForm').reset();
+                loadTeachers();
+            } catch(e) {
+                SOMSTAR.showNotification('Error saving teacher: ' + e.message, 'error');
+                console.error('Add teacher error:', e);
+            }
+            if (btn) { btn.disabled = false; btn.innerHTML = 'Add Teacher'; }
+        }
+
+        async function deleteTeacher(uid) {
+            if (!confirm('Delete this teacher?')) return;
+            try {
+                await db.ref('teachers/' + uid).remove();
+                SOMSTAR.showNotification('Teacher deleted', 'info');
+                loadTeachers();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        function exportStudentsPDF() {
+            SOMSTAR.exportToPDF('section-students', 'SOMSTAR-Students.pdf');
+        }
+
+        async function seedDefaultTeachers() {
+            try {
+                const snap = await db.ref('teachers').once('value');
+                if (snap.val()) return;
+                const teachers = [
+                    { name: 'Try', subject: 'General' },
+                    { name: 'C.Shakuur', subject: 'General' },
+                    { name: 'Muqtaar', subject: 'General' }
+                ];
+                for (let i = 0; i < teachers.length; i++) {
+                    const num = String(i + 1).padStart(3, '0');
+                    await db.ref('teachers').push({
+                        teacherId: `TCH${num}`, ...teachers[i], contact: '',
+                        password: '@som1234', createdAt: new Date().toISOString()
+                    });
+                }
+                console.log('Default teachers created');
+            } catch(e) { console.error(e); }
+        }
+
+        loadOverview();
+        seedDefaultTeachers();
+    </script>
+</body>
+</html>

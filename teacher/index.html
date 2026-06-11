@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - SOMSTAR Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <script>
+        const user = JSON.parse(localStorage.getItem('somstar_user') || '{}');
+        if (!user || user.role !== 'teacher') window.location.href = '../login.html';
+        if(localStorage.getItem('somstar_dark')==='true')document.body.classList.add('dark-mode');
+    </script>
+
+    <div class="flex">
+        <aside id="sidebar" class="sidebar fixed md:relative z-50">
+            <div class="p-5 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">T</span>
+                    </div>
+                    <div>
+                        <div class="text-white font-bold">SOMSTAR</div>
+                        <div class="text-green-300 text-xs">Teacher Panel</div>
+                    </div>
+                </div>
+            </div>
+            <nav class="p-3 space-y-1 mt-2">
+                <a href="#" onclick="showSection('overview')" class="sidebar-link active" data-section="overview"><i class="fas fa-home"></i> <span>Overview</span></a>
+                <a href="#" onclick="showSection('myattendance')" class="sidebar-link" data-section="myattendance"><i class="fas fa-user-clock"></i> <span>My Attendance</span></a>
+                <a href="#" onclick="showSection('announcements')" class="sidebar-link" data-section="announcements"><i class="fas fa-bullhorn"></i> <span>Announcements</span></a>
+                <a href="#" onclick="showSection('attendance')" class="sidebar-link" data-section="attendance"><i class="fas fa-calendar-check"></i> <span>Attendance</span></a>
+                <a href="#" onclick="showSection('lessons')" class="sidebar-link" data-section="lessons"><i class="fas fa-book-open"></i> <span>Upload Lessons</span></a>
+                <a href="#" onclick="showSection('marks')" class="sidebar-link" data-section="marks"><i class="fas fa-star"></i> <span>Student Marks</span></a>
+                <a href="#" onclick="showSection('quizzes')" class="sidebar-link" data-section="quizzes"><i class="fas fa-question-circle"></i> <span>Quizzes</span></a>
+                <a href="#" onclick="showSection('classes')" class="sidebar-link" data-section="classes"><i class="fas fa-door-open"></i> <span>Manage Classes</span></a>
+                <a href="#" onclick="showSection('reports')" class="sidebar-link" data-section="reports"><i class="fas fa-chart-bar"></i> <span>Reports</span></a>
+            </nav>
+            <div class="p-3 mt-auto border-t border-white/10">
+                <a href="#" onclick="AUTH.logout()" class="sidebar-link logout-btn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+            </div>
+        </aside>
+
+        <main class="flex-1 min-h-screen bg-gray-50 dark:bg-gray-900 transition-all">
+            <div class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 py-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button id="sidebarToggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <h1 class="text-lg font-semibold text-gray-900 dark:text-white" id="pageTitle">Overview</h1>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="SOMSTAR.toggleDarkMode()" id="darkModeToggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <i class="fas fa-moon text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <i class="fas fa-user-circle text-xl"></i>
+                            <span class="hidden sm:inline">${user.name || 'Teacher'}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 md:p-6 space-y-6">
+                <div id="section-overview" class="section-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="dashboard-card bg-gradient-to-br from-green-500 to-green-700 text-white">
+                            <div class="flex justify-between items-start">
+                                <div><p class="text-green-100 text-sm">Total Students</p><h3 class="text-3xl font-bold mt-1" id="ovStudents">0</h3></div>
+                                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-users text-xl"></i></div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-blue-500 to-blue-700 text-white">
+                            <div><p class="text-blue-100 text-sm">Present Today</p><h3 class="text-3xl font-bold mt-1" id="ovPresent">0</h3></div>
+                            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-check-circle text-xl"></i></div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-purple-500 to-purple-700 text-white">
+                            <div><p class="text-purple-100 text-sm">Lessons Uploaded</p><h3 class="text-3xl font-bold mt-1" id="ovLessons">0</h3></div>
+                            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-book text-xl"></i></div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-yellow-500 to-yellow-700 text-white">
+                            <div><p class="text-yellow-100 text-sm">Quizzes</p><h3 class="text-3xl font-bold mt-1" id="ovQuizzes">0</h3></div>
+                            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-question-circle text-xl"></i></div>
+                        </div>
+                    </div>
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Today's Attendance</h3>
+                            <div id="todayAttendance" class="space-y-3"><p class="text-gray-400 text-sm">No records yet</p></div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-4">My Check-in</h3>
+                            <div id="teacherCheckinStatus" class="text-center py-4">
+                                <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-clock text-2xl text-gray-400"></i>
+                                </div>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm mb-2" id="checkinTimeDisplay">Not checked in yet</p>
+                                <button id="checkinBtn" onclick="toggleCheckin()" class="btn-primary px-6 py-2.5 rounded-xl text-white text-sm"><i class="fas fa-sign-in-alt mr-1"></i> Check In</button>
+                            </div>
+                            <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-center">
+                                <a href="#" onclick="showSection('myattendance');return false" class="text-xs text-blue-600 hover:underline"><i class="fas fa-history mr-1"></i> View my attendance history</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-myattendance" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">My Attendance History</h3>
+                            <div class="flex items-center gap-2">
+                                <input type="month" id="myattMonth" class="form-input text-sm w-auto">
+                                <button onclick="loadMyAttendanceHistory()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm"><i class="fas fa-search"></i></button>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th></tr></thead>
+                                <tbody id="myattHistoryBody"><tr><td colspan="4" class="text-center text-gray-400 py-8">Select month to view</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-announcements" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Announcements</h3>
+                        </div>
+                        <div id="teacherAnnouncementsList"><p class="text-gray-400 text-sm text-center py-8">Loading announcements...</p></div>
+                    </div>
+                </div>
+
+                <div id="section-attendance" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Add Attendance</h3>
+                            <div class="flex items-center gap-2">
+                                <input type="date" id="attDate" class="form-input text-sm w-auto">
+                                <select id="attClassFilter" class="form-input text-sm w-auto" onchange="loadStudentsForAttendance()">
+                                    <option value="TRY 2:00">TRY 2:00</option>
+                                    <option value="Abdishakuur 2:00">Abdishakuur 2:00</option>
+                                    <option value="Muktar 2:00">Muktar 2:00</option>
+                                    <option value="TRY 3:00">TRY 3:00</option>
+                                    <option value="Abdishakuur 3:00">Abdishakuur 3:00</option>
+                                    <option value="Muktar 3:00">Muktar 3:00</option>
+                                    <option value="TRY 4:00">TRY 4:00</option>
+                                    <option value="Abdishakuur 4:00">Abdishakuur 4:00</option>
+                                    <option value="Muktar 4:00">Muktar 4:00</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Student ID</th><th>Name</th><th>Class</th><th>Attendance</th></tr></thead>
+                                <tbody id="attendanceTableBody"><tr><td colspan="4" class="text-center text-gray-400 py-8">Loading students...</td></tr></tbody>
+                            </table>
+                        </div>
+                        <button onclick="saveAttendance()" class="btn-primary px-6 py-2.5 rounded-xl text-white mt-4"><i class="fas fa-save mr-1"></i> Save Attendance</button>
+                    </div>
+                </div>
+
+                <div id="section-lessons" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Upload Lessons</h3>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="p-6 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 text-center hover:border-blue-500 transition cursor-pointer" onclick="document.getElementById('lessonFile').click()">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                                <p class="text-gray-600 dark:text-gray-400 font-medium">Click to upload lesson</p>
+                                <p class="text-xs text-gray-400 mt-1">PDF, Video, Audio, Documents</p>
+                                <input type="file" id="lessonFile" class="hidden" onchange="uploadLesson(this.files[0])">
+                            </div>
+                            <div>
+                                <div class="space-y-3">
+                                    <input type="text" id="lessonTitle" class="form-input" placeholder="Lesson title">
+                                    <select id="lessonType" class="form-input">
+                                        <option value="">Select type</option>
+                                        <option value="pdf">PDF</option>
+                                        <option value="video">Video</option>
+                                        <option value="audio">Audio</option>
+                                        <option value="document">Document</option>
+                                    </select>
+                                    <select id="lessonClass" class="form-input">
+                                        <option value="">Select class</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-8">
+                            <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Uploaded Lessons</h4>
+                            <div id="lessonsList" class="grid md:grid-cols-3 gap-4"><p class="text-gray-400 col-span-3 text-center py-8">No lessons uploaded yet</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-marks" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Add Student Marks</h3>
+                            <select id="markClassFilter" class="form-input text-sm w-auto" onchange="loadStudentsForMarks()">
+                                <option value="TRY 2:00">TRY 2:00</option>
+                                <option value="Abdishakuur 2:00">Abdishakuur 2:00</option>
+                                <option value="Muktar 2:00">Muktar 2:00</option>
+                                <option value="TRY 3:00">TRY 3:00</option>
+                                <option value="Abdishakuur 3:00">Abdishakuur 3:00</option>
+                                <option value="Muktar 3:00">Muktar 3:00</option>
+                                <option value="TRY 4:00">TRY 4:00</option>
+                                <option value="Abdishakuur 4:00">Abdishakuur 4:00</option>
+                                <option value="Muktar 4:00">Muktar 4:00</option>
+                            </select>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-4 mb-6">
+                            <input type="text" id="markSubject" class="form-input" placeholder="Subject (e.g. Math)">
+                            <input type="number" id="markScore" class="form-input" placeholder="Score (0-100)" min="0" max="100">
+                            <button onclick="addMark()" class="btn-primary px-4 py-2.5 rounded-xl text-white"><i class="fas fa-plus mr-1"></i> Add Mark</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Student</th><th>Subject</th><th>Score</th><th>Date</th></tr></thead>
+                                <tbody id="marksTableBody"><tr><td colspan="4" class="text-center text-gray-400 py-8">Select a student to view marks</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-quizzes" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Create Quizzes</h3>
+                            <button onclick="showCreateQuizModal()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm"><i class="fas fa-plus mr-1"></i> New Quiz</button>
+                        </div>
+                        <div id="quizzesList" class="grid md:grid-cols-3 gap-4">
+                            <p class="text-gray-400 col-span-3 text-center py-8">No quizzes created yet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-classes" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-6">My Classes</h3>
+                        <div class="grid md:grid-cols-3 gap-4" id="teacherMyClasses"></div>
+                    </div>
+                </div>
+
+                <div id="section-reports" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Reports</h3>
+                            <button onclick="SOMSTAR.exportToPDF('teacherReport','Teacher-Report.pdf')" class="px-4 py-2 bg-red-600 text-white rounded-xl text-sm"><i class="fas fa-file-pdf mr-1"></i> Export PDF</button>
+                        </div>
+                        <div id="teacherReport">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div><h4 class="font-medium mb-3 text-gray-900 dark:text-white">Class Distribution</h4><canvas id="teacherClassChart" height="200"></canvas></div>
+                                <div><h4 class="font-medium mb-3 text-gray-900 dark:text-white">Attendance Summary</h4><canvas id="teacherAttChart" height="200"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="createQuizModal" class="fixed inset-0 bg-black/50 z-[200] hidden flex items-center justify-center p-4" onclick="if(event.target===this)closeCreateQuizModal()">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Create New Quiz</h3>
+            <form id="quizForm" onsubmit="createQuiz(event)">
+                <div class="space-y-4">
+                    <div><label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Quiz Title</label><input type="text" id="quizTitle" class="form-input" required></div>
+                    <div><label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Class</label>
+                        <select id="quizClass" class="form-input" required><option value="">Select</option><option value="TRY 2:00">TRY 2:00</option><option value="Abdishakuur 2:00">Abdishakuur 2:00</option><option value="Muktar 2:00">Muktar 2:00</option><option value="TRY 3:00">TRY 3:00</option><option value="Abdishakuur 3:00">Abdishakuur 3:00</option><option value="Muktar 3:00">Muktar 3:00</option><option value="TRY 4:00">TRY 4:00</option><option value="Abdishakuur 4:00">Abdishakuur 4:00</option><option value="Muktar 4:00">Muktar 4:00</option></select>
+                    </div>
+                    <div id="questionsContainer">
+                        <div class="question-item p-4 border rounded-xl mb-3 dark:border-gray-600">
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Question 1</label>
+                            <input type="text" class="form-input mt-1 q-text" placeholder="Question" required>
+                            <div class="grid grid-cols-2 gap-2 mt-2">
+                                <input type="text" class="form-input q-option" placeholder="Option A" required>
+                                <input type="text" class="form-input q-option" placeholder="Option B" required>
+                                <input type="text" class="form-input q-option" placeholder="Option C">
+                                <input type="text" class="form-input q-option" placeholder="Option D">
+                            </div>
+                            <div class="mt-2"><select class="form-input q-answer" required><option value="">Correct Answer</option><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select></div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addQuestion()" class="text-blue-600 text-sm font-medium"><i class="fas fa-plus mr-1"></i> Add Question</button>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="btn-primary flex-1 py-2.5 rounded-xl text-white">Create Quiz</button>
+                    <button type="button" onclick="closeCreateQuizModal()" class="flex-1 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        let selectedStudentId = null;
+        let currentMarkStudentId = null;
+
+        SOMSTAR.loadSidebar();
+        SOMSTAR.setupLogout();
+        SOMSTAR.initDarkMode();
+        document.getElementById('attDate').value = SOMSTAR.getToday();
+        document.getElementById('myattMonth').value = new Date().toISOString().slice(0, 7);
+
+        const teacherClasses = {
+            'try': ['TRY 2:00','TRY 3:00','TRY 4:00'],
+            'abdishakuur': ['Abdishakuur 2:00','Abdishakuur 3:00','Abdishakuur 4:00'],
+            'c.shakuur': ['Abdishakuur 2:00','Abdishakuur 3:00','Abdishakuur 4:00'],
+            'muqtaar': ['Muktar 2:00','Muktar 3:00','Muktar 4:00'],
+            'muktar': ['Muktar 2:00','Muktar 3:00','Muktar 4:00']
+        };
+        const userData = JSON.parse(localStorage.getItem('somstar_user') || '{}');
+        const userName = (userData.name || '').toLowerCase();
+        let myClasses = teacherClasses['try'];
+        for (const [key, classes] of Object.entries(teacherClasses)) {
+            if (userName.includes(key)) { myClasses = classes; break; }
+        }
+        function populateTeacherFilters() {
+            ['attClassFilter','markClassFilter','lessonClass'].forEach(id => {
+                const sel = document.getElementById(id);
+                if (!sel) return;
+                sel.innerHTML = myClasses.map(c => `<option value="${c}">${c}</option>`).join('');
+            });
+        }
+        populateTeacherFilters();
+
+        function showSection(section) {
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+            const el = document.getElementById('section-' + section);
+            if (el) el.classList.remove('hidden');
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            const link = document.querySelector(`[data-section="${section}"]`);
+            if (link) link.classList.add('active');
+            const titles = { overview:'Overview', myattendance:'My Attendance', announcements:'Announcements', attendance:'Attendance', lessons:'Upload Lessons', marks:'Student Marks',
+                quizzes:'Quizzes', classes:'Manage Classes', reports:'Reports' };
+            document.getElementById('pageTitle').textContent = titles[section] || section;
+
+            if (section === 'overview') loadTeacherOverview();
+            if (section === 'myattendance') loadMyAttendanceHistory();
+            if (section === 'announcements') loadTeacherAnnouncements();
+            if (section === 'attendance') loadStudentsForAttendance();
+            if (section === 'lessons') loadLessons();
+            if (section === 'marks') { loadStudentsForMarks(); }
+            if (section === 'quizzes') loadQuizzes();
+            if (section === 'classes') loadClassCounts();
+            if (section === 'reports') loadTeacherReports();
+        }
+
+        async function loadTeacherOverview() {
+            try {
+                const students = await SOMSTAR.getStudents();
+                const today = SOMSTAR.getToday();
+                const attSnap = await db.ref('attendance').orderByChild('date').equalTo(today).once('value');
+                const attData = attSnap.val();
+                const attRecords = attData ? Object.values(attData) : [];
+                const lessonsSnap = await db.ref('lessons').once('value');
+                const lessons = lessonsSnap.val() ? Object.values(lessonsSnap.val()) : [];
+                const quizzesSnap = await db.ref('quizzes').once('value');
+                const quizzes = quizzesSnap.val() ? Object.values(quizzesSnap.val()) : [];
+
+                document.getElementById('ovStudents').textContent = students.length;
+                document.getElementById('ovPresent').textContent = attRecords.filter(a => a.status === 'present').length;
+                document.getElementById('ovLessons').textContent = lessons.length;
+                document.getElementById('ovQuizzes').textContent = quizzes.length;
+
+                const present = attRecords.filter(a => a.status === 'present').length;
+                const absent = attRecords.filter(a => a.status === 'absent').length;
+                const vacation = attRecords.filter(a => a.status === 'vacation').length;
+
+                document.getElementById('todayAttendance').innerHTML = `
+                    <div class="flex justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-xl"><span class="text-sm">Present</span><span class="text-sm font-semibold text-green-600">${present}</span></div>
+                    <div class="flex justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-xl"><span class="text-sm">Absent</span><span class="text-sm font-semibold text-red-600">${absent}</span></div>
+                    <div class="flex justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl"><span class="text-sm">Vacation</span><span class="text-sm font-semibold text-yellow-600">${vacation}</span></div>
+                `;
+                document.getElementById('teacherActivity').innerHTML = `
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"><div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center"><i class="fas fa-users text-green-600 text-sm"></i></div><div><p class="text-sm text-gray-700 dark:text-gray-300">${students.length} total students</p><p class="text-xs text-gray-400">Across all classes</p></div></div>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"><div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center"><i class="fas fa-calendar-check text-blue-600 text-sm"></i></div><div><p class="text-sm text-gray-700 dark:text-gray-300">${attRecords.length} attendance records today</p><p class="text-xs text-gray-400">${today}</p></div></div>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"><div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center"><i class="fas fa-book text-purple-600 text-sm"></i></div><div><p class="text-sm text-gray-700 dark:text-gray-300">${lessons.length} lessons uploaded</p><p class="text-xs text-gray-400">Total resources</p></div></div>
+                `;
+
+                // Load announcements (show latest in overview)
+                const annSnap = await db.ref('announcements').once('value');
+                const annData = annSnap.val();
+                if (annData) {
+                    const allAnnouncements = Object.values(annData).filter(a => a.recipientType !== 'student').sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+                    if (allAnnouncements.length > 0) {
+                        const latest = allAnnouncements.slice(0,2);
+                        window._annAudio = window._annAudio || {};
+                        const idx = Date.now();
+                        window._annAudio[idx] = latest.map(a => a.audioUrl || '');
+                        document.getElementById('teacherActivity').innerHTML = latest.map((a,i) => {
+                            const audioBtn = a.audioUrl ? `<button onclick="playAnnAudio(${idx},${i})" class="text-xs text-blue-600 mt-1 hover:underline"><i class="fas fa-headphones mr-1"></i> Listen</button>` : '';
+                            return `<div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
+                                <div class="flex items-center gap-2 mb-1"><i class="fas fa-bullhorn text-yellow-600 text-sm"></i><span class="text-sm font-medium text-gray-900 dark:text-white">${a.title}</span></div>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">${a.message}</p>
+                                ${audioBtn}
+                            </div>`;
+                        }).join('');
+                    }
+                }
+
+                // Load check-in status
+                const ckSnap = await db.ref('teacherAttendance').orderByChild('teacherId').equalTo(userData.name || '').once('value');
+                const ckData = ckSnap.val();
+                const todayRecords = ckData ? Object.values(ckData).filter(r => r.date === today) : [];
+                const todayRecord = todayRecords.length > 0 ? todayRecords[todayRecords.length - 1] : null;
+                const ckDiv = document.getElementById('teacherCheckinStatus');
+                if (todayRecord && todayRecord.checkIn && !todayRecord.checkOut) {
+                    const lateBadge = todayRecord.late ? '<span class="text-xs text-red-600 font-medium ml-1">(Late)</span>' : '';
+                    ckDiv.innerHTML = `
+                        <div class="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-check-circle text-2xl text-green-600"></i>
+                        </div>
+                        <p class="text-green-600 font-medium text-sm mb-1">Checked In${lateBadge}</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-xs mb-3" id="checkinTimeDisplay">${todayRecord.checkIn}</p>
+                        <button id="checkinBtn" onclick="toggleCheckin()" class="px-6 py-2.5 rounded-xl text-white text-sm bg-red-600 hover:bg-red-700"><i class="fas fa-sign-out-alt mr-1"></i> Check Out</button>
+                    `;
+                } else if (todayRecord && todayRecord.checkOut) {
+                    const lateBadge = todayRecord.late ? '<span class="text-xs text-red-600 font-medium ml-1">(Late)</span>' : '';
+                    ckDiv.innerHTML = `
+                        <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-clipboard-check text-2xl text-gray-500"></i>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-1">Done for today${lateBadge}</p>
+                        <p class="text-xs text-gray-400 mb-1">In: ${todayRecord.checkIn}</p>
+                        <p class="text-xs text-gray-400 mb-3">Out: ${todayRecord.checkOut}</p>
+                        <button id="checkinBtn" onclick="toggleCheckin()" class="px-6 py-2.5 rounded-xl text-white text-sm bg-blue-600 hover:bg-blue-700"><i class="fas fa-redo mr-1"></i> Check In Again</button>
+                    `;
+                } else {
+                    ckDiv.innerHTML = `
+                        <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-clock text-2xl text-gray-400"></i>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-2" id="checkinTimeDisplay">Not checked in yet</p>
+                        <button id="checkinBtn" onclick="toggleCheckin()" class="btn-primary px-6 py-2.5 rounded-xl text-white text-sm"><i class="fas fa-sign-in-alt mr-1"></i> Check In</button>
+                    `;
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadTeacherAnnouncements() {
+            try {
+                const annSnap = await db.ref('announcements').once('value');
+                const annData = annSnap.val();
+                const container = document.getElementById('teacherAnnouncementsList');
+                if (!annData || Object.keys(annData).length === 0) {
+                    container.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">No announcements yet</p>';
+                    return;
+                }
+                const all = Object.values(annData).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+                window._annAudio = window._annAudio || {};
+                const idx = Date.now();
+                window._annAudio[idx] = all.map(a => a.audioUrl || '');
+                container.innerHTML = all.map((a,i) => {
+                    const audioBtn = a.audioUrl ? `<button onclick="playAnnAudio(${idx},${i})" class="text-xs text-blue-600 mt-1 hover:underline"><i class="fas fa-headphones mr-1"></i> Listen</button>` : '';
+                    const typeTag = a.recipientType === 'all-teachers' ? '<span class="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full">All Teachers</span>' :
+                        a.recipientType === 'all-students' ? '<span class="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full">All Students</span>' :
+                        a.recipientType === 'teacher' ? '<span class="text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 px-2 py-0.5 rounded-full">Teachers</span>' :
+                        a.recipientType === 'class' ? '<span class="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 px-2 py-0.5 rounded-full">Class</span>' :
+                        a.recipientType === 'student' ? '<span class="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-2 py-0.5 rounded-full">Student</span>' : '';
+                    return `<div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl mb-3">
+                        <div class="flex items-center justify-between mb-1">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-bullhorn text-yellow-600 text-sm"></i>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">${a.title}</span>
+                                ${typeTag}
+                            </div>
+                            <span class="text-xs text-gray-400">${a.createdAt ? new Date(a.createdAt).toLocaleDateString() : ''}</span>
+                        </div>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">${a.message}</p>
+                        ${audioBtn}
+                    </div>`;
+                }).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function toggleCheckin() {
+            try {
+                const today = SOMSTAR.getToday();
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                const snap = await db.ref('teacherAttendance').orderByChild('teacherId').equalTo(userData.name || '').once('value');
+                const data = snap.val();
+                const records = data ? Object.values(data) : [];
+                const todayRecord = records.filter(r => r.date === today);
+                const existingKey = todayRecord.length > 0 ? Object.keys(data).find(k => data[k].date === today && data[k].teacherId === (userData.name || '')) : null;
+
+                if (existingKey && data[existingKey].checkIn && !data[existingKey].checkOut) {
+                    await db.ref('teacherAttendance/' + existingKey + '/checkOut').set(timeStr);
+                    SOMSTAR.showNotification('Checked out at ' + timeStr, 'success');
+                } else {
+                    // Determine if late (after 8:00 AM)
+                    const hour = now.getHours();
+                    const minute = now.getMinutes();
+                    const late = hour > 8 || (hour === 8 && minute > 0);
+                    if (existingKey) {
+                        await db.ref('teacherAttendance/' + existingKey + '/checkIn').set(timeStr);
+                        await db.ref('teacherAttendance/' + existingKey + '/late').set(late);
+                        await db.ref('teacherAttendance/' + existingKey + '/checkOut').set(null);
+                    } else {
+                        await db.ref('teacherAttendance').push({
+                            teacherId: userData.name || '',
+                            teacherName: userData.name || '',
+                            date: today,
+                            checkIn: timeStr,
+                            late: late,
+                            checkOut: null
+                        });
+                    }
+                    if (late) SOMSTAR.showNotification('Checked in at ' + timeStr + ' (LATE)', 'warning');
+                    else SOMSTAR.showNotification('Checked in at ' + timeStr, 'success');
+                }
+                loadTeacherOverview();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        function playAnnAudio(idx, i) {
+            const url = window._annAudio && window._annAudio[idx] && window._annAudio[idx][i];
+            if (!url) return;
+            const html = `<div class="fixed inset-0 bg-black/50 z-[300] flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full text-center">
+                    <audio src="${url}" controls class="w-full" autoplay></audio>
+                    <button onclick="this.closest('.fixed').remove()" class="mt-3 text-gray-500 text-sm"><i class="fas fa-times mr-1"></i> Close</button>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        async function loadMyAttendanceHistory() {
+            try {
+                const month = document.getElementById('myattMonth').value;
+                const snap = await db.ref('teacherAttendance').orderByChild('teacherId').equalTo(userData.name || '').once('value');
+                const data = snap.val();
+                const tbody = document.getElementById('myattHistoryBody');
+                if (!data) { tbody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-400 py-8">No records</td></tr>'; return; }
+
+                let records = Object.values(data).filter(r => !month || (r.date && r.date.startsWith(month)));
+                records.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+                if (records.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-400 py-8">No records for this period</td></tr>'; return; }
+
+                tbody.innerHTML = records.map(r => {
+                    const hasCheckout = r.checkIn && r.checkOut;
+                    const onlyCheckin = r.checkIn && !r.checkOut;
+                    const lateLabel = r.late ? ' (Late)' : '';
+                    const status = hasCheckout ? ('Completed' + lateLabel) : onlyCheckin ? ('Active' + lateLabel) : '—';
+                    const isLate = r.late && r.checkIn;
+                    const statusColor = isLate ? 'text-red-600 bg-red-100' : hasCheckout ? 'text-green-600 bg-green-100' : onlyCheckin ? 'text-yellow-600 bg-yellow-100' : 'text-gray-400 bg-gray-100';
+                    return `<tr>
+                        <td>${SOMSTAR.formatDate(r.date)}</td>
+                        <td>${r.checkIn || '—'}</td>
+                        <td>${r.checkOut || '—'}</td>
+                        <td><span class="px-2 py-1 rounded-full text-xs font-medium ${statusColor}">${status}</span></td>
+                    </tr>`;
+                }).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadStudentsForAttendance() {
+            try {
+                const students = await SOMSTAR.getStudents();
+                const cls = document.getElementById('attClassFilter').value;
+                if (!cls) { document.getElementById('attendanceTableBody').innerHTML = '<tr><td colspan="4" class="text-center text-gray-400 py-8">Select a class above</td></tr>'; return; }
+                let filtered = students.filter(s => s.class === cls);
+                const tbody = document.getElementById('attendanceTableBody');
+                if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-400 py-8">No students in this class</td></tr>'; return; }
+
+                const today = document.getElementById('attDate').value || SOMSTAR.getToday();
+                const existingSnap = await db.ref('attendance').once('value');
+                const existingData = existingSnap.val() || {};
+                const existingKeys = Object.keys(existingData).filter(k => 
+                    existingData[k].date === today && existingData[k].class === cls
+                );
+                const existingStudents = existingKeys.map(k => existingData[k].studentId);
+
+                tbody.innerHTML = filtered.map(s => {
+                    const hasRecord = existingStudents.includes(s.studentId);
+                    const rec = existingKeys.find(k => existingData[k].studentId === s.studentId);
+                    const existingStatus = rec ? existingData[rec].status : '';
+                    return `<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="font-medium text-gray-900 dark:text-white">${s.studentId}</td>
+                        <td>${s.fullName}</td>
+                        <td>${s.class}</td>
+                        <td>
+                            <div class="flex gap-2">
+                                <label class="flex items-center gap-1 cursor-pointer ${hasRecord && existingStatus !== 'present' ? 'opacity-50' : ''}">
+                                    <input type="radio" name="att_${s.studentId}" value="present" ${existingStatus === 'present' ? 'checked' : ''} onclick="markAttendance('${s.studentId}','present')"> <span class="text-sm text-green-600">P</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer ${hasRecord && existingStatus !== 'absent' ? 'opacity-50' : ''}">
+                                    <input type="radio" name="att_${s.studentId}" value="absent" ${existingStatus === 'absent' ? 'checked' : ''} onclick="markAttendance('${s.studentId}','absent')"> <span class="text-sm text-red-600">A</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer ${hasRecord && existingStatus !== 'vacation' ? 'opacity-50' : ''}">
+                                    <input type="radio" name="att_${s.studentId}" value="vacation" ${existingStatus === 'vacation' ? 'checked' : ''} onclick="markAttendance('${s.studentId}','vacation')"> <span class="text-sm text-yellow-600">V</span>
+                                </label>
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        let pendingAttendance = {};
+
+        function markAttendance(studentId, status) {
+            pendingAttendance[studentId] = status;
+        }
+
+        async function saveAttendance() {
+            const date = document.getElementById('attDate').value || SOMSTAR.getToday();
+            const cls = document.getElementById('attClassFilter').value;
+            if (!cls) { SOMSTAR.showNotification('Select a class first', 'error'); return; }
+            const students = await SOMSTAR.getStudents();
+            let saved = 0;
+
+            try {
+                for (const student of students) {
+                    if (student.class !== cls) continue;
+                    const status = pendingAttendance[student.studentId] || 
+                        document.querySelector(`input[name="att_${student.studentId}"]:checked`)?.value;
+                    if (!status) continue;
+
+                    // Check if record exists for today + class
+                    const existingSnap = await db.ref('attendance').once('value');
+                    const allData = existingSnap.val() || {};
+                    const existingKey = Object.keys(allData).find(k => 
+                        allData[k].studentId === student.studentId && 
+                        allData[k].date === date && 
+                        allData[k].class === cls
+                    );
+
+                    if (existingKey) {
+                        await db.ref('attendance/' + existingKey + '/status').set(status);
+                    } else {
+                        await db.ref('attendance').push({
+                            studentId: student.studentId,
+                            name: student.fullName,
+                            class: cls,
+                            date: date,
+                            status: status,
+                            timestamp: new Date().toISOString()
+                        });
+                    }
+                    saved++;
+                }
+                SOMSTAR.showNotification(`Attendance saved for ${saved} students in ${cls}!`, 'success');
+                pendingAttendance = {};
+                loadStudentsForAttendance();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        async function uploadLesson(file) {
+            if (!file) return;
+            const title = document.getElementById('lessonTitle').value.trim();
+            const type = document.getElementById('lessonType').value;
+            const cls = document.getElementById('lessonClass').value;
+            if (!title || !type || !cls) { SOMSTAR.showNotification('Fill title, type, and select a class', 'error'); return; }
+
+            try {
+                const lessonRef = db.ref('lessons').push();
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    await lessonRef.set({
+                        title, class: cls, type, fileName: file.name, fileSize: file.size,
+                        dataUrl: e.target.result,
+                        uploadedAt: new Date().toISOString()
+                    });
+                    SOMSTAR.showNotification('Lesson uploaded!', 'success');
+                    document.getElementById('lessonTitle').value = '';
+                    loadLessons();
+                };
+                reader.readAsDataURL(file);
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        async function loadLessons() {
+            try {
+                const snap = await db.ref('lessons').once('value');
+                const data = snap.val();
+                const container = document.getElementById('lessonsList');
+                if (!data) { container.innerHTML = '<p class="text-gray-400 col-span-3 text-center py-8">No lessons uploaded yet</p>'; return; }
+
+                const lessons = Object.keys(data).map(k => ({ key: k, ...data[k] }));
+                const icons = { pdf:'fa-file-pdf text-red-500', video:'fa-video text-blue-500', audio:'fa-music text-green-500', document:'fa-file-alt text-yellow-500' };
+
+                container.innerHTML = lessons.map(l => `
+                    <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600">
+                        <div class="flex items-start gap-3">
+                            <i class="fas ${icons[l.type] || 'fa-file'} text-2xl"></i>
+                            <div class="flex-1 min-w-0">
+                                <h5 class="font-medium text-gray-900 dark:text-white text-sm truncate">${l.title}</h5>
+                                <p class="text-xs text-gray-400">${l.class} &middot; ${l.type}</p>
+                                ${l.dataUrl ? `<a href="${l.dataUrl}" download="${l.fileName}" class="text-blue-600 text-xs mt-1 inline-block hover:underline"><i class="fas fa-download mr-1"></i>Download</a>` : ''}
+                                <button onclick="deleteLesson('${l.key}')" class="text-red-600 text-xs mt-1 ml-2 hover:underline"><i class="fas fa-trash mr-1"></i>Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function deleteLesson(key) {
+            if (!confirm('Delete this lesson?')) return;
+            try { await db.ref('lessons/' + key).remove(); SOMSTAR.showNotification('Lesson deleted', 'info'); loadLessons(); } catch(e) { SOMSTAR.showNotification('Error', 'error'); }
+        }
+
+        async function loadStudentsForMarks() {
+            try {
+                const students = await SOMSTAR.getStudents();
+                const cls = document.getElementById('markClassFilter').value;
+                let filtered = cls ? students.filter(s => s.class === cls) : students;
+
+                const container = document.getElementById('marksTableBody');
+                if (filtered.length === 0) { container.innerHTML = '<tr><td colspan="4" class="text-center text-gray-400 py-8">No students</td></tr>'; return; }
+
+                container.innerHTML = filtered.map(s => `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer" onclick="selectStudentForMark('${s.studentId}','${s.fullName}')">
+                        <td class="font-medium text-gray-900 dark:text-white">${s.studentId}</td>
+                        <td>${s.fullName}</td>
+                        <td>${s.class}</td>
+                        <td><button onclick="event.stopPropagation();viewStudentMarks('${s.studentId}')" class="text-blue-600 text-sm hover:underline"><i class="fas fa-eye mr-1"></i>View Marks</button></td>
+                    </tr>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        function selectStudentForMark(studentId, name) {
+            selectedStudentId = studentId;
+            document.getElementById('markSubject').focus();
+            SOMSTAR.showNotification(`Adding mark for ${name}`, 'info');
+        }
+
+        async function addMark() {
+            if (!selectedStudentId) { SOMSTAR.showNotification('Select a student first', 'error'); return; }
+            const subject = document.getElementById('markSubject').value.trim();
+            const score = parseInt(document.getElementById('markScore').value);
+            if (!subject || isNaN(score) || score < 0 || score > 100) { SOMSTAR.showNotification('Enter valid subject and score (0-100)', 'error'); return; }
+
+            try {
+                await db.ref('marks').push({
+                    studentId: selectedStudentId,
+                    subject: subject,
+                    score: score,
+                    date: SOMSTAR.getToday(),
+                    timestamp: new Date().toISOString()
+                });
+                SOMSTAR.showNotification('Mark added successfully!', 'success');
+                document.getElementById('markSubject').value = '';
+                document.getElementById('markScore').value = '';
+                viewStudentMarks(selectedStudentId);
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        async function viewStudentMarks(studentId) {
+            try {
+                const snap = await db.ref('marks').orderByChild('studentId').equalTo(studentId).once('value');
+                const data = snap.val();
+                const marks = data ? Object.values(data) : [];
+                const tbody = document.getElementById('marksTableBody');
+                if (marks.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="text-center text-gray-400 py-8">No marks for ${studentId}</td></tr>`; return; }
+                tbody.innerHTML = marks.map(m => `
+                    <tr><td class="font-medium">${studentId}</td><td>${m.subject}</td><td><span class="font-semibold ${m.score >= 50 ? 'text-green-600' : 'text-red-600'}">${m.score}/100</span></td><td>${SOMSTAR.formatDate(m.date)}</td></tr>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        let questionCount = 1;
+
+        function showCreateQuizModal() {
+            document.getElementById('createQuizModal').classList.remove('hidden');
+            const sel = document.getElementById('quizClass');
+            if (sel) sel.innerHTML = '<option value="">Select class</option>' + myClasses.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+        function closeCreateQuizModal() { document.getElementById('createQuizModal').classList.add('hidden'); }
+
+        function addQuestion() {
+            questionCount++;
+            const container = document.getElementById('questionsContainer');
+            const div = document.createElement('div');
+            div.className = 'question-item p-4 border rounded-xl mb-3 dark:border-gray-600';
+            div.innerHTML = `
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Question ${questionCount}</label>
+                <input type="text" class="form-input mt-1 q-text" placeholder="Question" required>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <input type="text" class="form-input q-option" placeholder="Option A" required>
+                    <input type="text" class="form-input q-option" placeholder="Option B" required>
+                    <input type="text" class="form-input q-option" placeholder="Option C">
+                    <input type="text" class="form-input q-option" placeholder="Option D">
+                </div>
+                <div class="mt-2"><select class="form-input q-answer" required><option value="">Correct Answer</option><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select></div>
+                <button type="button" onclick="this.parentElement.remove()" class="text-red-500 text-xs mt-2"><i class="fas fa-times mr-1"></i>Remove</button>
+            `;
+            container.appendChild(div);
+        }
+
+        async function createQuiz(e) {
+            e.preventDefault();
+            const title = document.getElementById('quizTitle').value.trim();
+            const cls = document.getElementById('quizClass').value;
+            const questions = [];
+            document.querySelectorAll('.question-item').forEach(q => {
+                const text = q.querySelector('.q-text').value;
+                const options = Array.from(q.querySelectorAll('.q-option')).map(o => o.value).filter(Boolean);
+                const answer = parseInt(q.querySelector('.q-answer').value);
+                if (text && options.length >= 2 && !isNaN(answer)) {
+                    questions.push({ question: text, options, answer });
+                }
+            });
+
+            if (questions.length === 0) { SOMSTAR.showNotification('Add at least one complete question', 'error'); return; }
+
+            try {
+                await db.ref('quizzes').push({
+                    title, class: cls, questions,
+                    createdAt: new Date().toISOString()
+                });
+                SOMSTAR.showNotification('Quiz created successfully!', 'success');
+                closeCreateQuizModal();
+                document.getElementById('quizForm').reset();
+                questionCount = 1;
+                document.getElementById('questionsContainer').innerHTML = `
+                    <div class="question-item p-4 border rounded-xl mb-3 dark:border-gray-600">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Question 1</label>
+                        <input type="text" class="form-input mt-1 q-text" placeholder="Question" required>
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <input type="text" class="form-input q-option" placeholder="Option A" required>
+                            <input type="text" class="form-input q-option" placeholder="Option B" required>
+                            <input type="text" class="form-input q-option" placeholder="Option C">
+                            <input type="text" class="form-input q-option" placeholder="Option D">
+                        </div>
+                        <div class="mt-2"><select class="form-input q-answer" required><option value="">Correct Answer</option><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select></div>
+                    </div>
+                `;
+                loadQuizzes();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        async function loadQuizzes() {
+            try {
+                const snap = await db.ref('quizzes').once('value');
+                const data = snap.val();
+                const container = document.getElementById('quizzesList');
+                if (!data) { container.innerHTML = '<p class="text-gray-400 col-span-3 text-center py-8">No quizzes created yet</p>'; return; }
+                const quizzes = Object.keys(data).map(k => ({ key: k, ...data[k] }));
+                container.innerHTML = quizzes.map(q => `
+                    <div class="p-5 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-question-circle text-purple-600"></i>
+                            <h5 class="font-medium text-gray-900 dark:text-white">${q.title}</h5>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-3">${q.class} &middot; ${q.questions ? q.questions.length : 0} questions</p>
+                        <div class="flex gap-2">
+                            <button onclick="deleteQuiz('${q.key}')" class="text-xs text-red-600 hover:underline"><i class="fas fa-trash mr-1"></i>Delete</button>
+                            <button onclick="viewQuiz('${q.key}')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-eye mr-1"></i>View</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function deleteQuiz(key) {
+            if (!confirm('Delete this quiz?')) return;
+            try { await db.ref('quizzes/' + key).remove(); SOMSTAR.showNotification('Quiz deleted', 'info'); loadQuizzes(); } catch(e) { SOMSTAR.showNotification('Error', 'error'); }
+        }
+
+        async function viewQuiz(key) {
+            const snap = await db.ref('quizzes/' + key).once('value');
+            const quiz = snap.val();
+            if (!quiz) return;
+            let html = `<div class="fixed inset-0 bg-black/50 z-[300] flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()"><div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto"><h3 class="font-bold text-lg mb-4 text-gray-900 dark:text-white">${quiz.title}</h3>`;
+            (quiz.questions || []).forEach((q, i) => {
+                html += `<div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl"><p class="font-medium text-sm mb-2 text-gray-900 dark:text-white">${i+1}. ${q.question}</p>`;
+                (q.options || []).forEach((o, j) => {
+                    html += `<div class="text-sm ${j === q.answer ? 'text-green-600 font-medium' : 'text-gray-600 dark:text-gray-400'}">${String.fromCharCode(65+j)}. ${o} ${j === q.answer ? '<i class="fas fa-check text-green-600 ml-1"></i>' : ''}</div>`;
+                });
+                html += `</div>`;
+            });
+            html += `<button onclick="this.closest('.fixed').remove()" class="btn-primary w-full py-2 rounded-xl text-white mt-2">Close</button></div></div>`;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        async function loadClassCounts() {
+            try {
+                const students = await SOMSTAR.getStudents();
+                const colors = ['blue','green','yellow','indigo','red','pink','teal','orange','purple'];
+                const html = myClasses.map((c,i) => {
+                    const count = students.filter(s => s.class === c).length;
+                    return `<div onclick="filterByClass('${c}')" class="p-5 rounded-xl bg-gradient-to-br from-${colors[i]}-50 to-${colors[i]}-100 dark:from-gray-700 dark:to-gray-700 border-2 border-${colors[i]}-200 dark:border-gray-600 cursor-pointer hover:shadow-lg transition text-center">
+                        <i class="fas fa-chalkboard-teacher text-2xl text-${colors[i]}-600 mb-1"></i>
+                        <h4 class="font-semibold text-sm text-gray-900 dark:text-white">${c}</h4>
+                        <p class="text-xs text-gray-500 mt-1">${count} students</p>
+                    </div>`;
+                }).join('');
+                document.getElementById('teacherMyClasses').innerHTML = html;
+            } catch(e) { console.error(e); }
+        }
+
+        function filterByClass(cls) {
+            document.getElementById('attClassFilter').value = cls;
+            showSection('attendance');
+        }
+
+        async function loadTeacherReports() {
+            try {
+                const students = await SOMSTAR.getStudents();
+                const rooms = ['TRY 2:00','Abdishakuur 2:00','Muktar 2:00','TRY 3:00','Abdishakuur 3:00','Muktar 3:00','TRY 4:00','Abdishakuur 4:00','Muktar 4:00'];
+
+                if (window.t1) window.t1.destroy();
+                if (window.t2) window.t2.destroy();
+
+                const ctx1 = document.getElementById('teacherClassChart').getContext('2d');
+                window.t1 = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: rooms,
+                        datasets: [{ label: 'Students', data: rooms.map(r => students.filter(s => s.class === r).length), backgroundColor: ['#3b82f6','#10b981','#f59e0b','#6366f1','#ef4444','#ec4899','#14b8a6','#f97316','#8b5cf6'] }]
+                    },
+                    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+                });
+
+                const today = SOMSTAR.getToday();
+                const attSnap = await db.ref('attendance').orderByChild('date').equalTo(today).once('value');
+                const attData = attSnap.val();
+                const attRecords = attData ? Object.values(attData) : [];
+
+                const ctx2 = document.getElementById('teacherAttChart').getContext('2d');
+                window.t2 = new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Present', 'Absent', 'Vacation'],
+                        datasets: [{
+                            data: [attRecords.filter(a=>a.status==='present').length, attRecords.filter(a=>a.status==='absent').length, attRecords.filter(a=>a.status==='vacation').length],
+                            backgroundColor: ['#10b981','#ef4444','#f59e0b']
+                        }]
+                    },
+                    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        loadTeacherOverview();
+    </script>
+</body>
+</html>

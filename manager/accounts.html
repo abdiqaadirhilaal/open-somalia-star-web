@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Accounts - SOMSTAR Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <script>
+        const user = JSON.parse(localStorage.getItem('somstar_user') || '{}');
+        if (!user || user.role !== 'manager') window.location.href = '../login.html';
+        if(localStorage.getItem('somstar_dark')==='true')document.body.classList.add('dark-mode');
+    </script>
+
+    <div class="flex">
+        <aside id="sidebar" class="sidebar fixed md:relative z-50">
+            <div class="p-5 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">S</span>
+                    </div>
+                    <div>
+                        <div class="text-white font-bold">SOMSTAR</div>
+                        <div class="text-blue-300 text-xs">Accounts Panel</div>
+                    </div>
+                </div>
+            </div>
+            <nav class="p-3 space-y-1 mt-2">
+                <a href="index.html" class="sidebar-link"><i class="fas fa-arrow-left"></i> <span>Back to Dashboard</span></a>
+                <a href="#" onclick="showSection('accounts')" class="sidebar-link active" data-section="accounts"><i class="fas fa-users-cog"></i> <span>User Accounts</span></a>
+                <a href="#" onclick="showSection('generate')" class="sidebar-link" data-section="generate"><i class="fas fa-key"></i> <span>Generate IDs</span></a>
+                <a href="#" onclick="showSection('testing')" class="sidebar-link" data-section="testing"><i class="fas fa-flask"></i> <span>Testing Mode</span></a>
+            </nav>
+            <div class="p-3 mt-auto border-t border-white/10">
+                <a href="#" onclick="AUTH.logout()" class="sidebar-link logout-btn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+            </div>
+        </aside>
+
+        <main class="flex-1 min-h-screen bg-gray-50 dark:bg-gray-900 transition-all">
+            <div class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 py-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button id="sidebarToggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <h1 class="text-lg font-semibold text-gray-900 dark:text-white" id="pageTitle">User Accounts</h1>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="SOMSTAR.toggleDarkMode()" id="darkModeToggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <i class="fas fa-moon text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <i class="fas fa-user-shield text-xl"></i>
+                            <span class="hidden sm:inline">Manager</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 md:p-6 space-y-6">
+
+                <div id="section-accounts" class="section-content">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <div>
+                                <h3 class="font-semibold text-gray-900 dark:text-white text-lg">All User Accounts</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage student IDs, passwords, and account status</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="relative">
+                                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                                    <input type="text" id="accountSearch" placeholder="Search accounts..." class="form-input text-sm py-2 pl-9 pr-3 w-48 md:w-64">
+                                </div>
+                                <button onclick="openGenerateSection()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm whitespace-nowrap">
+                                    <i class="fas fa-plus mr-1"></i> New ID
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+                            <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                                <p class="text-xs text-blue-600 dark:text-blue-400 font-medium">Total Accounts</p>
+                                <p class="text-2xl font-bold text-blue-700 dark:text-blue-300" id="totalAccounts">0</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                                <p class="text-xs text-green-600 dark:text-green-400 font-medium">Active</p>
+                                <p class="text-2xl font-bold text-green-700 dark:text-green-300" id="activeAccounts">0</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                                <p class="text-xs text-yellow-600 dark:text-yellow-400 font-medium">Disabled</p>
+                                <p class="text-2xl font-bold text-yellow-700 dark:text-yellow-300" id="disabledAccounts">0</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+                                <p class="text-xs text-purple-600 dark:text-purple-400 font-medium">IDs Generated</p>
+                                <p class="text-2xl font-bold text-purple-700 dark:text-purple-300" id="generatedRange">0</p>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="data-table" id="accountsTable">
+                                <thead>
+                                    <tr>
+                                        <th class="w-8"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
+                                        <th>Student ID</th>
+                                        <th>Username</th>
+                                        <th>Password Status</th>
+                                        <th>Class</th>
+                                        <th>Account Status</th>
+                                        <th class="text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="accountsTableBody">
+                                    <tr><td colspan="7" class="text-center text-gray-400 py-12"><i class="fas fa-spinner fa-spin mr-2"></i> Loading accounts...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                            <div class="text-sm text-gray-500">
+                                Showing <span id="shownCount">0</span> of <span id="totalCount">0</span> accounts
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="exportAccountsCSV()" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-download mr-1"></i> Export CSV
+                                </button>
+                                <button onclick="refreshAccounts()" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-sync-alt mr-1"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-generate" class="section-content hidden">
+                    <div class="max-w-4xl mx-auto space-y-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                            <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2">Generate Student IDs</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Create new student accounts with auto-generated IDs from SOMSTAR100 to SOMSTAR300. Default password: <code class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-blue-600 font-mono text-xs">@som1234</code></p>
+
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div class="p-5 rounded-xl border-2 border-dashed border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10">
+                                    <h4 class="font-medium text-gray-900 dark:text-white mb-3"><i class="fas fa-layer-group text-blue-600 mr-2"></i>Bulk Generate</h4>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">Number of IDs to generate</label>
+                                            <div class="flex gap-2">
+                                                <input type="number" id="bulkCount" class="form-input text-sm" value="5" min="1" max="200">
+                                                <button onclick="generateBulkIDs()" class="btn-primary px-5 py-2 rounded-xl text-white text-sm whitespace-nowrap">
+                                                    <i class="fas fa-gem mr-1"></i> Generate
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">Assign to Class</label>
+                                            <select id="bulkClass" class="form-input text-sm">
+                                                <option value="TRY 2:00">TRY 2:00</option>
+                                                <option value="Abdishakuur 2:00">Abdishakuur 2:00</option>
+                                                <option value="Muktar 2:00">Muktar 2:00</option>
+                                                <option value="TRY 3:00">TRY 3:00</option>
+                                                <option value="Abdishakuur 3:00">Abdishakuur 3:00</option>
+                                                <option value="Muktar 3:00">Muktar 3:00</option>
+                                                <option value="TRY 4:00">TRY 4:00</option>
+                                                <option value="Abdishakuur 4:00">Abdishakuur 4:00</option>
+                                                <option value="Muktar 4:00">Muktar 4:00</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-xl border-2 border-dashed border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10">
+                                    <h4 class="font-medium text-gray-900 dark:text-white mb-3"><i class="fas fa-id-card text-green-600 mr-2"></i>Single Generate</h4>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">Student ID</label>
+                                            <div class="flex gap-2">
+                                                <input type="text" id="singleId" class="form-input text-sm font-mono" placeholder="SOMSTAR..." readonly>
+                                                <button onclick="generateSingleId()" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-xl text-sm hover:bg-gray-300 whitespace-nowrap">
+                                                    <i class="fas fa-dice mr-1"></i> Auto
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">Full Name</label>
+                                            <input type="text" id="singleName" class="form-input text-sm" placeholder="Enter student name">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">Class</label>
+                                            <select id="singleClass" class="form-input text-sm">
+                                                <option value="TRY 2:00">TRY 2:00</option>
+                                                <option value="Abdishakuur 2:00">Abdishakuur 2:00</option>
+                                                <option value="Muktar 2:00">Muktar 2:00</option>
+                                                <option value="TRY 3:00">TRY 3:00</option>
+                                                <option value="Abdishakuur 3:00">Abdishakuur 3:00</option>
+                                                <option value="Muktar 3:00">Muktar 3:00</option>
+                                                <option value="TRY 4:00">TRY 4:00</option>
+                                                <option value="Abdishakuur 4:00">Abdishakuur 4:00</option>
+                                                <option value="Muktar 4:00">Muktar 4:00</option>
+                                            </select>
+                                        </div>
+                                        <button onclick="createSingleAccount()" class="btn-primary w-full py-2 rounded-xl text-white text-sm">
+                                            <i class="fas fa-user-plus mr-1"></i> Create Account
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                            <h4 class="font-medium text-gray-900 dark:text-white mb-4">ID Range Status</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Range</span>
+                                    <span class="text-sm font-mono font-medium text-gray-900 dark:text-white">SOMSTAR100 — SOMSTAR300</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Used</span>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white" id="usedCount">0</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">Available</span>
+                                    <span class="text-sm font-medium text-green-600" id="availableCount">201</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
+                                    <div id="rangeBar" class="bg-blue-600 h-2.5 rounded-full transition-all" style="width:0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-testing" class="section-content hidden">
+                    <div class="max-w-3xl mx-auto">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg">
+                                    <i class="fas fa-vial text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-gray-900 dark:text-white text-lg">Testing Mode</h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Verify that generated student IDs and passwords work correctly during login</p>
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                <div class="p-5 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-gray-700 dark:to-gray-700 border border-indigo-100 dark:border-gray-600">
+                                    <h4 class="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                        <i class="fas fa-flask text-indigo-600"></i> Test Login Credentials
+                                    </h4>
+                                    <form id="testLoginForm" onsubmit="testCredentials(event)" class="space-y-3">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Student ID</label>
+                                            <input type="text" id="testStudentId" class="form-input text-sm font-mono" placeholder="e.g. SOMSTAR100" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Password</label>
+                                            <input type="password" id="testPassword" class="form-input text-sm" value="@som1234" required>
+                                        </div>
+                                        <button type="submit" id="testLoginBtn" class="btn-primary w-full py-2.5 rounded-xl text-white text-sm">
+                                            <i class="fas fa-play mr-1"></i> Test Login
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <div class="p-5 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600">
+                                    <h4 class="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                        <i class="fas fa-history text-gray-500"></i> Test Results
+                                    </h4>
+                                    <div id="testResults" class="space-y-2">
+                                        <div class="text-sm text-gray-400 text-center py-8">
+                                            <i class="fas fa-arrow-right mb-2 text-lg block"></i>
+                                            Enter credentials and click "Test Login" to verify
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-lightbulb text-yellow-600 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Quick Test</p>
+                                        <p class="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                                            Click any student ID from the accounts table below to auto-fill it in the test form.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm mt-6">
+                            <h4 class="font-medium text-gray-900 dark:text-white mb-4">Recent Test History</h4>
+                            <div id="testHistory" class="space-y-2">
+                                <p class="text-sm text-gray-400 text-center py-4">No tests performed yet this session</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="editAccountModal" class="fixed inset-0 bg-black/50 z-[200] hidden flex items-center justify-center p-4" onclick="if(event.target===this)closeModal('editAccountModal')">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-semibold text-gray-900 dark:text-white">Edit Account</h3>
+                <button onclick="closeModal('editAccountModal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="editAccountForm" onsubmit="saveAccountEdit(event)" class="space-y-4">
+                <input type="hidden" id="editUid">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Student ID</label>
+                    <input type="text" id="editStudentId" class="form-input text-sm font-mono" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+                    <input type="text" id="editName" class="form-input text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Class</label>
+                    <select id="editClass" class="form-input text-sm">
+                        <option value="TRY 2:00">TRY 2:00</option>
+                        <option value="Abdishakuur 2:00">Abdishakuur 2:00</option>
+                        <option value="Muktar 2:00">Muktar 2:00</option>
+                        <option value="TRY 3:00">TRY 3:00</option>
+                        <option value="Abdishakuur 3:00">Abdishakuur 3:00</option>
+                        <option value="Muktar 3:00">Muktar 3:00</option>
+                        <option value="TRY 4:00">TRY 4:00</option>
+                        <option value="Abdishakuur 4:00">Abdishakuur 4:00</option>
+                        <option value="Muktar 4:00">Muktar 4:00</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="editPassword" class="form-input text-sm" placeholder="Leave blank to keep current">
+                        <button type="button" onclick="document.getElementById('editPassword').value='@som1234'" class="px-3 py-2 bg-gray-200 dark:bg-gray-600 rounded-xl text-xs whitespace-nowrap">Default</button>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" class="btn-primary flex-1 py-2.5 rounded-xl text-white text-sm">Save Changes</button>
+                    <button type="button" onclick="closeModal('editAccountModal')" class="flex-1 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="fixed inset-0 bg-black/50 z-[200] hidden flex items-center justify-center p-4" onclick="if(event.target===this)closeModal('confirmModal')">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full text-center">
+            <div id="confirmIcon" class="w-16 h-16 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle text-2xl text-yellow-600"></i>
+            </div>
+            <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2" id="confirmTitle">Confirm Action</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6" id="confirmMessage">Are you sure?</p>
+            <div class="flex gap-3">
+                <button id="confirmYesBtn" class="btn-primary flex-1 py-2.5 rounded-xl text-white text-sm">Yes</button>
+                <button onclick="closeModal('confirmModal')" class="flex-1 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        SOMSTAR.loadSidebar();
+        SOMSTAR.setupLogout();
+        SOMSTAR.initDarkMode();
+
+        let allAccounts = [];
+        let testHistory = [];
+
+        function showSection(section) {
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+            const el = document.getElementById('section-' + section);
+            if (el) el.classList.remove('hidden');
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            const link = document.querySelector(`[data-section="${section}"]`);
+            if (link) link.classList.add('active');
+            const titles = { accounts:'User Accounts', generate:'Generate IDs', testing:'Testing Mode' };
+            document.getElementById('pageTitle').textContent = titles[section] || section;
+            if (section === 'accounts') loadAccounts();
+            if (section === 'generate') updateGenerateStatus();
+        }
+
+        async function loadAccounts() {
+            try {
+                const snap = await db.ref('students').once('value');
+                const data = snap.val();
+                allAccounts = data ? Object.keys(data).map(k => ({ uid: k, ...data[k] })) : [];
+                renderAccounts(allAccounts);
+            } catch(e) {
+                console.error(e);
+                document.getElementById('accountsTableBody').innerHTML = '<tr><td colspan="7" class="text-center text-red-400 py-8">Error loading accounts</td></tr>';
+            }
+        }
+
+        function renderAccounts(accounts) {
+            const tbody = document.getElementById('accountsTableBody');
+            const totalEl = document.getElementById('totalCount');
+            const shownEl = document.getElementById('shownCount');
+
+            if (accounts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-400 py-12"><i class="fas fa-users-slash text-4xl block mb-3"></i> No accounts found</td></tr>';
+                document.getElementById('totalAccounts').textContent = '0';
+                document.getElementById('activeAccounts').textContent = '0';
+                document.getElementById('disabledAccounts').textContent = '0';
+                totalEl.textContent = '0';
+                shownEl.textContent = '0';
+                document.getElementById('totalCount').textContent = '0';
+                return;
+            }
+
+            const active = accounts.filter(a => a.status !== 'disabled').length;
+            const disabled = accounts.filter(a => a.status === 'disabled').length;
+            document.getElementById('totalAccounts').textContent = accounts.length;
+            document.getElementById('activeAccounts').textContent = active;
+            document.getElementById('disabledAccounts').textContent = disabled;
+            totalEl.textContent = allAccounts.length;
+            shownEl.textContent = accounts.length;
+            document.getElementById('totalCount').textContent = allAccounts.length;
+
+            tbody.innerHTML = accounts.map(a => `
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition ${a.status === 'disabled' ? 'opacity-60' : ''}">
+                    <td><input type="checkbox" class="rounded border-gray-300 account-check" value="${a.uid}" onchange="updateSelectAll()"></td>
+                    <td>
+                        <span class="font-mono font-medium text-gray-900 dark:text-white text-sm">${a.studentId || 'N/A'}</span>
+                    </td>
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br ${a.status === 'disabled' ? 'from-gray-400 to-gray-500' : 'from-blue-500 to-blue-600'} flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                ${(a.fullName || a.studentId || '?').charAt(0).toUpperCase()}
+                            </div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">${a.fullName || '—'}</span>
+                        </div>
+                    </td>
+                    <td>
+                        ${a.password ? `
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">
+                                <i class="fas fa-check-circle text-[10px]"></i> Set
+                            </span>
+                        ` : `
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
+                                <i class="fas fa-exclamation-circle text-[10px]"></i> Missing
+                            </span>
+                        `}
+                    </td>
+                    <td><span class="text-sm text-gray-600 dark:text-gray-400">${a.class || '—'}</span></td>
+                    <td>
+                        <button onclick="toggleAccountStatus('${a.uid}', '${a.status === 'disabled' ? 'active' : 'disabled'}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all
+                            ${a.status === 'disabled'
+                                ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/60'
+                                : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/60'
+                            }">
+                            <span class="w-1.5 h-1.5 rounded-full ${a.status === 'disabled' ? 'bg-red-500' : 'bg-green-500'}"></span>
+                            ${a.status === 'disabled' ? 'Disabled' : 'Active'}
+                        </button>
+                    </td>
+                    <td class="text-right">
+                        <div class="flex items-center justify-end gap-1">
+                            <button onclick="editAccount('${a.uid}')" class="p-1.5 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 transition" title="Edit">
+                                <i class="fas fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="resetPassword('${a.uid}')" class="p-1.5 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 text-purple-600 transition" title="Reset Password">
+                                <i class="fas fa-key text-xs"></i>
+                            </button>
+                            <button onclick="testThisAccount('${a.studentId}')" class="p-1.5 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 transition" title="Test Login">
+                                <i class="fas fa-flask text-xs"></i>
+                            </button>
+                            <button onclick="deleteAccount('${a.uid}')" class="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 transition" title="Delete">
+                                <i class="fas fa-trash-alt text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            setupSearch();
+        }
+
+        function setupSearch() {
+            const input = document.getElementById('accountSearch');
+            if (input) {
+                input.addEventListener('keyup', function() {
+                    const q = this.value.toLowerCase().trim();
+                    const filtered = allAccounts.filter(a =>
+                        (a.studentId || '').toLowerCase().includes(q) ||
+                        (a.fullName || '').toLowerCase().includes(q) ||
+                        (a.class || '').toLowerCase().includes(q)
+                    );
+                    renderAccounts(filtered);
+                });
+            }
+        }
+
+        function toggleSelectAll(master) {
+            document.querySelectorAll('.account-check').forEach(cb => cb.checked = master.checked);
+        }
+
+        function updateSelectAll() {
+            const checks = document.querySelectorAll('.account-check');
+            const master = document.getElementById('selectAll');
+            if (master) master.checked = checks.length > 0 && Array.from(checks).every(c => c.checked);
+        }
+
+        function openGenerateSection() {
+            showSection('generate');
+        }
+
+        async function updateGenerateStatus() {
+            try {
+                const accounts = await SOMSTAR.getStudents();
+                const used = accounts.length;
+                const available = 201 - used;
+                document.getElementById('usedCount').textContent = used;
+                document.getElementById('availableCount').textContent = Math.max(0, available);
+                const pct = Math.min(100, (used / 201) * 100);
+                document.getElementById('rangeBar').style.width = pct + '%';
+                document.getElementById('generatedRange').textContent = used;
+
+                const nextNum = 100 + used;
+                if (nextNum <= 300) {
+                    document.getElementById('singleId').value = `SOMSTAR${nextNum}`;
+                } else {
+                    document.getElementById('singleId').value = 'Range full';
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function generateSingleId() {
+            const nextId = await SOMSTAR.getNextStudentId();
+            document.getElementById('singleId').value = nextId;
+        }
+
+        async function generateBulkIDs() {
+            const count = parseInt(document.getElementById('bulkCount').value) || 5;
+            const cls = document.getElementById('bulkClass').value;
+            const btn = document.querySelector('#section-generate .btn-primary');
+            if (!btn) return;
+
+            try {
+                const snap = await db.ref('students').once('value');
+                const existing = snap.val();
+                const existingKeys = existing ? Object.keys(existing) : [];
+
+                const usedIds = new Set();
+                for (const key of existingKeys) {
+                    const s = existing[key];
+                    if (s && s.studentId) usedIds.add(s.studentId);
+                }
+
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+                btn.disabled = true;
+
+                let generated = 0;
+                for (let i = 100; i <= 300; i++) {
+                    if (generated >= count) break;
+                    const id = `SOMSTAR${i}`;
+                    if (usedIds.has(id)) continue;
+                    await db.ref('students').push({
+                        studentId: id,
+                        fullName: '',
+                        class: cls,
+                        phone: '',
+                        password: '@som1234',
+                        status: 'active',
+                        createdAt: new Date().toISOString(),
+                        authCreated: false
+                    });
+                    generated++;
+                    usedIds.add(id);
+                }
+
+                SOMSTAR.showNotification(`${generated} IDs generated!`, 'success');
+                updateGenerateStatus();
+                btn.innerHTML = original;
+                btn.disabled = false;
+            } catch(e) {
+                SOMSTAR.showNotification('Error: ' + e.message, 'error');
+                btn.innerHTML = '<i class="fas fa-gem mr-1"></i> Generate';
+                btn.disabled = false;
+            }
+        }
+
+        async function createSingleAccount() {
+            const id = document.getElementById('singleId').value.trim();
+            const name = document.getElementById('singleName').value.trim();
+            const cls = document.getElementById('singleClass').value;
+
+            if (!id) { SOMSTAR.showNotification('Generate an ID first', 'error'); return; }
+
+            try {
+                const existing = await db.ref('students').orderByChild('studentId').equalTo(id).once('value');
+                if (existing.val()) { SOMSTAR.showNotification('ID already exists', 'error'); return; }
+
+                await db.ref('students').push({
+                    studentId: id,
+                    fullName: name || '',
+                    class: cls,
+                    phone: '',
+                    password: '@som1234',
+                    status: 'active',
+                    createdAt: new Date().toISOString(),
+                    authCreated: false
+                });
+
+                SOMSTAR.showNotification(`Account ${id} created!`, 'success');
+                document.getElementById('singleName').value = '';
+                const nextId = await SOMSTAR.getNextStudentId();
+                document.getElementById('singleId').value = nextId;
+                updateGenerateStatus();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        function editAccount(uid) {
+            const account = allAccounts.find(a => a.uid === uid);
+            if (!account) return;
+            document.getElementById('editUid').value = uid;
+            document.getElementById('editStudentId').value = account.studentId || '';
+            document.getElementById('editName').value = account.fullName || '';
+            document.getElementById('editClass').value = account.class || 'TRY 2:00';
+            document.getElementById('editPassword').value = '';
+            openModal('editAccountModal');
+        }
+
+        async function saveAccountEdit(e) {
+            e.preventDefault();
+            const uid = document.getElementById('editUid').value;
+            const studentId = document.getElementById('editStudentId').value.trim();
+            const name = document.getElementById('editName').value.trim();
+            const cls = document.getElementById('editClass').value;
+            const password = document.getElementById('editPassword').value.trim();
+
+            try {
+                const updates = { studentId, fullName: name, class: cls };
+                if (password) updates.password = password;
+                await db.ref('students/' + uid).update(updates);
+                SOMSTAR.showNotification('Account updated successfully', 'success');
+                closeModal('editAccountModal');
+                loadAccounts();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        async function resetPassword(uid) {
+            showConfirm(
+                'Reset Password',
+                'Reset password to default (@som1234)?',
+                async () => {
+                    try {
+                        await db.ref('students/' + uid + '/password').set('@som1234');
+                        SOMSTAR.showNotification('Password reset to @som1234', 'success');
+                        loadAccounts();
+                    } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+                },
+                'reset'
+            );
+        }
+
+        async function toggleAccountStatus(uid, newStatus) {
+            const label = newStatus === 'disabled' ? 'Disable' : 'Enable';
+            showConfirm(
+                `${label} Account`,
+                `Are you sure you want to ${label.toLowerCase()} this account?`,
+                async () => {
+                    try {
+                        await db.ref('students/' + uid + '/status').set(newStatus);
+                        SOMSTAR.showNotification(`Account ${newStatus === 'disabled' ? 'disabled' : 'enabled'}`, 'success');
+                        loadAccounts();
+                    } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+                },
+                newStatus === 'disabled' ? 'warning' : 'success'
+            );
+        }
+
+        async function deleteAccount(uid) {
+            const account = allAccounts.find(a => a.uid === uid);
+            showConfirm(
+                'Delete Account',
+                `Permanently delete ${account ? account.studentId : 'this account'}?`,
+                async () => {
+                    try {
+                        await db.ref('students/' + uid).remove();
+                        SOMSTAR.showNotification('Account deleted', 'info');
+                        loadAccounts();
+                    } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+                },
+                'danger'
+            );
+        }
+
+        function testThisAccount(studentId) {
+            showSection('testing');
+            document.getElementById('testStudentId').value = studentId;
+            document.getElementById('testPassword').value = '@som1234';
+            document.getElementById('testPassword').focus();
+            SOMSTAR.showNotification(`Testing mode ready for ${studentId}`, 'info');
+        }
+
+        async function testCredentials(e) {
+            e.preventDefault();
+            const btn = document.getElementById('testLoginBtn');
+            const studentId = document.getElementById('testStudentId').value.trim();
+            const password = document.getElementById('testPassword').value.trim();
+
+            if (!studentId || !password) { SOMSTAR.showNotification('Enter ID and password', 'error'); return; }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+
+            const resultsDiv = document.getElementById('testResults');
+            const startTime = Date.now();
+
+            try {
+                // Test 1: Check if account exists in database
+                const snap = await db.ref('students').orderByChild('studentId').equalTo(studentId).once('value');
+                const data = snap.val();
+                const dbExists = !!data;
+
+                let accountStatus = 'unknown';
+                let dbPassword = '';
+                let dbName = '';
+
+                if (dbExists) {
+                    const uid = Object.keys(data)[0];
+                    const student = data[uid];
+                    accountStatus = student.status || 'active';
+                    dbPassword = student.password || '';
+                    dbName = student.fullName || studentId;
+                }
+
+                // Test 2: Verify password matches
+                const passwordMatch = dbExists && dbPassword === password;
+
+                // Test 3: Check account status
+                const isActive = accountStatus !== 'disabled';
+
+                // Test 4: Try Firebase Auth login (using email format)
+                let authResult = 'not_configured';
+                try {
+                    const email = studentId.toLowerCase() + '@somstaracademy.com';
+                    const authSnap = await firestore.collection('authLinks').doc(studentId).get();
+                    if (authSnap.exists) {
+                        authResult = 'linked';
+                    } else {
+                        authResult = 'no_auth_record';
+                    }
+                } catch(e) {
+                    authResult = 'firestore_unavailable';
+                }
+
+                const elapsed = Date.now() - startTime;
+
+                // Build detailed result
+                let resultHtml = `
+                    <div class="p-4 rounded-xl border ${dbExists && passwordMatch && isActive ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20' : 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20'}">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-10 h-10 rounded-full ${dbExists && passwordMatch && isActive ? 'bg-green-100 dark:bg-green-900/40' : 'bg-red-100 dark:bg-red-900/40'} flex items-center justify-center">
+                                <i class="fas ${dbExists && passwordMatch && isActive ? 'fa-check-circle text-green-600' : 'fa-times-circle text-red-600'}"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-sm ${dbExists && passwordMatch && isActive ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}">
+                                    ${dbExists && passwordMatch && isActive ? 'LOGIN SUCCESSFUL' : 'LOGIN FAILED'}
+                                </div>
+                                <div class="text-xs text-gray-500">Completed in ${elapsed}ms</div>
+                            </div>
+                        </div>
+                        <div class="space-y-1.5 text-xs">
+                            <div class="flex justify-between ${dbExists ? 'text-green-600' : 'text-red-600'}">
+                                <span>Account exists in database</span>
+                                <i class="fas ${dbExists ? 'fa-check' : 'fa-times'}"></i>
+                            </div>
+                            <div class="flex justify-between ${passwordMatch ? 'text-green-600' : 'text-red-600'}">
+                                <span>Password match</span>
+                                <i class="fas ${passwordMatch ? 'fa-check' : 'fa-times'}"></i>
+                            </div>
+                            <div class="flex justify-between ${isActive ? 'text-green-600' : 'text-red-600'}">
+                                <span>Account status: ${accountStatus}</span>
+                                <i class="fas ${isActive ? 'fa-check' : 'fa-times'}"></i>
+                            </div>
+                            <div class="flex justify-between text-gray-500">
+                                <span>Firebase Auth link</span>
+                                <span>${authResult === 'linked' ? '<span class="text-green-600"><i class="fas fa-check"></i> Linked</span>' : '<span class="text-yellow-600"><i class="fas fa-clock"></i> Pending</span>'}</span>
+                            </div>
+                        </div>
+                        ${!isActive ? `<div class="mt-2 p-2 bg-red-100 dark:bg-red-900/30 rounded-lg text-xs text-red-700 dark:text-red-300 text-center font-medium">This account is DISABLED. Enable it from the accounts table.</div>` : ''}
+                        ${!passwordMatch && dbExists ? `<div class="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg text-xs text-yellow-700 dark:text-yellow-300 text-center">Database password: <code class="font-mono">${dbPassword}</code></div>` : ''}
+                    </div>
+                `;
+
+                resultsDiv.innerHTML = resultHtml;
+
+                // Add to history
+                const historyEntry = {
+                    id: studentId,
+                    name: dbName,
+                    success: dbExists && passwordMatch && isActive,
+                    time: new Date().toLocaleTimeString()
+                };
+                testHistory.unshift(historyEntry);
+                renderTestHistory();
+
+            } catch(e) {
+                document.getElementById('testResults').innerHTML = `
+                    <div class="p-4 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                            <span class="text-sm text-red-700 dark:text-red-300">Error: ${e.message}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-play mr-1"></i> Test Login';
+        }
+
+        function renderTestHistory() {
+            const container = document.getElementById('testHistory');
+            if (testHistory.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">No tests performed yet this session</p>';
+                return;
+            }
+            container.innerHTML = testHistory.map(h => `
+                <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-2 rounded-full ${h.success ? 'bg-green-500' : 'bg-red-500'}"></div>
+                        <div>
+                            <span class="text-sm font-mono font-medium text-gray-900 dark:text-white">${h.id}</span>
+                            <span class="text-xs text-gray-400 ml-2">${h.name}</span>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-400">${h.time}</span>
+                </div>
+            `).join('');
+        }
+
+        function refreshAccounts() {
+            loadAccounts();
+            SOMSTAR.showNotification('Accounts refreshed', 'info');
+        }
+
+        function exportAccountsCSV() {
+            if (allAccounts.length === 0) { SOMSTAR.showNotification('No accounts to export', 'error'); return; }
+            const headers = ['Student ID','Full Name','Password','Class','Status','Created'];
+            const rows = allAccounts.map(a => [
+                a.studentId || '',
+                a.fullName || '',
+                a.password || '@som1234',
+                a.class || '',
+                a.status || 'active',
+                a.createdAt || ''
+            ]);
+            const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(','))].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'SOMSTAR-Accounts.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            SOMSTAR.showNotification('CSV exported', 'success');
+        }
+
+        // Modal helpers
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        let confirmCallback = null;
+
+        function showConfirm(title, message, callback, type = 'warning') {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            const icon = document.getElementById('confirmIcon');
+            const icons = {
+                warning: '<i class="fas fa-exclamation-triangle text-2xl text-yellow-600"></i>',
+                danger: '<i class="fas fa-trash-alt text-2xl text-red-600"></i>',
+                success: '<i class="fas fa-check-circle text-2xl text-green-600"></i>',
+                reset: '<i class="fas fa-key text-2xl text-purple-600"></i>'
+            };
+            icon.innerHTML = icons[type] || icons.warning;
+            confirmCallback = callback;
+            document.getElementById('confirmYesBtn').onclick = function() {
+                closeModal('confirmModal');
+                if (confirmCallback) confirmCallback();
+            };
+            openModal('confirmModal');
+        }
+
+        loadAccounts();
+    </script>
+</body>
+</html>

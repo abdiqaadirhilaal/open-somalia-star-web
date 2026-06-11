@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOMSTAR Academy - Student Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50">
+    <script>if(localStorage.getItem('somstar_dark')==='true')document.body.classList.add('dark-mode');</script>
+
+    <nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md shadow-sm dark:bg-gray-900/90">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+                        <span class="text-white font-bold text-lg"> <img height="10px" width="30px"     src="./image.png" alt=""></span>
+                    </div>
+                     
+                    <span class="text-xl font-bold text-gray-900 dark:text-white">SOMALIA STAR ACEDEMY</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="document.body.classList.toggle('dark-mode');localStorage.setItem('somstar_dark',document.body.classList.contains('dark-mode'))" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                        <i class="fas fa-moon text-gray-600 dark:text-gray-300"></i>
+                      
+                    </button>
+                    <a href="login.html" class="btn-primary px-5 py-2.5 rounded-xl text-white font-medium text-sm">Login</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-gradient pt-20 min-h-screen flex items-center relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-white rounded-full blur-3xl animate-pulse"></div>
+            <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-400 rounded-full blur-3xl animate-pulse" style="animation-delay:1s"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h1 class="text-4xl md:text-6xl font-bold text-white leading-tight mb-6">
+                        Welcome to <span class="text-yellow-400">SOMALIA STAR ACEDEMY </span> Academy
+                    </h1>
+                    <p class="text-lg text-blue-100 mb-8 leading-relaxed">
+                        A comprehensive student management system designed to streamline attendance, 
+                        lessons, marks, and communication between teachers, students, and management.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="login.html" class="inline-flex items-center gap-2 bg-yellow-400 text-gray-900 px-8 py-3.5 rounded-xl font-semibold hover:bg-yellow-300 transition-all shadow-lg hover:shadow-yellow-400/30">
+                            <i class="fas fa-sign-in-alt"></i> Get Started
+                        </a>
+                        <a href="#about" class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-8 py-3.5 rounded-xl font-semibold hover:bg-white/20 transition-all border border-white/20">
+                            <i class="fas fa-info-circle"></i> Learn More
+                        </a>
+                    </div>
+                </div>
+                <div class="hidden md:flex justify-center">
+                    <div class="relative">
+                        <div class="w-80 h-80 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 opacity-20 absolute animate-ping"></div>
+                        <div class="w-72 h-72 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center p-8 relative">
+                            <div class="text-center text-white">
+                                <i class="fas fa-graduation-cap text-7xl text-yellow-400 mb-4"></i>
+                                <CEnter><img height="10px" width="60px"     src="./image.png" alt=""></CEnter>
+                                <h3 class="text-2xl font-bold">SOMALIA STAR ACEDEMY </h3>
+                                <p class="text-blue-200">Excellence in Education</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-white dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="stat-card text-center p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-700">
+                    <div class="text-4xl font-bold text-blue-600 dark:text-blue-400">250+</div>
+                    <div class="text-gray-600 dark:text-gray-300 mt-2 font-medium">Students</div>
+                </div>
+                <div class="stat-card text-center p-8 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 dark:from-gray-800 dark:to-gray-700">
+                    <div class="text-4xl font-bold text-green-600 dark:text-green-400">05+</div>
+                    <div class="text-gray-600 dark:text-gray-300 mt-2 font-medium">Teachers</div>
+                </div>
+                <div class="stat-card text-center p-8 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-gray-800 dark:to-gray-700">
+                    <div class="text-4xl font-bold text-purple-600 dark:text-purple-400">9</div>
+                    <div class="text-gray-600 dark:text-gray-300 mt-2 font-medium">Classes</div>
+                </div>
+                <div class="stat-card text-center p-8 rounded-2xl bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-gray-800 dark:to-gray-700">
+                    <div class="text-4xl font-bold text-yellow-600 dark:text-yellow-400">99%</div>
+                    <div class="text-gray-600 dark:text-gray-300 mt-2 font-medium">Success Rate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="py-20 bg-gray-50 dark:bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Why Choose SOMSTAR?</h2>
+                <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">We provide a complete digital solution for educational management</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-8 rounded-2xl bg-white dark:bg-gray-700 shadow-lg hover:shadow-xl transition-all">
+                    <div class="w-14 h-14 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-5">
+                        <i class="fas fa-user-check text-2xl text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Smart Attendance</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Digital attendance tracking with real-time updates and detailed history for every student.</p>
+                </div>
+                <div class="p-8 rounded-2xl bg-white dark:bg-gray-700 shadow-lg hover:shadow-xl transition-all">
+                    <div class="w-14 h-14 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center mb-5">
+                        <i class="fas fa-book-open text-2xl text-green-600 dark:text-green-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Digital Lessons</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Upload and access PDFs, videos, audio files and documents in one centralized platform.</p>
+                </div>
+                <div class="p-8 rounded-2xl bg-white dark:bg-gray-700 shadow-lg hover:shadow-xl transition-all">
+                    <div class="w-14 h-14 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center mb-5">
+                        <i class="fas fa-chart-line text-2xl text-purple-600 dark:text-purple-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Performance Tracking</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Comprehensive marks, quizzes, and reports to monitor student progress effectively.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="story" class="py-20 bg-white dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">Our Story</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+                        SOMSTAR Academy was founded with a vision to transform educational management 
+                        through technology. We believe in empowering educators and students with tools 
+                        that simplify daily academic operations.
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                        Our platform serves three distinct roles - Managers, Teachers, and Students - 
+                        each with tailored dashboards and permissions to ensure smooth academic workflows.
+                    </p>
+                    <div class="flex flex-wrap gap-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                                <i class="fas fa-users text-blue-600"></i>
+                            </div>
+                            <div><div class="font-semibold text-gray-900 dark:text-white">250+</div><div class="text-sm text-gray-500">Students</div></div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
+                                <i class="fas fa-chalkboard-teacher text-green-600"></i>
+                            </div>
+                            <div><div class="font-semibold text-gray-900 dark:text-white">05+</div><div class="text-sm text-gray-500">Teachers</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-blue-600 to-indigo-800 p-1 rounded-3xl">
+                    <div class="bg-white dark:bg-gray-800 rounded-3xl p-8">
+                        <i class="fas fa-quote-left text-3xl text-blue-600 mb-4"></i>
+                        <p class="text-gray-600 dark:text-gray-400 italic mb-6">
+                            "Education is the most powerful weapon which you can use to change the world."
+                        </p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">NM</div>
+                            <div><div class="font-semibold text-gray-900 dark:text-white">Nelson Mandela</div><div class="text-sm text-gray-500">Inspiration</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="py-20 bg-gray-50 dark:bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Contact Us</h2>
+                <p class="text-gray-600 dark:text-gray-400">Get in touch with SOMSTAR Academy</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div class="text-center p-6 rounded-2xl bg-white dark:bg-gray-700 shadow-md">
+                    <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-map-marker-alt text-blue-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Address</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">123 Education Street, Learning City</p>
+                </div>
+                <div class="text-center p-6 rounded-2xl bg-white dark:bg-gray-700 shadow-md">
+                    <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-phone text-green-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Phone</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">+1 234 567 8900</p>
+                </div>
+                <div class="text-center p-6 rounded-2xl bg-white dark:bg-gray-700 shadow-md">
+                    <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-envelope text-purple-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Email</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">info@somstaracademy.com</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gray-900 text-gray-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+                            <span class="text-white font-bold text-lg">S</span>
+                        </div>
+                        <span class="text-xl font-bold text-white">SOMSTAR Academy</span>
+                    </div>
+                    <p class="text-sm leading-relaxed">Empowering education through technology. A complete student management system for modern academies.</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#about" class="hover:text-white transition">About</a></li>
+                        <li><a href="#story" class="hover:text-white transition">Our Story</a></li>
+                        <li><a href="#contact" class="hover:text-white transition">Contact</a></li>
+                        <li><a href="login.html" class="hover:text-white transition">Login</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Roles</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="login.html" class="hover:text-white transition">Manager</a></li>
+                        <li><a href="login.html" class="hover:text-white transition">Teacher</a></li>
+                        <li><a href="login.html" class="hover:text-white transition">Student</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-sm text-center">
+                &copy; 2026 SOMSTAR Academy. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>SOMSTAR.initDarkMode();</script>
+</body>
+</html>

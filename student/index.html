@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - SOMSTAR Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <script>
+        const user = JSON.parse(localStorage.getItem('somstar_user') || '{}');
+        if (!user || user.role !== 'student') window.location.href = '../login.html';
+        if(localStorage.getItem('somstar_dark')==='true')document.body.classList.add('dark-mode');
+    </script>
+
+    <div class="flex">
+        <aside id="sidebar" class="sidebar fixed md:relative z-50">
+            <div class="p-5 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">S</span>
+                    </div>
+                    <div>
+                        <div class="text-white font-bold">SOMSTAR</div>
+                        <div class="text-purple-300 text-xs">Student Panel</div>
+                    </div>
+                </div>
+            </div>
+            <nav class="p-3 space-y-1 mt-2">
+                <a href="#" onclick="showSection('overview')" class="sidebar-link active" data-section="overview"><i class="fas fa-home"></i> <span>Overview</span></a>
+                <a href="#" onclick="showSection('attendance')" class="sidebar-link" data-section="attendance"><i class="fas fa-calendar-check"></i> <span>My Attendance</span></a>
+                <a href="#" onclick="showSection('lessons')" class="sidebar-link" data-section="lessons"><i class="fas fa-book-open"></i> <span>My Lessons</span></a>
+                <a href="#" onclick="showSection('marks')" class="sidebar-link" data-section="marks"><i class="fas fa-star"></i> <span>Exam Marks</span></a>
+                <a href="#" onclick="showSection('quizzes')" class="sidebar-link" data-section="quizzes"><i class="fas fa-question-circle"></i> <span>Solve Quizzes</span></a>
+                <a href="#" onclick="showSection('profile')" class="sidebar-link" data-section="profile"><i class="fas fa-user-cog"></i> <span>Profile Settings</span></a>
+            </nav>
+            <div class="p-3 mt-auto border-t border-white/10">
+                <a href="#" onclick="AUTH.logout()" class="sidebar-link logout-btn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+            </div>
+        </aside>
+
+        <main class="flex-1 min-h-screen bg-gray-50 dark:bg-gray-900 transition-all">
+            <div class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 py-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button id="sidebarToggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <h1 class="text-lg font-semibold text-gray-900 dark:text-white" id="pageTitle">Overview</h1>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="SOMSTAR.toggleDarkMode()" id="darkModeToggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <i class="fas fa-moon text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <i class="fas fa-user-circle text-xl"></i>
+                            <span class="hidden sm:inline">${user.name || user.id}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 md:p-6 space-y-6">
+                <div id="section-overview" class="section-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="dashboard-card bg-gradient-to-br from-purple-500 to-purple-700 text-white">
+                            <div><p class="text-purple-100 text-sm">Attendance Rate</p><h3 class="text-3xl font-bold mt-1" id="myAttRate">0%</h3></div>
+                            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-percentage text-xl"></i></div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-blue-500 to-blue-700 text-white">
+                            <div><p class="text-blue-100 text-sm">Total Present</p><h3 class="text-3xl font-bold mt-1" id="myPresent">0</h3></div>
+                            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-check-circle text-xl"></i></div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-green-500 to-green-700 text-white">
+                            <div><p class="text-green-100 text-sm">Average Marks</p><h3 class="text-3xl font-bold mt-1" id="myAvgMarks">0</h3></div>
+                            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-chart-line text-xl"></i></div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-yellow-500 to-yellow-700 text-white">
+                            <div><p class="text-yellow-100 text-sm">Lessons</p><h3 class="text-3xl font-bold mt-1" id="myLessons">0</h3></div>
+                            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-book text-xl"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Attendance Rating</h3>
+                            <div id="attendanceRating" class="text-center py-6">
+                                <div class="w-32 h-32 rounded-full border-8 border-blue-600 flex items-center justify-center mx-auto mb-4">
+                                    <span class="text-3xl font-bold text-blue-600" id="ratingPercent">0%</span>
+                                </div>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">Overall attendance rate</p>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Recent Attendance</h3>
+                            <div id="recentAttendanceList" class="space-y-2"><p class="text-gray-400 text-sm">Loading...</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-attendance" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-6">My Attendance History</h3>
+                        <div class="flex gap-2 mb-4">
+                            <input type="month" id="attMonth" class="form-input text-sm w-auto">
+                            <button onclick="loadAttendanceHistory()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm"><i class="fas fa-search"></i></button>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Date</th><th>Class</th><th>Status</th></tr></thead>
+                                <tbody id="attendanceHistoryBody"><tr><td colspan="3" class="text-center text-gray-400 py-8">Select month to view</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-lessons" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-6">My Lessons</h3>
+                        <div class="flex gap-2 mb-4">
+                            <input type="text" id="lessonSearch" class="form-input text-sm" placeholder="Search lessons...">
+                            <select id="lessonTypeFilter" class="form-input text-sm w-auto" onchange="loadStudentLessons()">
+                                <option value="">All Types</option>
+                                <option value="pdf">PDF</option>
+                                <option value="video">Video</option>
+                                <option value="audio">Audio</option>
+                                <option value="document">Document</option>
+                            </select>
+                        </div>
+                        <div id="studentLessonsList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <p class="text-gray-400 col-span-3 text-center py-8">Loading lessons...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-marks" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-6">My Exam Marks</h3>
+                        <div class="grid md:grid-cols-3 gap-4 mb-6">
+                            <div class="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-center">
+                                <p class="text-sm text-gray-500">Average</p>
+                                <p class="text-2xl font-bold text-green-600" id="avgMarksDisplay">0</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-center">
+                                <p class="text-sm text-gray-500">Highest</p>
+                                <p class="text-2xl font-bold text-blue-600" id="highestMarks">0</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 text-center">
+                                <p class="text-sm text-gray-500">Subjects</p>
+                                <p class="text-2xl font-bold text-purple-600" id="subjectCount">0</p>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Subject</th><th>Score</th><th>Date</th></tr></thead>
+                                <tbody id="marksHistoryBody"><tr><td colspan="3" class="text-center text-gray-400 py-8">No marks recorded yet</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-quizzes" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-6">Solve Quizzes</h3>
+                        <div id="availableQuizzes" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <p class="text-gray-400 col-span-3 text-center py-8">Loading quizzes...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-profile" class="section-content hidden">
+                    <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-6 text-lg">Profile Settings</h3>
+                        <div class="flex items-center gap-4 mb-8 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-2xl font-bold">
+                                ${(user.name || user.id || 'S').charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 dark:text-white" id="profileName">${user.name || 'Student'}</h4>
+                                <p class="text-sm text-gray-500" id="profileId"></p>
+                            </div>
+                        </div>
+                        <form id="profileForm" onsubmit="updateProfile(event)">
+                            <div class="space-y-4">
+                                <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label><input type="text" id="profileFullName" class="form-input"></div>
+                                <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone</label><input type="tel" id="profilePhone" class="form-input"></div>
+                                <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Change Password</label><input type="password" id="profileNewPassword" class="form-input" placeholder="Leave empty to keep current"></div>
+                            </div>
+                            <button type="submit" class="btn-primary w-full py-3 rounded-xl text-white font-semibold mt-6"><i class="fas fa-save mr-2"></i> Update Profile</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        const studentId = user.id;
+        let studentUid = user.uid;
+
+        SOMSTAR.loadSidebar();
+        SOMSTAR.setupLogout();
+        SOMSTAR.initDarkMode();
+        document.getElementById('attMonth').value = new Date().toISOString().slice(0, 7);
+
+        function showSection(section) {
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+            const el = document.getElementById('section-' + section);
+            if (el) el.classList.remove('hidden');
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            const link = document.querySelector(`[data-section="${section}"]`);
+            if (link) link.classList.add('active');
+            const titles = { overview:'Overview', attendance:'My Attendance', lessons:'My Lessons', marks:'Exam Marks', quizzes:'Solve Quizzes', profile:'Profile Settings' };
+            document.getElementById('pageTitle').textContent = titles[section] || section;
+
+            if (section === 'overview') loadStudentOverview();
+            if (section === 'attendance') loadAttendanceHistory();
+            if (section === 'lessons') loadStudentLessons();
+            if (section === 'marks') loadMyMarks();
+            if (section === 'quizzes') loadAvailableQuizzes();
+            if (section === 'profile') loadProfile();
+        }
+
+        async function loadStudentOverview() {
+            try {
+                const attRecords = await SOMSTAR.getAttendance(studentId);
+                const marks = await SOMSTAR.getMarks(studentId);
+                const lessonsSnap = await db.ref('lessons').once('value');
+                const lessons = lessonsSnap.val() ? Object.values(lessonsSnap.val()) : [];
+
+                const present = attRecords.filter(a => a.status === 'present').length;
+                const total = attRecords.length;
+                const rate = total > 0 ? Math.round((present / total) * 100) : 0;
+                const avgMarks = marks.length > 0 ? Math.round(marks.reduce((s, m) => s + m.score, 0) / marks.length) : 0;
+
+                document.getElementById('myAttRate').textContent = rate + '%';
+                document.getElementById('myPresent').textContent = present;
+                document.getElementById('myAvgMarks').textContent = avgMarks;
+                document.getElementById('myLessons').textContent = lessons.length;
+
+                document.getElementById('ratingPercent').textContent = rate + '%';
+                const circle = document.querySelector('#attendanceRating .rounded-full');
+                if (circle) {
+                    const colors = rate >= 75 ? 'border-green-500' : rate >= 50 ? 'border-yellow-500' : 'border-red-500';
+                    circle.className = `w-32 h-32 rounded-full border-8 ${colors} flex items-center justify-center mx-auto mb-4`;
+                }
+
+                const recent = attRecords.slice(-5).reverse();
+                document.getElementById('recentAttendanceList').innerHTML = recent.length > 0
+                    ? recent.map(r => {
+                        const colors = { present: 'text-green-600 bg-green-100 dark:bg-green-900/30', absent: 'text-red-600 bg-red-100 dark:bg-red-900/30', vacation: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30' };
+                        return `<div class="flex justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50"><span class="text-sm text-gray-600 dark:text-gray-400">${SOMSTAR.formatDate(r.date)}</span><span class="text-xs font-medium px-2 py-0.5 rounded-full ${colors[r.status] || ''}">${r.status}</span></div>`;
+                    }).join('')
+                    : '<p class="text-gray-400 text-sm">No attendance records yet</p>';
+
+                // Load announcements
+                const annSnap = await db.ref('announcements').once('value');
+                const annData = annSnap.val();
+                if (annData) {
+                    // Get student's class
+                    let sClass = '';
+                    try {
+                        const sSnap2 = await db.ref('students/' + studentUid).once('value');
+                        const sData2 = sSnap2.val();
+                        sClass = sData2 ? sData2.class : '';
+                    } catch(e2) {}
+                    const allAnnouncements = Object.values(annData).filter(a => {
+                        if (a.recipientType === 'all-students') return true;
+                        if (a.recipientType === 'class' && a.recipientValue === sClass) return true;
+                        if (a.recipientType === 'student' && a.recipientValue === studentId) return true;
+                        return false;
+                    }).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+                    if (allAnnouncements.length > 0) {
+                        window._annAudio = window._annAudio || {};
+                        const idx = Date.now();
+                        window._annAudio[idx] = allAnnouncements.slice(0,3).map(a => a.audioUrl || '');
+                        const annHtml = allAnnouncements.slice(0,3).map((a,i) => `
+                            <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl mb-2">
+                                <div class="flex items-center gap-2 mb-1"><i class="fas fa-bullhorn text-yellow-600 text-sm"></i><span class="text-sm font-medium text-gray-900 dark:text-white">${a.title}</span></div>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">${a.message}</p>
+                                ${a.audioUrl ? `<button onclick="playStudentAudio(${idx},${i})" class="text-xs text-blue-600 mt-1 hover:underline"><i class="fas fa-headphones mr-1"></i> Listen</button>` : ''}
+                            </div>
+                        `).join('');
+                        const ratingDiv = document.getElementById('attendanceRating');
+                        if (ratingDiv) ratingDiv.insertAdjacentHTML('afterend', '<div class="mt-4"><h4 class="font-semibold text-gray-900 dark:text-white mb-3 text-sm"><i class="fas fa-bullhorn text-yellow-600 mr-1"></i>Announcements</h4>' + annHtml + '</div>');
+                    }
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadAttendanceHistory() {
+            try {
+                const attRecords = await SOMSTAR.getAttendance(studentId);
+                const month = document.getElementById('attMonth').value;
+                const filtered = month ? attRecords.filter(r => r.date && r.date.startsWith(month)) : attRecords;
+                const tbody = document.getElementById('attendanceHistoryBody');
+
+                if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="2" class="text-center text-gray-400 py-8">No records for this period</td></tr>'; return; }
+
+                tbody.innerHTML = filtered.sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(r => {
+                    const colors = { present: 'text-green-600 bg-green-100', absent: 'text-red-600 bg-red-100', vacation: 'text-yellow-600 bg-yellow-100' };
+                    return `<tr><td>${SOMSTAR.formatDate(r.date)}</td><td>${r.class || '—'}</td><td><span class="px-2 py-1 rounded-full text-xs font-medium ${colors[r.status] || ''}">${r.status}</span></td></tr>`;
+                }).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadStudentLessons() {
+            try {
+                const snap = await db.ref('lessons').once('value');
+                const data = snap.val();
+                const container = document.getElementById('studentLessonsList');
+                const typeFilter = document.getElementById('lessonTypeFilter').value;
+
+                if (!data) { container.innerHTML = '<p class="text-gray-400 col-span-3 text-center py-8">No lessons available</p>'; return; }
+
+                let lessons = Object.keys(data).map(k => ({ key: k, ...data[k] }));
+
+                // Filter by student's class
+                let studentClass = '';
+                try {
+                    const sSnap = await db.ref('students/' + studentUid).once('value');
+                    const sData = sSnap.val();
+                    studentClass = sData ? sData.class : '';
+                } catch(e) {}
+                if (studentClass) lessons = lessons.filter(l => l.class === studentClass || l.class === 'All' || !l.class);
+
+                if (typeFilter) lessons = lessons.filter(l => l.type === typeFilter);
+                lessons.sort((a, b) => (b.uploadedAt || '').localeCompare(a.uploadedAt || ''));
+
+                if (lessons.length === 0) { container.innerHTML = '<p class="text-gray-400 col-span-3 text-center py-8">No lessons found</p>'; return; }
+
+                const icons = { pdf:'fa-file-pdf text-red-500', video:'fa-video text-blue-500', audio:'fa-music text-green-500', document:'fa-file-alt text-yellow-500' };
+
+                container.innerHTML = lessons.map(l => `
+                    <div class="p-4 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition">
+                        <div class="flex items-start gap-3">
+                            <i class="fas ${icons[l.type] || 'fa-file'} text-2xl"></i>
+                            <div class="flex-1 min-w-0">
+                                <h5 class="font-medium text-gray-900 dark:text-white text-sm truncate">${l.title}</h5>
+                                <p class="text-xs text-gray-400">${l.type} &middot; ${l.class || ''}</p>
+                                <div class="flex gap-2 mt-2">
+                                    ${l.type === 'video' && l.dataUrl ? `<button onclick="playMedia('${l.dataUrl.replace(/'/g, "\\'")}','video')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-play mr-1"></i>Watch</button>` : ''}
+                                    ${l.type === 'audio' && l.dataUrl ? `<button onclick="playMedia('${l.dataUrl.replace(/'/g, "\\'")}','audio')" class="text-xs text-green-600 hover:underline"><i class="fas fa-headphones mr-1"></i>Listen</button>` : ''}
+                                    ${l.dataUrl ? `<a href="${l.dataUrl}" download="${l.fileName || l.title}" class="text-xs text-purple-600 hover:underline"><i class="fas fa-download mr-1"></i>Download</a>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                SOMSTAR.searchTable('lessonSearch', 'studentLessonsList');
+            } catch(e) { console.error(e); }
+        }
+
+        function playMedia(dataUrl, type) {
+            const html = `<div class="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 max-w-2xl w-full">
+                    ${type === 'video' ? `<video src="${dataUrl}" controls class="w-full rounded-xl" style="max-height:70vh"></video>` : `<audio src="${dataUrl}" controls class="w-full"></audio>`}
+                    <button onclick="this.closest('.fixed').remove()" class="mt-3 text-gray-500 text-sm"><i class="fas fa-times mr-1"></i>Close</button>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        async function loadMyMarks() {
+            try {
+                const marks = await SOMSTAR.getMarks(studentId);
+                const tbody = document.getElementById('marksHistoryBody');
+
+                if (marks.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-400 py-8">No marks recorded yet</td></tr>'; return; }
+
+                const avg = Math.round(marks.reduce((s, m) => s + m.score, 0) / marks.length);
+                const highest = Math.max(...marks.map(m => m.score));
+                const subjects = [...new Set(marks.map(m => m.subject))].length;
+
+                document.getElementById('avgMarksDisplay').textContent = avg;
+                document.getElementById('highestMarks').textContent = highest;
+                document.getElementById('subjectCount').textContent = subjects;
+
+                tbody.innerHTML = marks.sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(m => `
+                    <tr><td class="font-medium text-gray-900 dark:text-white">${m.subject}</td>
+                    <td><span class="font-semibold ${m.score >= 50 ? 'text-green-600' : 'text-red-600'}">${m.score}/100</span></td>
+                    <td>${SOMSTAR.formatDate(m.date)}</td></tr>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadAvailableQuizzes() {
+            try {
+                const snap = await db.ref('quizzes').once('value');
+                const data = snap.val();
+                const container = document.getElementById('availableQuizzes');
+
+                if (!data) { container.innerHTML = '<p class="text-gray-400 col-span-3 text-center py-8">No quizzes available</p>'; return; }
+
+                // Get student's class
+                let studentClass = '';
+                try {
+                    const sSnap = await db.ref('students/' + studentUid).once('value');
+                    const sData = sSnap.val();
+                    studentClass = sData ? sData.class : '';
+                } catch(e) {}
+
+                const quizzes = Object.keys(data).map(k => ({ key: k, ...data[k] }))
+                    .filter(q => !studentClass || q.class === studentClass || !q.class);
+
+                if (quizzes.length === 0) { container.innerHTML = '<p class="text-gray-400 col-span-3 text-center py-8">No quizzes for your class</p>'; return; }
+
+                container.innerHTML = quizzes.map(q => `
+                    <div class="p-5 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-question-circle text-purple-600"></i>
+                            <h5 class="font-medium text-gray-900 dark:text-white">${q.title}</h5>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-3">${q.class || 'All classes'} &middot; ${q.questions ? q.questions.length : 0} questions</p>
+                        <button onclick="startQuiz('${q.key}')" class="btn-primary px-4 py-2 rounded-xl text-white text-sm w-full"><i class="fas fa-play mr-1"></i> Start Quiz</button>
+                    </div>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function startQuiz(quizKey) {
+            const snap = await db.ref('quizzes/' + quizKey).once('value');
+            const quiz = snap.val();
+            if (!quiz || !quiz.questions) { SOMSTAR.showNotification('Quiz not found', 'error'); return; }
+
+            const questions = quiz.questions;
+            let currentIndex = 0;
+            let score = 0;
+            let answers = [];
+
+            function showQuestion() {
+                if (currentIndex >= questions.length) {
+                    // Show result
+                    const resultHtml = `<div class="fixed inset-0 bg-black/50 z-[300] flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full text-center">
+                            <div class="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-check-circle text-4xl text-green-600"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Quiz Complete!</h3>
+                            <p class="text-4xl font-bold text-blue-600 mb-2">${score}/${questions.length}</p>
+                            <p class="text-gray-500 mb-4">${Math.round((score/questions.length)*100)}% correct</p>
+                            <button onclick="this.closest('.fixed').remove()" class="btn-primary px-6 py-2.5 rounded-xl text-white">Close</button>
+                        </div>
+                    </div>`;
+                    document.body.insertAdjacentHTML('beforeend', resultHtml);
+                    return;
+                }
+
+                const q = questions[currentIndex];
+                const html = `<div class="fixed inset-0 bg-black/50 z-[300] flex items-center justify-center p-4" id="quizModal">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-sm text-gray-400">Question ${currentIndex+1} of ${questions.length}</span>
+                            <span class="text-sm font-medium text-blue-600">${score} correct</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${q.question}</h3>
+                        <div class="space-y-2 mb-6">
+                            ${q.options.map((opt, i) => `
+                                <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 quiz-option" onclick="selectAnswer(this, ${i})">
+                                    <input type="radio" name="quizAns" value="${i}" class="hidden">
+                                    <span class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-sm font-medium">${String.fromCharCode(65+i)}</span>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">${opt}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                        <button onclick="submitAnswer(${q.answer})" class="btn-primary w-full py-2.5 rounded-xl text-white" id="submitQuizBtn" disabled>Next</button>
+                    </div>
+                </div>`;
+
+                const existing = document.getElementById('quizModal');
+                if (existing) existing.remove();
+                document.body.insertAdjacentHTML('beforeend', html);
+                window._currentAnswer = null;
+            }
+
+            window.selectAnswer = function(el, idx) {
+                document.querySelectorAll('.quiz-option').forEach(o => {
+                    o.classList.remove('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/20');
+                });
+                el.classList.add('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/20');
+                window._currentAnswer = idx;
+                document.getElementById('submitQuizBtn').disabled = false;
+            };
+
+            window.submitAnswer = function(correctIdx) {
+                if (window._currentAnswer === correctIdx) score++;
+                currentIndex++;
+                document.getElementById('quizModal').remove();
+                showQuestion();
+            };
+
+            window.startQuiz = function(key) { /* no-op, handled above */ };
+
+            showQuestion();
+        }
+
+        async function loadProfile() {
+            try {
+                const snap = await db.ref('students/' + studentUid).once('value');
+                const data = snap.val();
+                if (data) {
+                    document.getElementById('profileFullName').value = data.fullName || '';
+                    document.getElementById('profilePhone').value = data.phone || '';
+                    document.getElementById('profileName').textContent = data.fullName || user.name || 'Student';
+                    document.getElementById('profileId').textContent = data.studentId || user.id || '';
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function updateProfile(e) {
+            e.preventDefault();
+            const name = document.getElementById('profileFullName').value.trim();
+            const phone = document.getElementById('profilePhone').value.trim();
+            const newPassword = document.getElementById('profileNewPassword').value.trim();
+
+            try {
+                const updates = {};
+                if (name) updates['fullName'] = name;
+                if (phone) updates['phone'] = phone;
+                if (newPassword) updates['password'] = newPassword;
+
+                if (Object.keys(updates).length > 0) {
+                    await db.ref('students/' + studentUid).update(updates);
+                }
+
+                SOMSTAR.showNotification('Profile updated successfully!', 'success');
+                document.getElementById('profileNewPassword').value = '';
+                if (name) {
+                    document.getElementById('profileName').textContent = name;
+                    const stored = JSON.parse(localStorage.getItem('somstar_user') || '{}');
+                    stored.name = name;
+                    localStorage.setItem('somstar_user', JSON.stringify(stored));
+                }
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        function playStudentAudio(idx, i) {
+            const url = window._annAudio && window._annAudio[idx] && window._annAudio[idx][i];
+            if (!url) return;
+            const html = `<div class="fixed inset-0 bg-black/50 z-[300] flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full text-center">
+                    <audio src="${url}" controls class="w-full" autoplay></audio>
+                    <button onclick="this.closest('.fixed').remove()" class="mt-3 text-gray-500 text-sm"><i class="fas fa-times mr-1"></i> Close</button>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        loadStudentOverview();
+    </script>
+</body>
+</html>

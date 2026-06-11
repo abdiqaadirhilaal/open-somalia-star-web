@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOMSTAR IDs & Passwords</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <script>if(localStorage.getItem('somstar_dark')==='true')document.body.classList.add('dark-mode');</script>
+
+    <div class="max-w-5xl mx-auto px-4 py-8">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">S</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">SOMSTAR Academy</h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Student IDs & Passwords</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="document.body.classList.toggle('dark-mode');localStorage.setItem('somstar_dark',document.body.classList.contains('dark-mode'))" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <i class="fas fa-moon text-gray-600 dark:text-gray-300"></i>
+                </button>
+                <button onclick="printTable()" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">
+                    <i class="fas fa-print mr-1"></i> Print
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" id="idSearch" placeholder="Search ID..." class="form-input text-sm py-2 pl-9 pr-3 w-48" onkeyup="filterTable()">
+                    </div>
+                    <select id="statusFilter" class="form-input text-sm py-2 w-auto" onchange="loadIDs()">
+                        <option value="all">All Accounts</option>
+                        <option value="active">Active Only</option>
+                        <option value="disabled">Disabled Only</option>
+                        <option value="unused">Unused IDs</option>
+                    </select>
+                </div>
+                <span class="text-sm text-gray-500" id="totalDisplay">Showing 0 of 0</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="data-table" id="idsTable">
+                    <thead>
+                        <tr>
+                            <th class="w-12">#</th>
+                            <th>Student ID</th>
+                            <th>Password</th>
+                            <th>Full Name</th>
+                            <th>Class</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="idsTableBody">
+                        <tr><td colspan="6" class="text-center text-gray-400 py-12"><i class="fas fa-spinner fa-spin mr-2"></i> Loading IDs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-sm text-gray-500">
+                <div class="flex gap-4">
+                    <span>Range: <strong>SOMSTAR100</strong> — <strong>SOMSTAR300</strong></span>
+                    <span>Default Password: <code class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-blue-600 font-mono">@som1234</code></span>
+                </div>
+                <div class="flex gap-2">
+                    <span id="activeBadge" class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium">0 Active</span>
+                    <span id="disabledBadge" class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-medium">0 Disabled</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        let allIDs = [];
+        let existingAccounts = [];
+
+        async function loadIDs() {
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            // Build full ID list SOMSTAR100 - SOMSTAR300
+            allIDs = [];
+            for (let i = 100; i <= 300; i++) {
+                allIDs.push({
+                    id: `SOMSTAR${i}`,
+                    num: i,
+                    password: '@som1234',
+                    exists: false
+                });
+            }
+
+            // Fetch existing from Firebase
+            try {
+                const snap = await db.ref('students').once('value');
+                const data = snap.val();
+                existingAccounts = data ? Object.values(data) : [];
+
+                allIDs.forEach(item => {
+                    const match = existingAccounts.find(a => a.studentId === item.id);
+                    if (match) {
+                        item.exists = true;
+                        item.fullName = match.fullName || '';
+                        item.class = match.class || '';
+                        item.status = match.status || 'active';
+                        item.password = match.password || '@som1234';
+                        item.dbPassword = match.password || '@som1234';
+                    } else {
+                        item.fullName = '';
+                        item.class = '';
+                        item.status = 'unused';
+                        item.dbPassword = '@som1234';
+                    }
+                });
+            } catch(e) {
+                console.error(e);
+                // Show full range even without Firebase
+                allIDs.forEach(item => {
+                    item.exists = false;
+                    item.fullName = '';
+                    item.class = '';
+                    item.status = 'unused';
+                });
+            }
+
+            renderTable(statusFilter);
+        }
+
+        function renderTable(filter) {
+            let filtered = allIDs;
+
+            if (filter === 'active') filtered = allIDs.filter(i => i.status === 'active');
+            else if (filter === 'disabled') filtered = allIDs.filter(i => i.status === 'disabled');
+            else if (filter === 'unused') filtered = allIDs.filter(i => i.status === 'unused');
+
+            const search = document.getElementById('idSearch').value.toLowerCase().trim();
+            if (search) {
+                filtered = filtered.filter(i =>
+                    i.id.toLowerCase().includes(search) ||
+                    (i.fullName || '').toLowerCase().includes(search)
+                );
+            }
+
+            const tbody = document.getElementById('idsTableBody');
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-12">No IDs match your criteria</td></tr>';
+            } else {
+                tbody.innerHTML = filtered.map((item, idx) => {
+                    const statusStyles = {
+                        active: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+                        disabled: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+                        unused: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                    };
+                    return `<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 ${item.status === 'unused' ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'}">
+                        <td class="text-gray-400 text-xs">${idx + 1}</td>
+                        <td class="font-mono font-medium">${item.id}</td>
+                        <td class="font-mono ${item.status === 'unused' ? 'text-gray-400' : 'text-gray-600 dark:text-gray-400'}">${item.dbPassword}</td>
+                        <td class="text-sm">${item.fullName || '<span class="text-gray-400 italic">—</span>'}</td>
+                        <td class="text-sm">${item.class || '<span class="text-gray-400">—</span>'}</td>
+                        <td><span class="px-2.5 py-1 rounded-full text-xs font-medium ${statusStyles[item.status] || statusStyles.unused}">${item.status}</span></td>
+                    </tr>`;
+                }).join('');
+            }
+
+            const active = allIDs.filter(i => i.status === 'active').length;
+            const disabled = allIDs.filter(i => i.status === 'disabled').length;
+            const unused = allIDs.filter(i => i.status === 'unused').length;
+            const used = active + disabled;
+
+            document.getElementById('totalDisplay').textContent = `Showing ${filtered.length} of ${allIDs.length} IDs`;
+            document.getElementById('activeBadge').textContent = `${active} Active`;
+            document.getElementById('disabledBadge').textContent = `${disabled} Disabled`;
+        }
+
+        function filterTable() {
+            const filter = document.getElementById('statusFilter').value;
+            renderTable(filter);
+        }
+
+        function printTable() {
+            window.print();
+        }
+
+        loadIDs();
+    </script>
+
+    <style>
+        @media print {
+            body { background: white !important; }
+            .dark-mode { background: white !important; color: black !important; }
+            .form-input, #statusFilter, #idSearch, button { display: none !important; }
+            .bg-white { box-shadow: none !important; border: 1px solid #ddd !important; }
+        }
+    </style>
+</body>
+</html>
