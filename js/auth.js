@@ -50,7 +50,7 @@ const AUTH = {
 
                     return { success: true, role: 'teacher', data: teacher };
                 } catch (e2) {
-                    if (studentId === 'MANAGER' && password === '@som1234') {
+                    if (studentId === 'MANAGER' && password === 'somalistar12345') {
                         this.currentUser = { uid: 'manager' };
                         this.userRole = 'manager';
                         this.userData = { name: 'Manager' };
