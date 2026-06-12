@@ -1,0 +1,12 @@
+{
+  "name": "somstar-academy",
+  "version": "1.0.0",
+  "description": "SOMSTAR Academy Management System",
+  "scripts": {
+    "start": "node backend/server.js",
+    "build": "cd backend && npm install"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

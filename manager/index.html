@@ -41,6 +41,7 @@
                 <a href="#" onclick="showSection('attendance')" class="sidebar-link" data-section="attendance"><i class="fas fa-calendar-check"></i> <span>Attendance</span></a>
                 <a href="#" onclick="showSection('teacheratt')" class="sidebar-link" data-section="teacheratt"><i class="fas fa-user-clock"></i> <span>Teacher Attendance</span></a>
                 <a href="#" onclick="showSection('finance')" class="sidebar-link" data-section="finance"><i class="fas fa-coins"></i> <span>Finance</span></a>
+                <a href="#" onclick="showSection('backup')" class="sidebar-link" data-section="backup"><i class="fas fa-database"></i> <span>Data Backup</span></a>
             </nav>
             <div class="p-3 mt-auto border-t border-white/10">
                 <a href="#" onclick="AUTH.logout()" class="sidebar-link logout-btn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
@@ -420,8 +421,35 @@
                     <button type="button" onclick="closeAddTeacherModal()" class="flex-1 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm">Cancel</button>
                 </div>
             </form>
-        </div>
-    </div>
+                </div>
+
+                <div id="section-backup" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Data Backup</h3>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Export your data as a JSON file or import a previously saved backup.</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="p-6 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-center">
+                                <i class="fas fa-download text-3xl text-blue-600 mb-3"></i>
+                                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Export Data</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Download all your data as a JSON backup file</p>
+                                <button onclick="exportData()" class="btn-primary px-6 py-2.5 rounded-xl text-white text-sm"><i class="fas fa-file-export mr-1"></i> Export JSON</button>
+                            </div>
+                            <div class="p-6 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-center">
+                                <i class="fas fa-upload text-3xl text-green-600 mb-3"></i>
+                                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Import Data</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Restore data from a previous JSON backup file</p>
+                                <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
+                                <button onclick="document.getElementById('importFileInput').click()" class="px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm"><i class="fas fa-file-import mr-1"></i> Import JSON</button>
+                            </div>
+                        </div>
+                        <div class="mt-6 p-4 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                            <p class="text-xs text-yellow-700 dark:text-yellow-400"><i class="fas fa-info-circle mr-1"></i> <strong>Note:</strong> Data is automatically saved to your browser's IndexedDB storage. Export/Import is for manual backup and transfer between devices.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
     <script src="../js/firebase-config.js"></script>
     <script src="../js/app.js"></script>
@@ -442,7 +470,7 @@
             const link = document.querySelector(`[data-section="${section}"]`);
             if (link) link.classList.add('active');
             const titles = { overview:'Overview', students:'Students', teachers:'Teachers', classes:'Classes',
-                credentials:'Credentials', register:'Register Student', reports:'Reports', announcements:'Announcements', attendance:'Attendance Records', teacheratt:'Teacher Attendance', finance:'Finance' };
+                credentials:'Credentials', register:'Register Student', reports:'Reports', announcements:'Announcements', attendance:'Attendance Records', teacheratt:'Teacher Attendance', finance:'Finance', backup:'Data Backup' };
             document.getElementById('pageTitle').textContent = titles[section] || section;
 
             if (section === 'students') loadStudents();
@@ -1077,8 +1105,72 @@
             SOMSTAR.exportToPDF('section-students', 'SOMSTAR-Students.pdf');
         }
 
+        function exportData() {
+            try {
+                if (window.location.protocol !== 'file:') {
+                    // Server mode — use API
+                    fetch('/api/export').then(r => r.json()).then(data => {
+                        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a'); a.href = url;
+                        a.download = 'SOMSTAR-backup-' + SOMSTAR.getToday() + '.json';
+                        a.click(); URL.revokeObjectURL(url);
+                        SOMSTAR.showNotification('Data exported!', 'success');
+                    }).catch(e => SOMSTAR.showNotification('Export error: ' + e.message, 'error'));
+                    return;
+                }
+                let store = {};
+                try { store = JSON.parse(localStorage.getItem('somstar_db') || '{}'); } catch(e) {}
+                if (Object.keys(store).length === 0) { SOMSTAR.showNotification('No data to export', 'error'); return; }
+                const blob = new Blob([JSON.stringify(store, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'SOMSTAR-backup-' + SOMSTAR.getToday() + '.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                SOMSTAR.showNotification('Data exported successfully!', 'success');
+            } catch(e) { SOMSTAR.showNotification('Export error: ' + e.message, 'error'); }
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data || typeof data !== 'object') { SOMSTAR.showNotification('Invalid backup file', 'error'); return; }
+                    if (window.location.protocol !== 'file:') {
+                        // Server mode — use API
+                        fetch('/api/import', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+                        }).then(r => r.json()).then(() => {
+                            SOMSTAR.showNotification('Data imported! Refreshing...', 'success');
+                            setTimeout(() => location.reload(), 1500);
+                        }).catch(err => SOMSTAR.showNotification('Import error: ' + err.message, 'error'));
+                        return;
+                    }
+                    localStorage.setItem('somstar_db', JSON.stringify(data));
+                    try {
+                        const req = indexedDB.open('SOMSTAR_ACADEMY_DB', 1);
+                        req.onsuccess = function() {
+                            const d = req.result;
+                            const tx = d.transaction('backup', 'readwrite');
+                            tx.objectStore('backup').put(data, 'somstar_db');
+                        };
+                    } catch(e) {}
+                    SOMSTAR.showNotification('Data imported! Refreshing...', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } catch(err) { SOMSTAR.showNotification('Import error: ' + err.message, 'error'); }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
         async function seedDefaultTeachers() {
             try {
+                await db.ready();
                 const snap = await db.ref('teachers').once('value');
                 if (snap.val()) return;
                 const teachers = [

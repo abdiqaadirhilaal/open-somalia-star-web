@@ -1,10 +1,123 @@
 const STORE_KEY = 'somstar_db';
+const DB_NAME = 'SOMSTAR_ACADEMY_DB';
+const DB_VERSION = 1;
+
+const BACKEND_URL = window.location.origin + '/api/ref';
+
+let _isServer = false;
+let _memoryStore = null;
+let _initDone = false;
+
+async function _openDB() {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('backup')) {
+                db.createObjectStore('backup');
+            }
+        };
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror = (e) => reject(e.target.error);
+    });
+}
+
+async function _loadFromIndexedDB() {
+    try {
+        const db = await _openDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction('backup', 'readonly');
+            const store = tx.objectStore('backup');
+            const req = store.get(STORE_KEY);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => resolve(null);
+        });
+    } catch(e) { return null; }
+}
+
+async function _saveToIndexedDB(data) {
+    try {
+        const db = await _openDB();
+        const tx = db.transaction('backup', 'readwrite');
+        tx.objectStore('backup').put(data, STORE_KEY);
+    } catch(e) {}
+}
+
+async function _init() {
+    if (_initDone) return;
+    // Detect if backend API is available
+    if (window.location.protocol !== 'file:') {
+        try {
+            const res = await fetch(window.location.origin + '/api/health', { method: 'HEAD', cache: 'no-store' });
+            _isServer = res.ok;
+        } catch(e) { _isServer = false; }
+    }
+    if (_isServer) {
+        _memoryStore = {};
+        _initDone = true;
+        return;
+    }
+    const idbData = await _loadFromIndexedDB();
+    if (idbData) {
+        _memoryStore = idbData;
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(idbData)); } catch(e) {}
+    } else {
+        try {
+            const local = localStorage.getItem(STORE_KEY);
+            _memoryStore = local ? JSON.parse(local) : {};
+        } catch(e) { _memoryStore = {}; }
+    }
+    _initDone = true;
+}
+
+const _initPromise = _init();
 
 function getStore() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; }
+    return _memoryStore || {};
 }
+
 function saveStore(store) {
-    localStorage.setItem(STORE_KEY, JSON.stringify(store));
+    _memoryStore = store;
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e) {}
+    _saveToIndexedDB(store);
+}
+
+async function _apiGet(path, child, value) {
+    let url = `${BACKEND_URL}/${path}`;
+    if (child && value !== undefined) url += `?child=${encodeURIComponent(child)}&value=${encodeURIComponent(value)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`API GET ${path} failed: ${res.status}`);
+    return res.json();
+}
+
+async function _apiPost(path, data) {
+    const res = await fetch(`${BACKEND_URL}/${path}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`API POST ${path} failed: ${res.status}`);
+    return res.json();
+}
+
+async function _apiPut(path, value) {
+    const res = await fetch(`${BACKEND_URL}/${path}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(value)
+    });
+    if (!res.ok) throw new Error(`API PUT ${path} failed: ${res.status}`);
+    return res.json();
+}
+
+async function _apiPatch(path, obj) {
+    const res = await fetch(`${BACKEND_URL}/${path}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(obj)
+    });
+    if (!res.ok) throw new Error(`API PATCH ${path} failed: ${res.status}`);
+    return res.json();
+}
+
+async function _apiDelete(path) {
+    const res = await fetch(`${BACKEND_URL}/${path}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error(`API DELETE ${path} failed: ${res.status}`);
+    return res.json();
 }
 
 function genKey() {
@@ -60,7 +173,12 @@ class MockSnapshot {
 
 class MockRef {
     constructor(path) { this.path = path; this._childKey = null; this._childVal = null; }
-    once(_eventType) {
+    async once(_eventType) {
+        await _initPromise;
+        if (_isServer) {
+            const data = await _apiGet(this.path, this._childKey, this._childVal);
+            return new MockSnapshot(data);
+        }
         const store = getStore();
         const data = navigate(store, this.path);
         if (this._childKey && this._childVal != null && data && typeof data === 'object') {
@@ -70,43 +188,59 @@ class MockRef {
                     filtered[k] = data[k];
                 }
             }
-            return Promise.resolve(new MockSnapshot(Object.keys(filtered).length ? filtered : null));
+            return new MockSnapshot(Object.keys(filtered).length ? filtered : null);
         }
-        return Promise.resolve(new MockSnapshot(data !== undefined ? data : null));
+        return new MockSnapshot(data !== undefined ? data : null);
     }
     push(data) {
-        const key = genKey();
-        const childPath = this.path + '/' + key;
-        if (data !== undefined) {
-            const store = getStore();
-            const parent = navigateOrCreate(store, this.path);
-            parent[key] = data;
-            saveStore(store);
-        }
-        const ref = new MockRef(childPath);
-        ref.key = key;
-        return ref;
+        return _initPromise.then(() => {
+            if (_isServer) {
+                if (data !== undefined) {
+                    return _apiPost(this.path, data).then(result => {
+                        const ref = new MockRef(this.path + '/' + result.key);
+                        ref.key = result.key;
+                        return ref;
+                    });
+                }
+                const tempKey = genKey();
+                const ref = new MockRef(this.path + '/' + tempKey);
+                ref.key = tempKey;
+                return ref;
+            }
+            const key = genKey();
+            const childPath = this.path + '/' + key;
+            if (data !== undefined) {
+                const store = getStore();
+                const parent = navigateOrCreate(store, this.path);
+                parent[key] = data;
+                saveStore(store);
+            }
+            const ref = new MockRef(childPath);
+            ref.key = key;
+            return ref;
+        });
     }
-    set(value) {
+    async set(value) {
+        await _initPromise;
+        if (_isServer) { return _apiPut(this.path, value); }
         const store = getStore();
         setPath(store, this.path, value);
         saveStore(store);
-        return Promise.resolve();
     }
-    update(obj) {
+    async update(obj) {
+        await _initPromise;
+        if (_isServer) { return _apiPatch(this.path, obj); }
         const store = getStore();
         const target = navigateOrCreate(store, this.path);
-        if (target && typeof target === 'object') {
-            Object.assign(target, obj);
-        }
+        if (target && typeof target === 'object') Object.assign(target, obj);
         saveStore(store);
-        return Promise.resolve();
     }
-    remove() {
+    async remove() {
+        await _initPromise;
+        if (_isServer) { return _apiDelete(this.path); }
         const store = getStore();
         removePath(store, this.path);
         saveStore(store);
-        return Promise.resolve();
     }
     orderByChild(child) {
         const q = new MockQuery(this.path);
@@ -121,7 +255,12 @@ class MockQuery {
         this._childVal = value;
         return this;
     }
-    once(_eventType) {
+    async once(_eventType) {
+        await _initPromise;
+        if (_isServer) {
+            const data = await _apiGet(this.path, this._childKey, this._childVal);
+            return new MockSnapshot(data);
+        }
         const store = getStore();
         const data = navigate(store, this.path);
         if (this._childKey && this._childVal != null && data && typeof data === 'object') {
@@ -131,14 +270,15 @@ class MockQuery {
                     filtered[k] = data[k];
                 }
             }
-            return Promise.resolve(new MockSnapshot(Object.keys(filtered).length ? filtered : null));
+            return new MockSnapshot(Object.keys(filtered).length ? filtered : null);
         }
-        return Promise.resolve(new MockSnapshot(data !== undefined ? data : null));
+        return new MockSnapshot(data !== undefined ? data : null);
     }
 }
 
 const db = {
-    ref(path) { return new MockRef(path); }
+    ref(path) { return new MockRef(path); },
+    ready() { return _initPromise; }
 };
 
 const auth = {

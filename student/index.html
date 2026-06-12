@@ -13,6 +13,9 @@
         const user = JSON.parse(localStorage.getItem('somstar_user') || '{}');
         if (!user || user.role !== 'student') window.location.href = '../login.html';
         if(localStorage.getItem('somstar_dark')==='true')document.body.classList.add('dark-mode');
+        document.addEventListener('contextmenu', e => {
+            if (e.target.closest('.fixed, video, audio, img, iframe')) e.preventDefault();
+        });
     </script>
 
     <div class="flex">
@@ -31,6 +34,7 @@
             <nav class="p-3 space-y-1 mt-2">
                 <a href="#" onclick="showSection('overview')" class="sidebar-link active" data-section="overview"><i class="fas fa-home"></i> <span>Overview</span></a>
                 <a href="#" onclick="showSection('attendance')" class="sidebar-link" data-section="attendance"><i class="fas fa-calendar-check"></i> <span>My Attendance</span></a>
+                <a href="#" onclick="showSection('announcements')" class="sidebar-link" data-section="announcements"><i class="fas fa-bullhorn"></i> <span>Announcements</span></a>
                 <a href="#" onclick="showSection('lessons')" class="sidebar-link" data-section="lessons"><i class="fas fa-book-open"></i> <span>My Lessons</span></a>
                 <a href="#" onclick="showSection('marks')" class="sidebar-link" data-section="marks"><i class="fas fa-star"></i> <span>Exam Marks</span></a>
                 <a href="#" onclick="showSection('quizzes')" class="sidebar-link" data-section="quizzes"><i class="fas fa-question-circle"></i> <span>Solve Quizzes</span></a>
@@ -113,6 +117,15 @@
                                 <tbody id="attendanceHistoryBody"><tr><td colspan="3" class="text-center text-gray-400 py-8">Select month to view</td></tr></tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+
+                <div id="section-announcements" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Announcements</h3>
+                        </div>
+                        <div id="studentAnnouncementsList"><p class="text-gray-400 text-sm text-center py-8">Loading announcements...</p></div>
                     </div>
                 </div>
 
@@ -214,11 +227,12 @@
             document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
             const link = document.querySelector(`[data-section="${section}"]`);
             if (link) link.classList.add('active');
-            const titles = { overview:'Overview', attendance:'My Attendance', lessons:'My Lessons', marks:'Exam Marks', quizzes:'Solve Quizzes', profile:'Profile Settings' };
+            const titles = { overview:'Overview', attendance:'My Attendance', announcements:'Announcements', lessons:'My Lessons', marks:'Exam Marks', quizzes:'Solve Quizzes', profile:'Profile Settings' };
             document.getElementById('pageTitle').textContent = titles[section] || section;
 
             if (section === 'overview') loadStudentOverview();
             if (section === 'attendance') loadAttendanceHistory();
+            if (section === 'announcements') loadStudentAnnouncements();
             if (section === 'lessons') loadStudentLessons();
             if (section === 'marks') loadMyMarks();
             if (section === 'quizzes') loadAvailableQuizzes();
@@ -261,7 +275,6 @@
                 const annSnap = await db.ref('announcements').once('value');
                 const annData = annSnap.val();
                 if (annData) {
-                    // Get student's class
                     let sClass = '';
                     try {
                         const sSnap2 = await db.ref('students/' + studentUid).once('value');
@@ -269,7 +282,7 @@
                         sClass = sData2 ? sData2.class : '';
                     } catch(e2) {}
                     const allAnnouncements = Object.values(annData).filter(a => {
-                        if (a.recipientType === 'all-students') return true;
+                        if (a.recipientType === 'all-teachers' || a.recipientType === 'all-students') return true;
                         if (a.recipientType === 'class' && a.recipientValue === sClass) return true;
                         if (a.recipientType === 'student' && a.recipientValue === studentId) return true;
                         return false;
@@ -277,8 +290,8 @@
                     if (allAnnouncements.length > 0) {
                         window._annAudio = window._annAudio || {};
                         const idx = Date.now();
-                        window._annAudio[idx] = allAnnouncements.slice(0,3).map(a => a.audioUrl || '');
-                        const annHtml = allAnnouncements.slice(0,3).map((a,i) => `
+                        window._annAudio[idx] = allAnnouncements.slice(0,2).map(a => a.audioUrl || '');
+                        const annHtml = allAnnouncements.slice(0,2).map((a,i) => `
                             <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl mb-2">
                                 <div class="flex items-center gap-2 mb-1"><i class="fas fa-bullhorn text-yellow-600 text-sm"></i><span class="text-sm font-medium text-gray-900 dark:text-white">${a.title}</span></div>
                                 <p class="text-xs text-gray-600 dark:text-gray-400">${a.message}</p>
@@ -289,6 +302,42 @@
                         if (ratingDiv) ratingDiv.insertAdjacentHTML('afterend', '<div class="mt-4"><h4 class="font-semibold text-gray-900 dark:text-white mb-3 text-sm"><i class="fas fa-bullhorn text-yellow-600 mr-1"></i>Announcements</h4>' + annHtml + '</div>');
                     }
                 }
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadStudentAnnouncements() {
+            try {
+                const annSnap = await db.ref('announcements').once('value');
+                const annData = annSnap.val();
+                const container = document.getElementById('studentAnnouncementsList');
+                if (!annData || Object.keys(annData).length === 0) {
+                    container.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">No announcements yet</p>';
+                    return;
+                }
+                const all = Object.values(annData).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+                window._annAudio = window._annAudio || {};
+                const idx = Date.now();
+                window._annAudio[idx] = all.map(a => a.audioUrl || '');
+                container.innerHTML = all.map((a,i) => {
+                    const audioBtn = a.audioUrl ? `<button onclick="playStudentAudio(${idx},${i})" class="text-xs text-blue-600 mt-1 hover:underline"><i class="fas fa-headphones mr-1"></i> Listen</button>` : '';
+                    const typeTag = a.recipientType === 'all-teachers' ? '<span class="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full">All Teachers</span>' :
+                        a.recipientType === 'all-students' ? '<span class="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full">All Students</span>' :
+                        a.recipientType === 'teacher' ? '<span class="text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 px-2 py-0.5 rounded-full">Teachers</span>' :
+                        a.recipientType === 'class' ? '<span class="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 px-2 py-0.5 rounded-full">Class</span>' :
+                        a.recipientType === 'student' ? '<span class="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-2 py-0.5 rounded-full">Student</span>' : '';
+                    return `<div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl mb-3">
+                        <div class="flex items-center justify-between mb-1">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-bullhorn text-yellow-600 text-sm"></i>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">${a.title}</span>
+                                ${typeTag}
+                            </div>
+                            <span class="text-xs text-gray-400">${a.createdAt ? new Date(a.createdAt).toLocaleDateString() : ''}</span>
+                        </div>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">${a.message}</p>
+                        ${audioBtn}
+                    </div>`;
+                }).join('');
             } catch(e) { console.error(e); }
         }
 
@@ -336,16 +385,16 @@
                 const icons = { pdf:'fa-file-pdf text-red-500', video:'fa-video text-blue-500', audio:'fa-music text-green-500', document:'fa-file-alt text-yellow-500' };
 
                 container.innerHTML = lessons.map(l => `
-                    <div class="p-4 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition">
+                    <div class="p-4 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition" oncontextmenu="return false">
                         <div class="flex items-start gap-3">
                             <i class="fas ${icons[l.type] || 'fa-file'} text-2xl"></i>
                             <div class="flex-1 min-w-0">
                                 <h5 class="font-medium text-gray-900 dark:text-white text-sm truncate">${l.title}</h5>
                                 <p class="text-xs text-gray-400">${l.type} &middot; ${l.class || ''}</p>
                                 <div class="flex gap-2 mt-2">
-                                    ${l.type === 'video' && l.dataUrl ? `<button onclick="playMedia('${l.dataUrl.replace(/'/g, "\\'")}','video')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-play mr-1"></i>Watch</button>` : ''}
-                                    ${l.type === 'audio' && l.dataUrl ? `<button onclick="playMedia('${l.dataUrl.replace(/'/g, "\\'")}','audio')" class="text-xs text-green-600 hover:underline"><i class="fas fa-headphones mr-1"></i>Listen</button>` : ''}
-                                    ${l.dataUrl ? `<a href="${l.dataUrl}" download="${l.fileName || l.title}" class="text-xs text-purple-600 hover:underline"><i class="fas fa-download mr-1"></i>Download</a>` : ''}
+                                    ${l.type === 'video' && l.dataUrl ? `<button onclick="viewLesson('${l.dataUrl.replace(/'/g, "\\'")}','${l.type}','${(l.title || '').replace(/'/g, "\\'")}')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-play mr-1"></i>View</button>` : ''}
+                                    ${l.type === 'audio' && l.dataUrl ? `<button onclick="viewLesson('${l.dataUrl.replace(/'/g, "\\'")}','${l.type}','${(l.title || '').replace(/'/g, "\\'")}')" class="text-xs text-green-600 hover:underline"><i class="fas fa-headphones mr-1"></i>Listen</button>` : ''}
+                                    ${(l.type === 'pdf' || l.type === 'document' || !l.type) && l.dataUrl ? `<button onclick="viewLesson('${l.dataUrl.replace(/'/g, "\\'")}','${l.type || 'pdf'}','${(l.title || '').replace(/'/g, "\\'")}')" class="text-xs text-purple-600 hover:underline"><i class="fas fa-eye mr-1"></i>View</button>` : ''}
                                 </div>
                             </div>
                         </div>
@@ -356,11 +405,28 @@
             } catch(e) { console.error(e); }
         }
 
-        function playMedia(dataUrl, type) {
-            const html = `<div class="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 max-w-2xl w-full">
-                    ${type === 'video' ? `<video src="${dataUrl}" controls class="w-full rounded-xl" style="max-height:70vh"></video>` : `<audio src="${dataUrl}" controls class="w-full"></audio>`}
-                    <button onclick="this.closest('.fixed').remove()" class="mt-3 text-gray-500 text-sm"><i class="fas fa-times mr-1"></i>Close</button>
+        function viewLesson(dataUrl, type, title) {
+            const isPdf = type === 'pdf' || type === 'document' || (!type && dataUrl.startsWith('data:application/pdf'));
+            const isImage = dataUrl.startsWith('data:image/');
+            let contentHtml = '';
+            if (type === 'video' || dataUrl.startsWith('data:video/')) {
+                contentHtml = `<video src="${dataUrl}" controls controlsList="nodownload" class="w-full rounded-xl" style="max-height:70vh" oncontextmenu="return false"></video>`;
+            } else if (type === 'audio' || dataUrl.startsWith('data:audio/')) {
+                contentHtml = `<audio src="${dataUrl}" controls controlsList="nodownload" class="w-full" oncontextmenu="return false"></audio>`;
+            } else if (isImage) {
+                contentHtml = `<img src="${dataUrl}" class="max-w-full max-h-[70vh] rounded-xl mx-auto" draggable="false" oncontextmenu="return false" style="user-select:none;-webkit-user-drag:none">`;
+            } else if (isPdf) {
+                contentHtml = `<iframe src="${dataUrl}#toolbar=0&navpanes=0" class="w-full rounded-xl" style="height:70vh" oncontextmenu="return false" sandbox="allow-scripts"></iframe>`;
+            } else {
+                contentHtml = `<iframe src="${dataUrl}#toolbar=0" class="w-full rounded-xl" style="height:70vh" oncontextmenu="return false" sandbox="allow-scripts"></iframe>`;
+            }
+            const html = `<div class="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()" oncontextmenu="return false">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 max-w-3xl w-full" style="user-select:none">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="font-medium text-gray-900 dark:text-white text-sm truncate">${title || 'Lesson'}</h4>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"><i class="fas fa-times"></i></button>
+                    </div>
+                    ${contentHtml}
                 </div>
             </div>`;
             document.body.insertAdjacentHTML('beforeend', html);
