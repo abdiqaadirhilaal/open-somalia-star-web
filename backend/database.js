@@ -35,7 +35,7 @@ async function initDB() {
         } catch(e) {
             console.error('  ✗ PostgreSQL connection failed:', e.message);
             console.log('  → Falling back to SQLite');
-            // Fall through to SQLite
+            pgPool = null; // Ensure broken pool is not used
         }
     }
     const initSqlJs = require('sql.js');
