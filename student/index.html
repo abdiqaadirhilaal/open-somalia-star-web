@@ -357,6 +357,8 @@
             } catch(e) { console.error(e); }
         }
 
+        let _lessonsData = {};
+
         async function loadStudentLessons() {
             try {
                 const snap = await db.ref('lessons').once('value');
@@ -384,6 +386,9 @@
 
                 const icons = { pdf:'fa-file-pdf text-red-500', video:'fa-video text-blue-500', audio:'fa-music text-green-500', document:'fa-file-alt text-yellow-500' };
 
+                _lessonsData = {};
+                lessons.forEach(l => { _lessonsData[l.key] = l; });
+
                 container.innerHTML = lessons.map(l => `
                     <div class="p-4 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition" oncontextmenu="return false">
                         <div class="flex items-start gap-3">
@@ -392,8 +397,8 @@
                                 <h5 class="font-medium text-gray-900 dark:text-white text-sm truncate">${l.title}</h5>
                                 <p class="text-xs text-gray-400">${l.type} &middot; ${l.class || ''}</p>
                                 <div class="flex gap-2 mt-2">
-                                    ${(l.type === 'video' || l.type === 'audio') && (l.dataUrl || l.fileUrl) ? `<button onclick="viewLesson('${(l.dataUrl || l.fileUrl).replace(/'/g, "\\'")}','${l.type}','${(l.title || '').replace(/'/g, "\\'")}')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-play mr-1"></i>View</button>` : ''}
-                                    ${(l.type === 'pdf' || l.type === 'document' || !l.type) && (l.dataUrl || l.fileUrl) ? `<button onclick="viewLesson('${(l.dataUrl || l.fileUrl).replace(/'/g, "\\'")}','${l.type || 'pdf'}','${(l.title || '').replace(/'/g, "\\'")}')" class="text-xs text-purple-600 hover:underline"><i class="fas fa-eye mr-1"></i>View</button>` : ''}
+                                    ${(l.type === 'video' || l.type === 'audio') && (l.dataUrl || l.fileUrl) ? `<button onclick="viewLesson('${l.key}')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-play mr-1"></i>View</button>` : ''}
+                                    ${(l.type === 'pdf' || l.type === 'document' || !l.type) && (l.dataUrl || l.fileUrl) ? `<button onclick="viewLesson('${l.key}')" class="text-xs text-purple-600 hover:underline"><i class="fas fa-eye mr-1"></i>View</button>` : ''}
                                 </div>
                             </div>
                         </div>
@@ -404,18 +409,19 @@
             } catch(e) { console.error(e); }
         }
 
-        function viewLesson(url, type, title) {
-            const isPdf = type === 'pdf' || type === 'document' || (!type && (!url || url.startsWith('data:application/pdf')));
-            const isImage = url && url.startsWith('data:image/');
-            const isDataUrl = url && url.startsWith('data:');
+        function viewLesson(key) {
+            const l = _lessonsData[key];
+            if (!l) return;
+            const url = l.fileUrl || l.dataUrl;
+            if (!url) return;
+            const type = l.type || 'pdf';
+            const isDataUrl = url.startsWith('data:');
             let contentHtml = '';
-            if (type === 'video' || (!type && url && url.startsWith('data:video/'))) {
+            if (type === 'video') {
                 contentHtml = `<video src="${url}" controls controlsList="nodownload" class="w-full rounded-xl" style="max-height:70vh" oncontextmenu="return false"></video>`;
-            } else if (type === 'audio' || (!type && url && url.startsWith('data:audio/'))) {
+            } else if (type === 'audio') {
                 contentHtml = `<audio src="${url}" controls controlsList="nodownload" class="w-full" oncontextmenu="return false"></audio>`;
-            } else if (isImage) {
-                contentHtml = `<img src="${url}" class="max-w-full max-h-[70vh] rounded-xl mx-auto" draggable="false" oncontextmenu="return false" style="user-select:none;-webkit-user-drag:none">`;
-            } else if (isPdf || type === 'pdf') {
+            } else if (type === 'pdf' || type === 'document' || (!isDataUrl && !url.endsWith('.mp4') && !url.endsWith('.mp3'))) {
                 contentHtml = `<iframe src="${url}${isDataUrl ? '#toolbar=0&navpanes=0' : '#toolbar=0'}" class="w-full rounded-xl" style="height:70vh" oncontextmenu="return false" sandbox="allow-scripts"></iframe>`;
             } else {
                 contentHtml = `<iframe src="${url}#toolbar=0" class="w-full rounded-xl" style="height:70vh" oncontextmenu="return false" sandbox="allow-scripts"></iframe>`;
@@ -423,7 +429,7 @@
             const html = `<div class="fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()" oncontextmenu="return false">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 max-w-3xl w-full" style="user-select:none">
                     <div class="flex justify-between items-center mb-3">
-                        <h4 class="font-medium text-gray-900 dark:text-white text-sm truncate">${title || 'Lesson'}</h4>
+                        <h4 class="font-medium text-gray-900 dark:text-white text-sm truncate">${l.title || 'Lesson'}</h4>
                         <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"><i class="fas fa-times"></i></button>
                     </div>
                     ${contentHtml}
