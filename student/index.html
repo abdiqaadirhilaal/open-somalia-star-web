@@ -241,6 +241,7 @@
 
         async function loadStudentOverview() {
             try {
+                if (typeof db === 'undefined') { document.getElementById('myLessons').textContent = '?'; return; }
                 const attRecords = await SOMSTAR.getAttendance(studentId);
                 const marks = await SOMSTAR.getMarks(studentId);
                 const lessonsSnap = await db.ref('lessons').once('value');
@@ -302,7 +303,7 @@
                         if (ratingDiv) ratingDiv.insertAdjacentHTML('afterend', '<div class="mt-4"><h4 class="font-semibold text-gray-900 dark:text-white mb-3 text-sm"><i class="fas fa-bullhorn text-yellow-600 mr-1"></i>Announcements</h4>' + annHtml + '</div>');
                     }
                 }
-            } catch(e) { console.error(e); }
+            } catch(e) { console.error(e); document.getElementById('myLessons').textContent = 'Err: ' + e.message; }
         }
 
         async function loadStudentAnnouncements() {
@@ -406,7 +407,7 @@
                 `).join('');
 
                 SOMSTAR.searchTable('lessonSearch', 'studentLessonsList');
-            } catch(e) { console.error(e); }
+            } catch(e) { console.error(e); document.getElementById('studentLessonsList').innerHTML = '<p class="text-red-400 col-span-3 text-center py-8">Error loading lessons: ' + e.message + '</p>'; }
         }
 
         function viewLesson(key) {
