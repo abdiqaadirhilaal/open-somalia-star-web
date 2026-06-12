@@ -255,7 +255,7 @@ async function seedDefaults() {
 
 // Health check
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', database: process.env.DATABASE_URL ? 'postgresql' : 'sqlite', timestamp: new Date().toISOString() });
 });
 
 // Migration: convert existing file-based lessons to have dataUrl in DB
