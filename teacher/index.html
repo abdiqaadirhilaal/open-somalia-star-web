@@ -666,19 +666,35 @@
             if (!title || !type || !cls) { SOMSTAR.showNotification('Fill title, type, and select a class', 'error'); return; }
 
             try {
-                const lessonRef = db.ref('lessons').push();
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    await lessonRef.set({
+                if (typeof IS_SERVER !== 'undefined' && IS_SERVER) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                    if (!res.ok) throw new Error('Upload failed');
+                    const uploadResult = await res.json();
+                    await db.ref('lessons').push({
                         title, class: cls, type, fileName: file.name, fileSize: file.size,
-                        dataUrl: e.target.result,
+                        fileUrl: uploadResult.url,
                         uploadedAt: new Date().toISOString()
                     });
-                    SOMSTAR.showNotification('Lesson uploaded!', 'success');
-                    document.getElementById('lessonTitle').value = '';
-                    loadLessons();
-                };
-                reader.readAsDataURL(file);
+                } else {
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        await db.ref('lessons').push({
+                            title, class: cls, type, fileName: file.name, fileSize: file.size,
+                            dataUrl: e.target.result,
+                            uploadedAt: new Date().toISOString()
+                        });
+                        SOMSTAR.showNotification('Lesson uploaded!', 'success');
+                        document.getElementById('lessonTitle').value = '';
+                        loadLessons();
+                    };
+                    reader.readAsDataURL(file);
+                    return;
+                }
+                SOMSTAR.showNotification('Lesson uploaded!', 'success');
+                document.getElementById('lessonTitle').value = '';
+                loadLessons();
             } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
         }
 
@@ -698,8 +714,9 @@
                             <i class="fas ${icons[l.type] || 'fa-file'} text-2xl"></i>
                             <div class="flex-1 min-w-0">
                                 <h5 class="font-medium text-gray-900 dark:text-white text-sm truncate">${l.title}</h5>
-                                <p class="text-xs text-gray-400">${l.class} &middot; ${l.type}</p>
+                                <p class="text-xs text-gray-400">${l.class} &middot; ${l.type} (${(l.fileSize/1024).toFixed(0)}KB)</p>
                                 ${l.dataUrl ? `<a href="${l.dataUrl}" download="${l.fileName}" class="text-blue-600 text-xs mt-1 inline-block hover:underline"><i class="fas fa-download mr-1"></i>Download</a>` : ''}
+                                ${l.fileUrl ? `<a href="${l.fileUrl}" download="${l.fileName}" class="text-blue-600 text-xs mt-1 inline-block hover:underline"><i class="fas fa-download mr-1"></i>Download</a>` : ''}
                                 <button onclick="deleteLesson('${l.key}')" class="text-red-600 text-xs mt-1 ml-2 hover:underline"><i class="fas fa-trash mr-1"></i>Delete</button>
                             </div>
                         </div>
@@ -710,7 +727,17 @@
 
         async function deleteLesson(key) {
             if (!confirm('Delete this lesson?')) return;
-            try { await db.ref('lessons/' + key).remove(); SOMSTAR.showNotification('Lesson deleted', 'info'); loadLessons(); } catch(e) { SOMSTAR.showNotification('Error', 'error'); }
+            try {
+                const snap = await db.ref('lessons/' + key).once('value');
+                const lesson = snap.val();
+                if (lesson && lesson.fileUrl && typeof IS_SERVER !== 'undefined' && IS_SERVER) {
+                    const filename = lesson.fileUrl.split('/').pop();
+                    fetch('/api/upload/' + filename, { method: 'DELETE' }).catch(() => {});
+                }
+                await db.ref('lessons/' + key).remove();
+                SOMSTAR.showNotification('Lesson deleted', 'info');
+                loadLessons();
+            } catch(e) { SOMSTAR.showNotification('Error', 'error'); }
         }
 
         async function loadStudentsForMarks() {

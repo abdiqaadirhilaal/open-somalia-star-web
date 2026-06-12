@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '200mb' }));
+app.use(express.urlencoded({ extended: true, limit: '200mb' }));
 
 // Serve static files from parent directory
 app.use(express.static(path.join(__dirname, '..')));
@@ -27,7 +27,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
     storage,
-    limits: { fileSize: 50 * 1024 * 1024 } // 50MB
+    limits: { fileSize: 200 * 1024 * 1024 } // 200MB
 });
 
 // Ensure upload dir exists
@@ -160,6 +160,17 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
         if (!req.file) return res.status(400).json({ error: 'No file' });
         const fileUrl = '/uploads/' + req.file.filename;
         res.json({ url: fileUrl, name: req.file.originalname, type: req.file.mimetype });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Delete uploaded file
+app.delete('/api/upload/:filename', (req, res) => {
+    try {
+        const filePath = path.join(uploadDir, req.params.filename);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
