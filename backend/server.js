@@ -185,7 +185,7 @@ app.use('/uploads', express.static(uploadDir));
 // Export/Import
 app.get('/api/export', async (req, res) => {
     try {
-        const tables = ['students', 'teachers', 'attendance', 'teacher_attendance', 'marks', 'lessons', 'quizzes', 'announcements', 'classes', 'finance'];
+        const tables = ['students', 'teachers', 'attendance', 'teacherAttendance', 'marks', 'lessons', 'quizzes', 'announcements', 'classes', 'finance'];
         const data = {};
         for (const t of tables) {
             const rows = await db.getAll(t);
@@ -207,7 +207,7 @@ app.post('/api/import', async (req, res) => {
     try {
         const data = req.body;
         if (!data || typeof data !== 'object') return res.status(400).json({ error: 'Invalid data' });
-        const tables = ['students', 'teachers', 'attendance', 'teacher_attendance', 'marks', 'lessons', 'quizzes', 'announcements', 'classes', 'finance'];
+        const tables = ['students', 'teachers', 'attendance', 'teacherAttendance', 'marks', 'lessons', 'quizzes', 'announcements', 'classes', 'finance'];
         for (const t of tables) {
             if (data[t]) {
                 const existing = await db.getAll(t);

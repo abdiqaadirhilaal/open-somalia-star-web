@@ -350,7 +350,7 @@
                 const filtered = month ? attRecords.filter(r => r.date && r.date.startsWith(month)) : attRecords;
                 const tbody = document.getElementById('attendanceHistoryBody');
 
-                if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="2" class="text-center text-gray-400 py-8">No records for this period</td></tr>'; return; }
+                if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-400 py-8">No records for this period</td></tr>'; return; }
 
                 tbody.innerHTML = filtered.sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(r => {
                     const colors = { present: 'text-green-600 bg-green-100', absent: 'text-red-600 bg-red-100', vacation: 'text-yellow-600 bg-yellow-100' };
@@ -400,7 +400,7 @@
                                 <p class="text-xs text-gray-400">${l.type} &middot; ${l.class || ''}</p>
                                 <div class="flex gap-2 mt-2">
                                     ${(l.type === 'video' || l.type === 'audio') && (l.dataUrl || l.fileUrl) ? `<button onclick="viewLesson('${l.key}')" class="text-xs text-blue-600 hover:underline"><i class="fas fa-play mr-1"></i>View</button>` : ''}
-                                    ${(l.type === 'pdf' || l.type === 'document' || !l.type) && (l.dataUrl || l.fileUrl) ? `<button onclick="viewLesson('${l.key}')" class="text-xs text-purple-600 hover:underline"><i class="fas fa-eye mr-1"></i>View</button>` : ''}
+                                    ${(l.type === 'pdf' || l.type === 'document' || !l.type) && (l.dataUrl || l.fileUrl) ? `<button onclick="viewLesson('${l.key}')" class="text-xs text-purple-600 hover:underline"><i class="fas ${l.type === 'document' ? 'fa-file' : 'fa-eye'} mr-1"></i>${l.type === 'document' ? 'Open' : 'View'}</button>` : ''}
                                 </div>
                             </div>
                         </div>
@@ -418,12 +418,18 @@
             if (!url) return;
             const type = l.type || 'pdf';
             const isDataUrl = url.startsWith('data:');
+            const fileExt = url.split('.').pop().toLowerCase();
+            const officeExts = ['ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx'];
+            const isOfficeFile = officeExts.includes(fileExt) || type === 'document';
             let contentHtml = '';
             if (type === 'video') {
                 contentHtml = `<video src="${url}" controls controlsList="nodownload" class="w-full rounded-xl" style="max-height:70vh" oncontextmenu="return false"></video>`;
             } else if (type === 'audio') {
                 contentHtml = `<audio src="${url}" controls controlsList="nodownload" class="w-full" oncontextmenu="return false"></audio>`;
-            } else if (type === 'pdf' || type === 'document' || (!isDataUrl && !url.endsWith('.mp4') && !url.endsWith('.mp3'))) {
+            } else if (isOfficeFile && !isDataUrl) {
+                const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(window.location.origin + url)}&embedded=true`;
+                contentHtml = `<iframe src="${viewerUrl}" class="w-full rounded-xl" style="height:70vh" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>`;
+            } else if (type === 'pdf' || type === 'document' || (!isDataUrl && !['mp4', 'mp3', 'webm', 'ogg'].includes(fileExt))) {
                 contentHtml = `<iframe src="${url}${isDataUrl ? '#toolbar=0&navpanes=0' : '#toolbar=0'}" class="w-full rounded-xl" style="height:70vh" oncontextmenu="return false" sandbox="allow-scripts"></iframe>`;
             } else {
                 contentHtml = `<iframe src="${url}#toolbar=0" class="w-full rounded-xl" style="height:70vh" oncontextmenu="return false" sandbox="allow-scripts"></iframe>`;

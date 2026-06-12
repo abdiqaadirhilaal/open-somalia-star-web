@@ -11,8 +11,7 @@ const SOMSTAR = {
     },
 
     generateId(index) {
-        const num = 100 + index;
-        if (num > 300) return `SOMSTAR${num}`;
+        const num = Math.min(100 + index, 300);
         return `SOMSTAR${num}`;
     },
 
@@ -79,7 +78,7 @@ const SOMSTAR = {
         const snap = await db.ref('students').once('value');
         const data = snap.val();
         if (!data) return 'SOMSTAR100';
-        const ids = Object.values(data).map(s => parseInt(s.studentId.replace('SOMSTAR', ''))).filter(n => !isNaN(n));
+        const ids = Object.values(data).map(s => s && s.studentId ? parseInt(s.studentId.replace('SOMSTAR', '')) : NaN).filter(n => !isNaN(n));
         const max = ids.length > 0 ? Math.max(...ids) : 99;
         const next = max + 1;
         return `SOMSTAR${next}`;

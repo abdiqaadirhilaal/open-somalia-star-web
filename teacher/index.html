@@ -189,8 +189,12 @@
                                     <select id="lessonClass" class="form-input">
                                         <option value="">Select class</option>
                                     </select>
-                                </div>
-                            </div>
+                    </div>
+                    <div id="teacherActivity" class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm mt-6">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
+                        <div class="space-y-3"><p class="text-gray-400 text-sm">Loading...</p></div>
+                    </div>
+                </div>
                         </div>
                         <div class="mt-8">
                             <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Uploaded Lessons</h4>
@@ -624,6 +628,8 @@
             let saved = 0;
 
             try {
+                const existingSnap = await db.ref('attendance').once('value');
+                const allData = existingSnap.val() || {};
                 for (const student of students) {
                     if (student.class !== cls) continue;
                     const status = pendingAttendance[student.studentId] || 
@@ -631,8 +637,6 @@
                     if (!status) continue;
 
                     // Check if record exists for today + class
-                    const existingSnap = await db.ref('attendance').once('value');
-                    const allData = existingSnap.val() || {};
                     const existingKey = Object.keys(allData).find(k => 
                         allData[k].studentId === student.studentId && 
                         allData[k].date === date && 

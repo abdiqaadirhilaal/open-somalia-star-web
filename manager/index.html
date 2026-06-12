@@ -42,6 +42,8 @@
                 <a href="#" onclick="showSection('teacheratt')" class="sidebar-link" data-section="teacheratt"><i class="fas fa-user-clock"></i> <span>Teacher Attendance</span></a>
                 <a href="#" onclick="showSection('finance')" class="sidebar-link" data-section="finance"><i class="fas fa-coins"></i> <span>Finance</span></a>
                 <a href="#" onclick="showSection('backup')" class="sidebar-link" data-section="backup"><i class="fas fa-database"></i> <span>Data Backup</span></a>
+                <a href="../student-logins.html" target="_blank" class="sidebar-link"><i class="fas fa-id-card"></i> <span>Student Logins</span></a>
+                <a href="../ids-table.html" target="_blank" class="sidebar-link"><i class="fas fa-table"></i> <span>IDs Table</span></a>
             </nav>
             <div class="p-3 mt-auto border-t border-white/10">
                 <a href="#" onclick="AUTH.logout()" class="sidebar-link logout-btn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
@@ -445,7 +447,7 @@
                             </div>
                         </div>
                         <div class="mt-6 p-4 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
-                            <p class="text-xs text-yellow-700 dark:text-yellow-400"><i class="fas fa-info-circle mr-1"></i> <strong>Note:</strong> Data is automatically saved to your browser's IndexedDB storage. Export/Import is for manual backup and transfer between devices.</p>
+                            <p class="text-xs text-yellow-700 dark:text-yellow-400"><i class="fas fa-info-circle mr-1"></i> <strong>Note:</strong> <span id="backupNote">Data is stored on the server database. Export/Import is for manual backup.</span></p>
                         </div>
                     </div>
                 </div>
@@ -462,6 +464,12 @@
         SOMSTAR.initDarkMode();
         document.getElementById('attendanceDate').value = SOMSTAR.getToday();
         document.getElementById('teacherAttDate').value = SOMSTAR.getToday();
+
+        if (window.location.protocol !== 'file:') {
+            document.getElementById('backupNote').textContent = 'Data is stored on the server database. Export/Import is for manual backup.';
+        } else {
+            document.getElementById('backupNote').textContent = 'Data is automatically saved to your browser. Export/Import is for manual backup and transfer.';
+        }
 
         function showSection(section) {
             document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
