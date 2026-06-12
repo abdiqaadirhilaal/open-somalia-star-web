@@ -4,7 +4,11 @@ const DB_VERSION = 1;
 
 const BACKEND_URL = window.location.origin + '/api/ref';
 
-let _isServer = false;
+// Server mode: when NOT file:// AND (port is 3000 OR hostname is a real domain)
+const IS_SERVER = window.location.protocol !== 'file:' && 
+    (window.location.port === '3000' || 
+     (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost'));
+
 let _memoryStore = null;
 let _initDone = false;
 
@@ -45,14 +49,7 @@ async function _saveToIndexedDB(data) {
 
 async function _init() {
     if (_initDone) return;
-    // Detect if backend API is available
-    if (window.location.protocol !== 'file:') {
-        try {
-            const res = await fetch(window.location.origin + '/api/health', { method: 'HEAD', cache: 'no-store' });
-            _isServer = res.ok;
-        } catch(e) { _isServer = false; }
-    }
-    if (_isServer) {
+    if (IS_SERVER) {
         _memoryStore = {};
         _initDone = true;
         return;
@@ -175,7 +172,7 @@ class MockRef {
     constructor(path) { this.path = path; this._childKey = null; this._childVal = null; }
     async once(_eventType) {
         await _initPromise;
-        if (_isServer) {
+        if (IS_SERVER) {
             const data = await _apiGet(this.path, this._childKey, this._childVal);
             return new MockSnapshot(data);
         }
@@ -194,7 +191,7 @@ class MockRef {
     }
     push(data) {
         return _initPromise.then(() => {
-            if (_isServer) {
+            if (IS_SERVER) {
                 if (data !== undefined) {
                     return _apiPost(this.path, data).then(result => {
                         const ref = new MockRef(this.path + '/' + result.key);
@@ -222,14 +219,14 @@ class MockRef {
     }
     async set(value) {
         await _initPromise;
-        if (_isServer) { return _apiPut(this.path, value); }
+        if (IS_SERVER) { return _apiPut(this.path, value); }
         const store = getStore();
         setPath(store, this.path, value);
         saveStore(store);
     }
     async update(obj) {
         await _initPromise;
-        if (_isServer) { return _apiPatch(this.path, obj); }
+        if (IS_SERVER) { return _apiPatch(this.path, obj); }
         const store = getStore();
         const target = navigateOrCreate(store, this.path);
         if (target && typeof target === 'object') Object.assign(target, obj);
@@ -237,7 +234,7 @@ class MockRef {
     }
     async remove() {
         await _initPromise;
-        if (_isServer) { return _apiDelete(this.path); }
+        if (IS_SERVER) { return _apiDelete(this.path); }
         const store = getStore();
         removePath(store, this.path);
         saveStore(store);
@@ -257,7 +254,7 @@ class MockQuery {
     }
     async once(_eventType) {
         await _initPromise;
-        if (_isServer) {
+        if (IS_SERVER) {
             const data = await _apiGet(this.path, this._childKey, this._childVal);
             return new MockSnapshot(data);
         }
