@@ -319,5 +319,8 @@ db.initDB().then(async () => {
     }
 }).catch(err => {
     console.error('Failed to initialize database:', err);
-    process.exit(1);
+    console.log('Starting server without database — some features may not work');
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running on port ${PORT} (limited mode)`);
+    });
 });
