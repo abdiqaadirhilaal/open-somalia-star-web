@@ -36,6 +36,9 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// Serve uploaded files
+app.use('/uploads', express.static(uploadDir));
+
 // ====== API Routes ======
 
 function parsePath(fullPath) {
