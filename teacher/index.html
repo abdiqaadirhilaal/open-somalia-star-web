@@ -679,7 +679,7 @@
                     const uploadResult = await res.json();
                     await db.ref('lessons').push({
                         title, class: cls, type, fileName: file.name, fileSize: file.size,
-                        fileUrl: uploadResult.url,
+                        fileUrl: uploadResult.url, dataUrl: uploadResult.dataUrl,
                         uploadedAt: new Date().toISOString()
                     });
                 } else {

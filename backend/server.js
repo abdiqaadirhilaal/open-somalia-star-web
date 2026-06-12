@@ -162,7 +162,10 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'No file' });
         const fileUrl = '/uploads/' + req.file.filename;
-        res.json({ url: fileUrl, name: req.file.originalname, type: req.file.mimetype });
+        const fileData = fs.readFileSync(req.file.path).toString('base64');
+        const mime = req.file.mimetype || 'application/octet-stream';
+        const dataUrl = `data:${mime};base64,${fileData}`;
+        res.json({ url: fileUrl, name: req.file.originalname, type: req.file.mimetype, dataUrl });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

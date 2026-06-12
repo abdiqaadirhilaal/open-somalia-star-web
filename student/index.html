@@ -429,6 +429,8 @@
             } else if (isOfficeFile && !isDataUrl) {
                 const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(window.location.origin + url)}&embedded=true`;
                 contentHtml = `<iframe src="${viewerUrl}" class="w-full rounded-xl" style="height:70vh" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>`;
+            } else if (isOfficeFile && isDataUrl) {
+                contentHtml = `<div class="text-center py-16"><i class="fas fa-file text-5xl text-gray-400 mb-4"></i><p class="text-gray-500">${l.fileName || 'Office document'}</p></div>`;
             } else if (type === 'pdf' || type === 'document' || (!isDataUrl && !['mp4', 'mp3', 'webm', 'ogg'].includes(fileExt))) {
                 contentHtml = `<iframe src="${url}${isDataUrl ? '#toolbar=0&navpanes=0' : '#toolbar=0'}" class="w-full rounded-xl" style="height:70vh" oncontextmenu="return false" sandbox="allow-scripts"></iframe>`;
             } else {
