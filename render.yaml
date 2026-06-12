@@ -10,4 +10,4 @@ services:
       - key: NODE_VERSION
         value: 18
       - key: DATABASE_URL
-        sync: false
+        value: postgresql://postgres:somalistar1234@db.rlztilksthbcvsioyzxi.supabase.co:5432/postgres
