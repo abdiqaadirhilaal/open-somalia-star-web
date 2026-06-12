@@ -36,9 +36,6 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Serve uploaded files
-app.use('/uploads', express.static(uploadDir));
-
 // ====== API Routes ======
 
 function parsePath(fullPath) {
@@ -182,8 +179,25 @@ app.delete('/api/upload/:filename', (req, res) => {
     }
 });
 
-// Serve uploaded files
+// Serve uploaded files — with DB fallback
 app.use('/uploads', express.static(uploadDir));
+app.get('/uploads/:filename', async (req, res) => {
+    const filePath = path.join(uploadDir, req.params.filename);
+    if (fs.existsSync(filePath)) return res.sendFile(filePath);
+    try {
+        const lessons = await db.getAll('lessons');
+        const lesson = lessons.find(l => l.fileUrl === '/uploads/' + req.params.filename && l.dataUrl);
+        if (lesson) {
+            const data = lesson.dataUrl.split(',')[1] || lesson.dataUrl;
+            const buf = Buffer.from(data, 'base64');
+            const ext = path.extname(req.params.filename).toLowerCase();
+            const mime = { '.pdf':'application/pdf','.mp4':'video/mp4','.mp3':'audio/mpeg','.pptx':'application/vnd.openxmlformats-officedocument.presentationml.presentation','.docx':'application/vnd.openxmlformats-officedocument.wordprocessingml.document','.xlsx':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }[ext] || 'application/octet-stream';
+            res.set('Content-Type', mime);
+            return res.send(buf);
+        }
+    } catch(e) {}
+    res.status(404).send('File not found');
+});
 
 // Export/Import
 app.get('/api/export', async (req, res) => {
@@ -244,11 +258,31 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Migration: convert existing file-based lessons to have dataUrl in DB
+async function migrateLessonFiles() {
+    try {
+        const lessons = await db.getAll('lessons');
+        for (const lesson of lessons) {
+            if (lesson.fileUrl && !lesson.dataUrl) {
+                const filePath = path.join(uploadDir, path.basename(lesson.fileUrl));
+                if (fs.existsSync(filePath)) {
+                    const fileData = fs.readFileSync(filePath).toString('base64');
+                    const ext = path.extname(lesson.fileName || '').toLowerCase();
+                    const mime = { '.pdf':'application/pdf','.mp4':'video/mp4','.mp3':'audio/mpeg','.pptx':'application/vnd.openxmlformats-officedocument.presentationml.presentation','.docx':'application/vnd.openxmlformats-officedocument.wordprocessingml.document','.xlsx':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','.jpg':'image/jpeg','.png':'image/png','.gif':'image/gif' }[ext] || 'application/octet-stream';
+                    await db.update('lessons', lesson.uid, { dataUrl: `data:${mime};base64,${fileData}` });
+                    console.log(`  ✓ Migrated lesson file: ${lesson.fileName}`);
+                }
+            }
+        }
+    } catch(e) { console.error('Migration error:', e.message); }
+}
+
 // Start server
 const isLocal = !process.env.DATABASE_URL;
 db.initDB().then(async () => {
     await db.migrateIfNeeded();
     await seedDefaults();
+    await migrateLessonFiles();
     if (isLocal) {
         let networkIP = 'Not found';
         const ifaces = os.networkInterfaces();
