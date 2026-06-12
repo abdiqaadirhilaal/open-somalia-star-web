@@ -380,28 +380,56 @@
                     <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="font-semibold text-gray-900 dark:text-white">Finance Management</h3>
-                            <button onclick="SOMSTAR.showNotification('Finance module ready','success')" class="btn-primary px-4 py-2 rounded-xl text-white text-sm"><i class="fas fa-plus mr-1"></i> Add Record</button>
                         </div>
-                        <div class="grid md:grid-cols-3 gap-4 mb-6">
-                            <div class="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Total Revenue</p>
-                                <p class="text-2xl font-bold text-green-600">$0.00</p>
+
+                        <div class="flex gap-2 mb-6">
+                            <select id="financeClass" class="form-input" onchange="loadFinanceStudents()">
+                                <option value="">Select class</option>
+                                <option value="TRY 2:00">TRY 2:00</option>
+                                <option value="Abdishakuur 2:00">Abdishakuur 2:00</option>
+                                <option value="Muktar 2:00">Muktar 2:00</option>
+                                <option value="TRY 3:00">TRY 3:00</option>
+                                <option value="Abdishakuur 3:00">Abdishakuur 3:00</option>
+                                <option value="Muktar 3:00">Muktar 3:00</option>
+                                <option value="TRY 4:00">TRY 4:00</option>
+                                <option value="Abdishakuur 4:00">Abdishakuur 4:00</option>
+                                <option value="Muktar 4:00">Muktar 4:00</option>
+                            </select>
+                            <select id="financeMonth" class="form-input">
+                                <option value="">This month</option>
+                                <option value="01">January</option><option value="02">February</option><option value="03">March</option>
+                                <option value="04">April</option><option value="05">May</option><option value="06">June</option>
+                                <option value="07">July</option><option value="08">August</option><option value="09">September</option>
+                                <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                            </select>
+                        </div>
+
+                        <div class="grid md:grid-cols-3 gap-4 mb-6" id="financeSummary">
+                            <div class="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-center">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Total Bixiyay</p>
+                                <p class="text-2xl font-bold text-green-600" id="financePaidCount">0</p>
                             </div>
-                            <div class="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Expenses</p>
-                                <p class="text-2xl font-bold text-red-600">$0.00</p>
+                            <div class="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-center">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Ma Bixin</p>
+                                <p class="text-2xl font-bold text-red-600" id="financeUnpaidCount">0</p>
                             </div>
-                            <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Balance</p>
-                                <p class="text-2xl font-bold text-blue-600">$0.00</p>
+                            <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-center">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Wadarta Ardayda</p>
+                                <p class="text-2xl font-bold text-blue-600" id="financeTotalCount">0</p>
                             </div>
                         </div>
+
                         <div class="table-container">
                             <table class="data-table">
-                                <thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Amount</th></tr></thead>
-                                <tbody><tr><td colspan="4" class="text-center text-gray-400 py-8">No records yet</td></tr></tbody>
+                                <thead><tr><th>Student ID</th><th>Name</th><th>Class</th><th>Bixiyay</th><th>Ma Bixin</th></tr></thead>
+                                <tbody id="financeTableBody">
+                                    <tr><td colspan="5" class="text-center text-gray-400 py-8">Select class to view students</td></tr>
+                                </tbody>
                             </table>
                         </div>
+
+                        <button onclick="saveFinance()" class="btn-primary px-6 py-2.5 rounded-xl text-white mt-4"><i class="fas fa-save mr-1"></i> Save</button>
+                        <button onclick="showFinanceReport()" class="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white mt-4 ml-2"><i class="fas fa-chart-bar mr-1"></i> Report</button>
                     </div>
                 </div>
             </div>
@@ -464,6 +492,7 @@
         SOMSTAR.initDarkMode();
         document.getElementById('attendanceDate').value = SOMSTAR.getToday();
         document.getElementById('teacherAttDate').value = SOMSTAR.getToday();
+        document.getElementById('financeMonth').value = String(new Date().getMonth() + 1).padStart(2, '0');
 
         if (window.location.protocol !== 'file:') {
             document.getElementById('backupNote').textContent = 'Data is stored on the server database. Export/Import is for manual backup.';
@@ -489,6 +518,7 @@
             if (section === 'announcements') { loadAnnouncements(); setupAnnRecipient(); }
             if (section === 'attendance') loadAttendanceRecords();
             if (section === 'teacheratt') loadTeacherAttendance();
+            if (section === 'finance') loadFinanceStudents();
             if (section === 'overview') loadOverview();
         }
 
@@ -1200,6 +1230,144 @@
 
         loadOverview();
         seedDefaultTeachers();
+
+        // ====== FINANCE ======
+        let _financeData = {};
+
+        async function loadFinanceStudents() {
+            const cls = document.getElementById('financeClass').value;
+            if (!cls) {
+                document.getElementById('financeTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 py-8">Select class to view students</td></tr>';
+                document.getElementById('financePaidCount').textContent = '0';
+                document.getElementById('financeUnpaidCount').textContent = '0';
+                document.getElementById('financeTotalCount').textContent = '0';
+                return;
+            }
+            try {
+                const students = await SOMSTAR.getStudents();
+                const filtered = students.filter(s => s.class === cls && s.status !== 'disabled');
+                document.getElementById('financeTotalCount').textContent = filtered.length;
+
+                // Get existing payment records
+                const snap = await db.ref('finance').once('value');
+                const data = snap.val() || {};
+                _financeData = {};
+
+                // Get current month
+                const month = document.getElementById('financeMonth').value || String(new Date().getMonth() + 1).padStart(2, '0');
+                const year = new Date().getFullYear();
+                const period = `${year}-${month}`;
+
+                const tbody = document.getElementById('financeTableBody');
+                tbody.innerHTML = filtered.map(s => {
+                    // Find existing record for this student + period
+                    const existingKey = Object.keys(data).find(k => data[k].studentId === s.studentId && data[k].period === period);
+                    const existing = existingKey ? data[existingKey] : null;
+                    const status = existing ? existing.status : 'unpaid';
+                    const uid = existingKey || s.uid + '_' + period;
+                    _financeData[uid] = { studentId: s.studentId, name: s.fullName, class: cls, period, status, uid };
+
+                    return `<tr>
+                        <td class="font-medium text-gray-900 dark:text-white">${s.studentId}</td>
+                        <td>${s.fullName}</td>
+                        <td>${s.class}</td>
+                        <td class="text-center"><input type="radio" name="fin_${s.studentId}" value="paid" ${status === 'paid' ? 'checked' : ''} onchange="updateFinanceStatus('${uid}','paid')"></td>
+                        <td class="text-center"><input type="radio" name="fin_${s.studentId}" value="unpaid" ${status === 'unpaid' ? 'checked' : ''} onchange="updateFinanceStatus('${uid}','unpaid')"></td>
+                    </tr>`;
+                }).join('');
+
+                updateFinanceSummary();
+            } catch(e) { console.error(e); }
+        }
+
+        function updateFinanceStatus(uid, status) {
+            if (_financeData[uid]) {
+                _financeData[uid].status = status;
+            }
+            updateFinanceSummary();
+        }
+
+        function updateFinanceSummary() {
+            const paid = Object.values(_financeData).filter(d => d.status === 'paid').length;
+            const unpaid = Object.values(_financeData).filter(d => d.status === 'unpaid').length;
+            document.getElementById('financePaidCount').textContent = paid;
+            document.getElementById('financeUnpaidCount').textContent = unpaid;
+        }
+
+        async function saveFinance() {
+            const records = Object.values(_financeData).filter(d => d.status);
+            if (records.length === 0) { SOMSTAR.showNotification('No changes to save', 'info'); return; }
+            try {
+                for (const rec of records) {
+                    const snap = await db.ref('finance').orderByChild('studentId').equalTo(rec.studentId).once('value');
+                    const data = snap.val();
+                    const existingKey = data ? Object.keys(data).find(k => data[k].period === rec.period) : null;
+                    if (existingKey) {
+                        await db.ref('finance/' + existingKey + '/status').set(rec.status);
+                    } else {
+                        await db.ref('finance').push({
+                            studentId: rec.studentId,
+                            name: rec.name,
+                            class: rec.class,
+                            period: rec.period,
+                            status: rec.status,
+                            updatedAt: new Date().toISOString()
+                        });
+                    }
+                }
+                SOMSTAR.showNotification('Finance saved!', 'success');
+                loadFinanceStudents();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        function showFinanceReport() {
+            const cls = document.getElementById('financeClass').value;
+            if (!cls) { SOMSTAR.showNotification('Select a class first', 'error'); return; }
+            const paid = Object.values(_financeData).filter(d => d.status === 'paid').length;
+            const unpaid = Object.values(_financeData).filter(d => d.status === 'unpaid').length;
+            const total = paid + unpaid;
+            const month = document.getElementById('financeMonth').value || String(new Date().getMonth() + 1).padStart(2, '0');
+            const monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+
+            const html = `<div class="fixed inset-0 bg-black/50 z-[300] flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-lg text-gray-900 dark:text-white">Finance Report</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                            <p class="text-sm text-gray-500">Class</p>
+                            <p class="font-semibold text-gray-900 dark:text-white">${cls}</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                            <p class="text-sm text-gray-500">Period</p>
+                            <p class="font-semibold text-gray-900 dark:text-white">${monthNames[parseInt(month)]} ${new Date().getFullYear()}</p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="p-3 rounded-xl bg-green-50 dark:bg-green-900/20 text-center">
+                                <p class="text-2xl font-bold text-green-600">${paid}</p>
+                                <p class="text-xs text-gray-500">Bixiyay</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-center">
+                                <p class="text-2xl font-bold text-red-600">${unpaid}</p>
+                                <p class="text-xs text-gray-500">Ma Bixin</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-center">
+                                <p class="text-2xl font-bold text-blue-600">${total}</p>
+                                <p class="text-xs text-gray-500">Wadarta</p>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-4 overflow-hidden">
+                            <div class="bg-green-500 h-full rounded-full transition-all" style="width:${total > 0 ? (paid/total*100) : 0}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 text-center">${total > 0 ? Math.round(paid/total*100) : 0}% of students have paid</p>
+                    </div>
+                    <button onclick="SOMSTAR.exportToPDF(this.parentElement,'Finance-Report-${cls}.pdf')" class="btn-primary w-full py-2.5 rounded-xl text-white mt-6"><i class="fas fa-file-pdf mr-1"></i> Export PDF</button>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
     </script>
 </body>
 </html>

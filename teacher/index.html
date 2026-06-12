@@ -185,9 +185,13 @@
                                         <option value="video">Video</option>
                                         <option value="audio">Audio</option>
                                         <option value="document">Document</option>
+                                        <option value="image">Image</option>
                                     </select>
-                                    <select id="lessonClass" class="form-input">
+                                    <select id="lessonClass" class="form-input" onchange="populateLessonStudents()">
                                         <option value="">Select class</option>
+                                    </select>
+                                    <select id="lessonStudent" class="form-input">
+                                        <option value="">All students in class</option>
                                     </select>
                     </div>
                     <div id="teacherActivity" class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm mt-6">
@@ -663,11 +667,24 @@
             } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
         }
 
+        async function populateLessonStudents() {
+            const cls = document.getElementById('lessonClass').value;
+            const sel = document.getElementById('lessonStudent');
+            if (!cls) { sel.innerHTML = '<option value="">All students in class</option>'; return; }
+            try {
+                const students = await SOMSTAR.getStudents();
+                const filtered = students.filter(s => s.class === cls && s.status !== 'disabled');
+                sel.innerHTML = '<option value="">All students in class</option>' +
+                    filtered.map(s => `<option value="${s.studentId}">${s.studentId} - ${s.fullName}</option>`).join('');
+            } catch(e) { sel.innerHTML = '<option value="">All students in class</option>'; }
+        }
+
         async function uploadLesson(file) {
             if (!file) return;
             const title = document.getElementById('lessonTitle').value.trim();
             const type = document.getElementById('lessonType').value;
             const cls = document.getElementById('lessonClass').value;
+            const targetStudent = document.getElementById('lessonStudent').value;
             if (!title || !type || !cls) { SOMSTAR.showNotification('Fill title, type, and select a class', 'error'); return; }
 
             try {
@@ -678,16 +695,18 @@
                     if (!res.ok) throw new Error('Upload failed');
                     const uploadResult = await res.json();
                     await db.ref('lessons').push({
-                        title, class: cls, type, fileName: file.name, fileSize: file.size,
-                        fileUrl: uploadResult.url, dataUrl: uploadResult.dataUrl,
-                        uploadedAt: new Date().toISOString()
-                    });
+                            title, class: cls, type, fileName: file.name, fileSize: file.size,
+                            fileUrl: uploadResult.url, dataUrl: uploadResult.dataUrl,
+                            targetStudent: targetStudent || '',
+                            uploadedAt: new Date().toISOString()
+                        });
                 } else {
                     const reader = new FileReader();
                     reader.onload = async function(e) {
                         await db.ref('lessons').push({
                             title, class: cls, type, fileName: file.name, fileSize: file.size,
                             dataUrl: e.target.result,
+                            targetStudent: targetStudent || '',
                             uploadedAt: new Date().toISOString()
                         });
                         SOMSTAR.showNotification('Lesson uploaded!', 'success');
@@ -711,7 +730,7 @@
                 if (!data) { container.innerHTML = '<p class="text-gray-400 col-span-3 text-center py-8">No lessons uploaded yet</p>'; return; }
 
                 const lessons = Object.keys(data).map(k => ({ key: k, ...data[k] }));
-                const icons = { pdf:'fa-file-pdf text-red-500', video:'fa-video text-blue-500', audio:'fa-music text-green-500', document:'fa-file-alt text-yellow-500' };
+                const icons = { pdf:'fa-file-pdf text-red-500', video:'fa-video text-blue-500', audio:'fa-music text-green-500', document:'fa-file-alt text-yellow-500', image:'fa-image text-pink-500' };
 
                 container.innerHTML = lessons.map(l => `
                     <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600">

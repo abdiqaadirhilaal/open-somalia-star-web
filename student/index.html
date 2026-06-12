@@ -140,6 +140,7 @@
                                 <option value="video">Video</option>
                                 <option value="audio">Audio</option>
                                 <option value="document">Document</option>
+                                <option value="image">Image</option>
                             </select>
                         </div>
                         <div id="studentLessonsList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -372,21 +373,25 @@
 
                 let lessons = Object.keys(data).map(k => ({ key: k, ...data[k] }));
 
-                // Filter by student's class
+                // Filter by student's class and per-student targeting
                 let studentClass = '';
                 try {
                     const sSnap = await db.ref('students/' + studentUid).once('value');
                     const sData = sSnap.val();
                     studentClass = sData ? sData.class : '';
                 } catch(e) {}
-                if (studentClass) lessons = lessons.filter(l => l.class === studentClass || l.class === 'All' || !l.class);
+                lessons = lessons.filter(l => {
+                    if (l.targetStudent) return l.targetStudent === studentId;
+                    if (studentClass) return l.class === studentClass || l.class === 'All' || !l.class;
+                    return true;
+                });
 
                 if (typeFilter) lessons = lessons.filter(l => l.type === typeFilter);
                 lessons.sort((a, b) => (b.uploadedAt || '').localeCompare(a.uploadedAt || ''));
 
                 if (lessons.length === 0) { container.innerHTML = '<p class="text-gray-400 col-span-3 text-center py-8">No lessons found</p>'; return; }
 
-                const icons = { pdf:'fa-file-pdf text-red-500', video:'fa-video text-blue-500', audio:'fa-music text-green-500', document:'fa-file-alt text-yellow-500' };
+                const icons = { pdf:'fa-file-pdf text-red-500', video:'fa-video text-blue-500', audio:'fa-music text-green-500', document:'fa-file-alt text-yellow-500', image:'fa-image text-pink-500' };
 
                 _lessonsData = {};
                 lessons.forEach(l => { _lessonsData[l.key] = l; });
@@ -426,6 +431,8 @@
                 contentHtml = `<video src="${url}" controls controlsList="nodownload" class="w-full rounded-xl" style="max-height:70vh" oncontextmenu="return false"></video>`;
             } else if (type === 'audio') {
                 contentHtml = `<audio src="${url}" controls controlsList="nodownload" class="w-full" oncontextmenu="return false"></audio>`;
+            } else if (type === 'image') {
+                contentHtml = `<img src="${url}" class="w-full rounded-xl" style="max-height:70vh;object-fit:contain" oncontextmenu="return false" draggable="false">`;
             } else if (isOfficeFile && !isDataUrl) {
                 const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(window.location.origin + url)}&embedded=true`;
                 contentHtml = `<iframe src="${viewerUrl}" class="w-full rounded-xl" style="height:70vh" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>`;
