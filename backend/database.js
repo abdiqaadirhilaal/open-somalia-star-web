@@ -16,20 +16,27 @@ function saveSQLite() {
 
 async function initDB() {
     if (isPostgres) {
-        const { Pool } = require('pg');
-        pgPool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
-        await pgPool.query(`
-            CREATE TABLE IF NOT EXISTS data (
-                collection TEXT NOT NULL,
-                uid TEXT NOT NULL,
-                json TEXT NOT NULL,
-                "createdAt" TEXT DEFAULT (to_char(now(), 'YYYY-MM-DD"T"HH24:MI:SS"Z"')),
-                PRIMARY KEY (collection, uid)
-            )
-        `);
-        await pgPool.query('CREATE INDEX IF NOT EXISTS idx_collection ON data(collection)');
-        await pgPool.query('CREATE INDEX IF NOT EXISTS idx_collection_created ON data(collection, "createdAt")');
-        return;
+        try {
+            const { Pool } = require('pg');
+            pgPool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+            await pgPool.query(`
+                CREATE TABLE IF NOT EXISTS data (
+                    collection TEXT NOT NULL,
+                    uid TEXT NOT NULL,
+                    json TEXT NOT NULL,
+                    "createdAt" TEXT DEFAULT (to_char(now(), 'YYYY-MM-DD"T"HH24:MI:SS"Z"')),
+                    PRIMARY KEY (collection, uid)
+                )
+            `);
+            await pgPool.query('CREATE INDEX IF NOT EXISTS idx_collection ON data(collection)');
+            await pgPool.query('CREATE INDEX IF NOT EXISTS idx_collection_created ON data(collection, "createdAt")');
+            console.log('  ✓ Connected to PostgreSQL');
+            return;
+        } catch(e) {
+            console.error('  ✗ PostgreSQL connection failed:', e.message);
+            console.log('  → Falling back to SQLite');
+            // Fall through to SQLite
+        }
     }
     const initSqlJs = require('sql.js');
     if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
@@ -53,7 +60,7 @@ async function initDB() {
 }
 
 async function runQuery(sql, params) {
-    if (isPostgres) {
+    if (pgPool) {
         const res = await pgPool.query(sql, params);
         return res;
     }
@@ -72,7 +79,7 @@ async function runQuery(sql, params) {
 }
 
 async function getAll(collection) {
-    if (isPostgres) {
+    if (pgPool) {
         const res = await pgPool.query('SELECT uid, json, "createdAt" FROM data WHERE collection = $1 ORDER BY "createdAt" DESC', [collection]);
         return res.rows.map(r => { let d = {}; try { d = JSON.parse(r.json); } catch(e) {} return { uid: r.uid, ...d }; });
     }
@@ -89,7 +96,7 @@ async function getAll(collection) {
 }
 
 async function getByUid(collection, uid) {
-    if (isPostgres) {
+    if (pgPool) {
         const res = await pgPool.query('SELECT json FROM data WHERE collection = $1 AND uid = $2', [collection, uid]);
         if (res.rows.length === 0) return null;
         let d = {}; try { d = JSON.parse(res.rows[0].json); } catch(e) {}
@@ -112,7 +119,7 @@ async function insert(collection, data) {
     const { uid: _u, ...rest } = data;
     const json = JSON.stringify(rest);
     const now = new Date().toISOString();
-    if (isPostgres) {
+    if (pgPool) {
         await pgPool.query(
             'INSERT INTO data (collection, uid, json, "createdAt") VALUES ($1, $2, $3, $4) ON CONFLICT (collection, uid) DO UPDATE SET json = $3',
             [collection, uid, json, now]
@@ -132,7 +139,7 @@ async function update(collection, uid, data) {
     const merged = { ...existing, ...rest };
     delete merged.uid;
     const json = JSON.stringify(merged);
-    if (isPostgres) {
+    if (pgPool) {
         await pgPool.query('UPDATE data SET json = $1 WHERE collection = $2 AND uid = $3', [json, collection, uid]);
     } else {
         sqliteDb.run('UPDATE data SET json = ? WHERE collection = ? AND uid = ?', [json, collection, uid]);
@@ -141,7 +148,7 @@ async function update(collection, uid, data) {
 }
 
 async function remove(collection, uid) {
-    if (isPostgres) {
+    if (pgPool) {
         await pgPool.query('DELETE FROM data WHERE collection = $1 AND uid = $2', [collection, uid]);
     } else {
         sqliteDb.run('DELETE FROM data WHERE collection = ? AND uid = ?', [collection, uid]);
@@ -155,7 +162,7 @@ async function queryByChild(collection, childKey, childValue) {
 }
 
 async function migrateIfNeeded() {
-    if (isPostgres) return; // No migration needed for fresh PG database
+    if (pgPool) return; // No migration needed for active PG database
     const tables = sqliteDb.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT IN ('data', 'sqlite_sequence')");
     if (!tables || tables.length === 0 || !tables[0].values) return;
     const oldTables = tables[0].values.map(v => v[0]);
@@ -180,4 +187,4 @@ async function migrateIfNeeded() {
     saveSQLite();
 }
 
-module.exports = { initDB, getDB: () => sqliteDb, getAll, getByUid, insert, update, remove, queryByChild, migrateIfNeeded };
+module.exports = { initDB, getDB: () => sqliteDb, getAll, getByUid, insert, update, remove, queryByChild, migrateIfNeeded, isUsingPostgres: () => pgPool !== null };

@@ -255,7 +255,7 @@ async function seedDefaults() {
 
 // Health check
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', database: process.env.DATABASE_URL ? 'postgresql' : 'sqlite', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', database: db.isUsingPostgres() ? 'postgresql' : 'sqlite', timestamp: new Date().toISOString() });
 });
 
 // Migration: convert existing file-based lessons to have dataUrl in DB
@@ -278,12 +278,11 @@ async function migrateLessonFiles() {
 }
 
 // Start server
-const isLocal = !process.env.DATABASE_URL;
 db.initDB().then(async () => {
     await db.migrateIfNeeded();
     await seedDefaults();
     await migrateLessonFiles();
-    if (isLocal) {
+    if (!process.env.DATABASE_URL) {
         let networkIP = 'Not found';
         const ifaces = os.networkInterfaces();
         for (const name of Object.keys(ifaces)) {
@@ -309,11 +308,12 @@ db.initDB().then(async () => {
         });
     } else {
         app.listen(PORT, '0.0.0.0', () => {
+            const dbType = db.isUsingPostgres() ? 'PostgreSQL' : 'SQLite (PostgreSQL unavailable)';
             console.log('========================================');
             console.log('  SOMSTAR Academy - Production');
             console.log('========================================');
             console.log(`  Server running on port ${PORT}`);
-            console.log(`  Database: PostgreSQL`);
+            console.log(`  Database: ${dbType}`);
             console.log('========================================');
         });
     }
