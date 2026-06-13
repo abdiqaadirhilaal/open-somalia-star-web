@@ -10,4 +10,6 @@ services:
       - key: NODE_VERSION
         value: 18
       - key: DATABASE_URL
-        value: "postgresql://postgres:somalistar1234@db.rlztilksthbcvsioyzxi.supabase.co:5432/postgres"
+        value: "postgresql://postgres:somalistar1234@db.rlztilksthbcvsioyzxi.supabase.co:5432/postgres?sslmode=require"
+      # If direct connection fails due to IPv6, use pooler:
+      # "postgresql://postgres.rlztilksthbcvsioyzxi:somalistar1234@aws-0-eu-west-2.pooler.supabase.com:6543/postgres?pgbouncer=true"

@@ -1421,9 +1421,22 @@
                 const badge = document.getElementById('dbBadge');
                 if (!badge) return;
                 const isPg = info.type === 'postgresql';
-                badge.className = 'hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium cursor-help ' + (isPg ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400');
-                badge.innerHTML = '<i class="fas fa-circle text-[8px] ' + (isPg ? 'text-green-500' : 'text-yellow-500') + '"></i> <span>' + (isPg ? 'PostgreSQL' : 'SQLite') + '</span>';
-                badge.title = isPg ? 'Data is permanent (PostgreSQL)' : 'Data may reset on restart (SQLite)';
+                badge.className = 'hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium cursor-help ' + (isPg ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 animate-pulse' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400');
+                badge.innerHTML = '<i class="fas fa-circle text-[8px] ' + (isPg ? 'text-green-500' : 'text-red-500') + '"></i> <span>' + (isPg ? 'PostgreSQL' : 'SQLITE! Data at risk') + '</span>';
+                badge.title = isPg ? 'Data is permanent (PostgreSQL)' : 'WARNING: Data may be lost on restart! Contact admin to fix database.';
+                if (!isPg) {
+                    let warn = document.getElementById('dbWarning');
+                    if (!warn) {
+                        warn = document.createElement('div');
+                        warn.id = 'dbWarning';
+                        warn.className = 'mx-4 md:mx-6 mb-2 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm flex items-center gap-2';
+                        warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>Warning:</strong> Database is using SQLite (temporary). Data will be lost on server restart. <a href="https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi" target="_blank" class="underline font-medium">Unpause Supabase</a> and redeploy.</span>';
+                        document.querySelector('.p-4.md\\:p-6')?.prepend(warn);
+                    }
+                } else {
+                    const warn = document.getElementById('dbWarning');
+                    if (warn) warn.remove();
+                }
             } catch(e) {}
         }
         updateDbBadge();

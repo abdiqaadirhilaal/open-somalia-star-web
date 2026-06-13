@@ -692,34 +692,17 @@
             if (!title || !type || !cls) { SOMSTAR.showNotification('Fill title, type, and select a class', 'error'); return; }
 
             try {
-                if (typeof IS_SERVER !== 'undefined' && IS_SERVER) {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                    if (!res.ok) throw new Error('Upload failed');
-                    const uploadResult = await res.json();
-                    await db.ref('lessons').push({
-                            title, class: cls, type, fileName: file.name, fileSize: file.size,
-                            fileUrl: uploadResult.url, dataUrl: uploadResult.dataUrl,
-                            targetStudent: targetStudent || '',
-                            uploadedAt: new Date().toISOString()
-                        });
-                } else {
-                    const reader = new FileReader();
-                    reader.onload = async function(e) {
-                        await db.ref('lessons').push({
-                            title, class: cls, type, fileName: file.name, fileSize: file.size,
-                            dataUrl: e.target.result,
-                            targetStudent: targetStudent || '',
-                            uploadedAt: new Date().toISOString()
-                        });
-                        SOMSTAR.showNotification('Lesson uploaded!', 'success');
-                        document.getElementById('lessonTitle').value = '';
-                        loadLessons();
-                    };
-                    reader.readAsDataURL(file);
-                    return;
-                }
+                const formData = new FormData();
+                formData.append('file', file);
+                const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                if (!res.ok) throw new Error('Upload failed');
+                const uploadResult = await res.json();
+                await db.ref('lessons').push({
+                    title, class: cls, type, fileName: file.name, fileSize: file.size,
+                    fileUrl: uploadResult.url, dataUrl: uploadResult.dataUrl,
+                    targetStudent: targetStudent || '',
+                    uploadedAt: new Date().toISOString()
+                });
                 SOMSTAR.showNotification('Lesson uploaded!', 'success');
                 document.getElementById('lessonTitle').value = '';
                 loadLessons();
@@ -758,7 +741,7 @@
             try {
                 const snap = await db.ref('lessons/' + key).once('value');
                 const lesson = snap.val();
-                if (lesson && lesson.fileUrl && typeof IS_SERVER !== 'undefined' && IS_SERVER) {
+                if (lesson && lesson.fileUrl) {
                     const filename = lesson.fileUrl.split('/').pop();
                     fetch('/api/upload/' + filename, { method: 'DELETE' }).catch(() => {});
                 }
@@ -1012,9 +995,9 @@
                 const badge = document.getElementById('dbBadge');
                 if (!badge) return;
                 const isPg = info.type === 'postgresql';
-                badge.className = 'hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium cursor-help ' + (isPg ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400');
-                badge.innerHTML = '<i class="fas fa-circle text-[8px] ' + (isPg ? 'text-green-500' : 'text-yellow-500') + '"></i> <span>' + (isPg ? 'PostgreSQL' : 'SQLite') + '</span>';
-                badge.title = isPg ? 'Data is permanent (PostgreSQL)' : 'Data may reset on restart (SQLite)';
+                badge.className = 'hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium cursor-help ' + (isPg ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 animate-pulse' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400');
+                badge.innerHTML = '<i class="fas fa-circle text-[8px] ' + (isPg ? 'text-green-500' : 'text-red-500') + '"></i> <span>' + (isPg ? 'PostgreSQL' : 'SQLITE! Data at risk') + '</span>';
+                badge.title = isPg ? 'Data is permanent (PostgreSQL)' : 'WARNING: Data may be lost on restart! Contact admin.';
             } catch(e) {}
         }
         updateDbBadge();

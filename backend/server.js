@@ -271,6 +271,87 @@ app.get('/api/db-status', (req, res) => {
     res.json(db.getDbInfo());
 });
 
+// ====== Authentication ======
+
+// POST /api/login — authenticate user and return user data (server-side)
+app.post('/api/login', async (req, res) => {
+    try {
+        const { userId, password, role } = req.body;
+        if (!userId || !password || !role) {
+            return res.status(400).json({ error: 'userId, password, and role required' });
+        }
+
+        if (role === 'manager') {
+            if (userId === 'MANAGER' && password === 'somalistar12345') {
+                return res.json({ success: true, role: 'manager', data: { name: 'Manager', uid: 'manager' } });
+            }
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        if (role === 'student') {
+            const snap = await db.ref('students').orderByChild('studentId').equalTo(userId).once('value');
+            const data = snap.val();
+            if (!data) return res.status(401).json({ error: 'Invalid credentials' });
+            const uid = Object.keys(data)[0];
+            const student = data[uid];
+            if (student.password !== password) return res.status(401).json({ error: 'Invalid credentials' });
+            if (student.status === 'disabled') return res.status(403).json({ error: 'Account disabled. Contact manager.' });
+            return res.json({ success: true, role: 'student', data: { uid, ...student } });
+        }
+
+        if (role === 'teacher') {
+            const snap = await db.ref('teachers').orderByChild('teacherId').equalTo(userId).once('value');
+            const data = snap.val();
+            if (!data) return res.status(401).json({ error: 'Invalid credentials' });
+            const tid = Object.keys(data)[0];
+            const teacher = data[tid];
+            if (teacher.password !== password) return res.status(401).json({ error: 'Invalid credentials' });
+            return res.json({ success: true, role: 'teacher', data: { uid: tid, ...teacher } });
+        }
+
+        return res.status(400).json({ error: 'Invalid role' });
+    } catch (e) {
+        console.error('Login error:', e);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// POST /api/change-password — allow password changes (manager only)
+app.post('/api/change-password', async (req, res) => {
+    try {
+        const { targetRole, targetId, newPassword } = req.body;
+        if (!targetRole || !targetId || !newPassword) {
+            return res.status(400).json({ error: 'targetRole, targetId, and newPassword required' });
+        }
+        if (newPassword.length < 4) {
+            return res.status(400).json({ error: 'Password must be at least 4 characters' });
+        }
+
+        if (targetRole === 'student') {
+            const snap = await db.ref('students').orderByChild('studentId').equalTo(targetId).once('value');
+            const data = snap.val();
+            if (!data) return res.status(404).json({ error: 'Student not found' });
+            const uid = Object.keys(data)[0];
+            await db.update('students', uid, { password: newPassword });
+            return res.json({ success: true });
+        }
+
+        if (targetRole === 'teacher') {
+            const snap = await db.ref('teachers').orderByChild('teacherId').equalTo(targetId).once('value');
+            const data = snap.val();
+            if (!data) return res.status(404).json({ error: 'Teacher not found' });
+            const tid = Object.keys(data)[0];
+            await db.update('teachers', tid, { password: newPassword });
+            return res.json({ success: true });
+        }
+
+        return res.status(400).json({ error: 'Invalid role' });
+    } catch (e) {
+        console.error('Change password error:', e);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // Migration: convert existing file-based lessons to have dataUrl in DB
 async function migrateLessonFiles() {
     try {

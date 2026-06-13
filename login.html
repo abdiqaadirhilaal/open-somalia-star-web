@@ -97,55 +97,24 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
 
             try {
-                if (currentRole === 'manager') {
-                    if (userId === 'MANAGER' && password === 'somalistar12345') {
-                        SOMSTAR.showNotification('Welcome Manager!', 'success');
-                        localStorage.setItem('somstar_user', JSON.stringify({
-                            id: 'MANAGER', role: 'manager', name: 'Manager', uid: 'manager'
-                        }));
-                        setTimeout(() => window.location.href = 'manager/index.html', 500);
-                        return;
-                    }
-                    throw new Error('Invalid manager credentials');
-                }
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, password, role: currentRole })
+                });
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error || 'Invalid credentials');
 
-                // Student login
-                if (currentRole === 'student') {
-                    const snap = await db.ref('students').orderByChild('studentId').equalTo(userId).once('value');
-                    const data = snap.val();
-                    if (!data) throw new Error('Invalid credentials');
-
-                    const uid = Object.keys(data)[0];
-                    const student = data[uid];
-
-                    if (student.password !== password) throw new Error('Invalid credentials');
-                    if (student.status === 'disabled') throw new Error('Account disabled. Contact manager.');
-
-                    localStorage.setItem('somstar_user', JSON.stringify({
-                        id: userId, role: 'student', name: student.fullName || userId, uid: uid
-                    }));
-                    SOMSTAR.showNotification('Welcome ' + (student.fullName || 'Student') + '!', 'success');
-                    setTimeout(() => window.location.href = 'student/index.html', 500);
-                    return;
-                }
-
-                // Teacher login
-                if (currentRole === 'teacher') {
-                    const snap = await db.ref('teachers').orderByChild('teacherId').equalTo(userId).once('value');
-                    const data = snap.val();
-                    if (!data) throw new Error('Invalid credentials');
-
-                    const tid = Object.keys(data)[0];
-                    const teacher = data[tid];
-                    if (teacher.password !== password) throw new Error('Invalid credentials');
-
-                    localStorage.setItem('somstar_user', JSON.stringify({
-                        id: userId, role: 'teacher', name: teacher.name || userId, uid: tid
-                    }));
-                    SOMSTAR.showNotification('Welcome ' + (teacher.name || 'Teacher') + '!', 'success');
-                    setTimeout(() => window.location.href = 'teacher/index.html', 500);
-                    return;
-                }
+                const displayName = result.data.fullName || result.data.name || userId;
+                localStorage.setItem('somstar_user', JSON.stringify({
+                    id: userId,
+                    role: result.role,
+                    name: displayName,
+                    uid: result.data.uid || 'manager'
+                }));
+                SOMSTAR.showNotification('Welcome ' + displayName + '!', 'success');
+                const paths = { manager: 'manager/', student: 'student/', teacher: 'teacher/' };
+                setTimeout(() => window.location.href = paths[result.role] + 'index.html', 500);
 
             } catch (err) {
                 SOMSTAR.showNotification(err.message, 'error');

@@ -4,6 +4,7 @@ const fs = require('fs');
 const isPostgres = !!process.env.DATABASE_URL;
 let pgPool = null;
 let sqliteDb = null;
+let _reconnectTimer = null;
 
 const DB_PATH = path.join(__dirname, 'data', 'somstar.db');
 const dataDir = path.dirname(DB_PATH);
@@ -14,30 +15,68 @@ function saveSQLite() {
     fs.writeFileSync(DB_PATH, Buffer.from(data));
 }
 
+async function _tryConnectPostgres() {
+    const { Pool } = require('pg');
+    const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false },
+        connectionTimeoutMillis: 20000,
+        max: 5
+    });
+    const test = await pool.query('SELECT 1 AS ok');
+    if (!test || !test.rows) throw new Error('No response from database');
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS data (
+            collection TEXT NOT NULL,
+            uid TEXT NOT NULL,
+            json TEXT NOT NULL,
+            "createdAt" TEXT DEFAULT (to_char(now(), 'YYYY-MM-DD"T"HH24:MI:SS"Z"')),
+            PRIMARY KEY (collection, uid)
+        )
+    `);
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_collection ON data(collection)');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_collection_created ON data(collection, "createdAt")');
+    return pool;
+}
+
+async function _scheduleReconnect() {
+    if (_reconnectTimer) clearTimeout(_reconnectTimer);
+    _reconnectTimer = setTimeout(async () => {
+        console.log('  → Attempting PostgreSQL reconnection...');
+        try {
+            const pool = await _tryConnectPostgres();
+            pgPool = pool;
+            _reconnectTimer = null;
+            console.log('  ✓ PostgreSQL reconnected successfully');
+
+            // Migrate any SQLite data to PostgreSQL
+            if (sqliteDb) {
+                try {
+                    const stmt = sqliteDb.prepare('SELECT collection, uid, json, createdAt FROM data ORDER BY collection, createdAt');
+                    while (stmt.step()) {
+                        const row = stmt.getAsObject();
+                        await pgPool.query(
+                            'INSERT INTO data (collection, uid, json, "createdAt") VALUES ($1, $2, $3, $4) ON CONFLICT (collection, uid) DO NOTHING',
+                            [row.collection, row.uid, row.json, row.createdAt]
+                        );
+                    }
+                    stmt.free();
+                    console.log('  ✓ SQLite data migrated to PostgreSQL');
+                } catch(e) {
+                    console.error('  ✗ Migration error:', e.message);
+                }
+            }
+        } catch(e) {
+            console.error('  ✗ Reconnection failed:', e.message.slice(0, 100));
+            _scheduleReconnect();
+        }
+    }, 30000); // Try again in 30 seconds
+}
+
 async function initDB() {
     if (isPostgres) {
         try {
-            const { Pool } = require('pg');
-            pgPool = new Pool({
-                connectionString: process.env.DATABASE_URL,
-                ssl: { rejectUnauthorized: false },
-                connectionTimeoutMillis: 15000,
-                max: 5
-            });
-            // Test connection with a simple query
-            const test = await pgPool.query('SELECT 1 AS ok');
-            if (!test || !test.rows) throw new Error('No response from database');
-            await pgPool.query(`
-                CREATE TABLE IF NOT EXISTS data (
-                    collection TEXT NOT NULL,
-                    uid TEXT NOT NULL,
-                    json TEXT NOT NULL,
-                    "createdAt" TEXT DEFAULT (to_char(now(), 'YYYY-MM-DD"T"HH24:MI:SS"Z"')),
-                    PRIMARY KEY (collection, uid)
-                )
-            `);
-            await pgPool.query('CREATE INDEX IF NOT EXISTS idx_collection ON data(collection)');
-            await pgPool.query('CREATE INDEX IF NOT EXISTS idx_collection_created ON data(collection, "createdAt")');
+            pgPool = await _tryConnectPostgres();
             console.log('  ✓ Connected to PostgreSQL (Supabase)');
             return;
         } catch(e) {
@@ -48,7 +87,7 @@ async function initDB() {
             } else if (e.message && e.message.includes('password')) {
                 console.log('  → Password may be wrong. Verify in Supabase dashboard.');
             }
-            console.log('  → Falling back to SQLite (data will not persist across server restarts)');
+            console.log('  → Falling back to SQLite temporarily. Will retry PostgreSQL every 30s.');
             pgPool = null;
         }
     }
@@ -71,6 +110,9 @@ async function initDB() {
         CREATE INDEX IF NOT EXISTS idx_collection_created ON data(collection, createdAt);
     `);
     saveSQLite();
+    if (isPostgres) {
+        _scheduleReconnect();
+    }
 }
 
 async function runQuery(sql, params) {
@@ -181,7 +223,9 @@ async function keepAlive() {
             await pgPool.query('SELECT 1');
             console.log('  ✓ Database keepalive ping');
         } catch(e) {
-            console.error('  ✗ Keepalive failed:', e.message);
+            console.error('  ✗ Keepalive failed:', e.message.slice(0, 100));
+            pgPool = null;
+            _scheduleReconnect();
         }
     }
 }
