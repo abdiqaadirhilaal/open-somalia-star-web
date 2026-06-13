@@ -255,7 +255,20 @@ async function seedDefaults() {
 
 // Health check
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', database: db.isUsingPostgres() ? 'postgresql' : 'sqlite', timestamp: new Date().toISOString() });
+    const info = db.getDbInfo();
+    res.json({
+        status: 'ok',
+        database: info.type,
+        connected: info.connected,
+        timestamp: info.timestamp,
+        uptime: process.uptime(),
+        memory: process.memoryUsage().rss
+    });
+});
+
+// Lightweight db-status for frontend badge
+app.get('/api/db-status', (req, res) => {
+    res.json(db.getDbInfo());
 });
 
 // Migration: convert existing file-based lessons to have dataUrl in DB
@@ -277,6 +290,14 @@ async function migrateLessonFiles() {
     } catch(e) { console.error('Migration error:', e.message); }
 }
 
+// Daily keepalive to prevent Supabase auto-pause
+let keepaliveInterval = null;
+function startKeepalive() {
+    if (keepaliveInterval) clearInterval(keepaliveInterval);
+    keepaliveInterval = setInterval(() => db.keepAlive(), 6 * 60 * 60 * 1000); // every 6 hours
+    console.log('  ✓ Database keepalive scheduled (every 6 hours)');
+}
+
 // Prevent crash on unhandled rejections
 process.on('unhandledRejection', (reason) => {
     console.error('Unhandled Rejection:', reason);
@@ -287,6 +308,9 @@ db.initDB().then(async () => {
     await db.migrateIfNeeded();
     await seedDefaults();
     await migrateLessonFiles();
+    // First keepalive after 5 minutes, then every 6 hours
+    setTimeout(() => db.keepAlive(), 5 * 60 * 1000);
+    startKeepalive();
     if (!process.env.DATABASE_URL) {
         let networkIP = 'Not found';
         const ifaces = os.networkInterfaces();

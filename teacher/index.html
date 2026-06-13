@@ -57,6 +57,10 @@
                         <button onclick="SOMSTAR.toggleDarkMode()" id="darkModeToggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
                             <i class="fas fa-moon text-gray-600 dark:text-gray-300"></i>
                         </button>
+                        <div id="dbBadge" class="hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-help" title="Database status">
+                            <i class="fas fa-circle text-[8px] text-gray-400"></i>
+                            <span>...</span>
+                        </div>
                         <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <i class="fas fa-user-circle text-xl"></i>
                             <span class="hidden sm:inline">${user.name || 'Teacher'}</span>
@@ -999,6 +1003,22 @@
         }
 
         loadTeacherOverview();
+    </script>
+    <script>
+        async function updateDbBadge() {
+            try {
+                const r = await fetch('/api/db-status');
+                const info = await r.json();
+                const badge = document.getElementById('dbBadge');
+                if (!badge) return;
+                const isPg = info.type === 'postgresql';
+                badge.className = 'hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium cursor-help ' + (isPg ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400');
+                badge.innerHTML = '<i class="fas fa-circle text-[8px] ' + (isPg ? 'text-green-500' : 'text-yellow-500') + '"></i> <span>' + (isPg ? 'PostgreSQL' : 'SQLite') + '</span>';
+                badge.title = isPg ? 'Data is permanent (PostgreSQL)' : 'Data may reset on restart (SQLite)';
+            } catch(e) {}
+        }
+        updateDbBadge();
+        setInterval(updateDbBadge, 60000);
     </script>
 </body>
 </html>

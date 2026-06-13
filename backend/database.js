@@ -175,6 +175,26 @@ async function queryByChild(collection, childKey, childValue) {
     return all.filter(item => String(item[childKey]) === String(childValue));
 }
 
+async function keepAlive() {
+    if (pgPool) {
+        try {
+            await pgPool.query('SELECT 1');
+            console.log('  ✓ Database keepalive ping');
+        } catch(e) {
+            console.error('  ✗ Keepalive failed:', e.message);
+        }
+    }
+}
+
+function getDbInfo() {
+    return {
+        type: pgPool ? 'postgresql' : 'sqlite',
+        connected: pgPool !== null || sqliteDb !== null,
+        hasPostgres: pgPool !== null,
+        timestamp: new Date().toISOString()
+    };
+}
+
 async function migrateIfNeeded() {
     if (pgPool) return; // No migration needed for active PG database
     const tables = sqliteDb.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT IN ('data', 'sqlite_sequence')");
@@ -201,4 +221,4 @@ async function migrateIfNeeded() {
     saveSQLite();
 }
 
-module.exports = { initDB, getDB: () => sqliteDb, getAll, getByUid, insert, update, remove, queryByChild, migrateIfNeeded, isUsingPostgres: () => pgPool !== null };
+module.exports = { initDB, getDB: () => sqliteDb, getAll, getByUid, insert, update, remove, queryByChild, migrateIfNeeded, isUsingPostgres: () => pgPool !== null, keepAlive, getDbInfo };
