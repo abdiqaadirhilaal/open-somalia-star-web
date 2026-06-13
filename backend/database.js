@@ -18,7 +18,15 @@ async function initDB() {
     if (isPostgres) {
         try {
             const { Pool } = require('pg');
-            pgPool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+            pgPool = new Pool({
+                connectionString: process.env.DATABASE_URL,
+                ssl: { rejectUnauthorized: false },
+                connectionTimeoutMillis: 15000,
+                max: 5
+            });
+            // Test connection with a simple query
+            const test = await pgPool.query('SELECT 1 AS ok');
+            if (!test || !test.rows) throw new Error('No response from database');
             await pgPool.query(`
                 CREATE TABLE IF NOT EXISTS data (
                     collection TEXT NOT NULL,
@@ -30,12 +38,18 @@ async function initDB() {
             `);
             await pgPool.query('CREATE INDEX IF NOT EXISTS idx_collection ON data(collection)');
             await pgPool.query('CREATE INDEX IF NOT EXISTS idx_collection_created ON data(collection, "createdAt")');
-            console.log('  ✓ Connected to PostgreSQL');
+            console.log('  ✓ Connected to PostgreSQL (Supabase)');
             return;
         } catch(e) {
             console.error('  ✗ PostgreSQL connection failed:', e.message);
-            console.log('  → Falling back to SQLite');
-            pgPool = null; // Ensure broken pool is not used
+            if (e.message && e.message.includes('timeout')) {
+                console.log('  → Connection timed out. Check if Supabase project is active.');
+                console.log('  → Visit https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi to unpause.');
+            } else if (e.message && e.message.includes('password')) {
+                console.log('  → Password may be wrong. Verify in Supabase dashboard.');
+            }
+            console.log('  → Falling back to SQLite (data will not persist across server restarts)');
+            pgPool = null;
         }
     }
     const initSqlJs = require('sql.js');

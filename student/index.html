@@ -247,7 +247,14 @@
                 const attRecords = await SOMSTAR.getAttendance(studentId);
                 const marks = await SOMSTAR.getMarks(studentId);
                 const lessonsSnap = await db.ref('lessons').once('value');
-                const lessons = lessonsSnap.val() ? Object.values(lessonsSnap.val()) : [];
+                let lessons = lessonsSnap.val() ? Object.values(lessonsSnap.val()) : [];
+                let sClassOv = '';
+                try { const ss = await db.ref('students/' + studentUid).once('value'); const sd = ss.val(); sClassOv = sd ? sd.class : ''; } catch(e) {}
+                lessons = lessons.filter(l => {
+                    if (l.targetStudent) return l.targetStudent === studentId;
+                    if (sClassOv) return l.class === sClassOv;
+                    return false;
+                });
 
                 const present = attRecords.filter(a => a.status === 'present').length;
                 const total = attRecords.length;
@@ -382,8 +389,8 @@
                 } catch(e) {}
                 lessons = lessons.filter(l => {
                     if (l.targetStudent) return l.targetStudent === studentId;
-                    if (studentClass) return l.class === studentClass || l.class === 'All' || !l.class;
-                    return true;
+                    if (studentClass) return l.class === studentClass;
+                    return false;
                 });
 
                 if (typeFilter) lessons = lessons.filter(l => l.type === typeFilter);

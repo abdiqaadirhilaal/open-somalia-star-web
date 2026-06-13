@@ -277,6 +277,11 @@ async function migrateLessonFiles() {
     } catch(e) { console.error('Migration error:', e.message); }
 }
 
+// Prevent crash on unhandled rejections
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled Rejection:', reason);
+});
+
 // Start server
 db.initDB().then(async () => {
     await db.migrateIfNeeded();
