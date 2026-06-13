@@ -5,6 +5,7 @@ const isPostgres = !!process.env.DATABASE_URL;
 let pgPool = null;
 let sqliteDb = null;
 let _reconnectTimer = null;
+let _pgError = null;
 
 const DB_PATH = path.join(__dirname, 'data', 'somstar.db');
 const dataDir = path.dirname(DB_PATH);
@@ -67,6 +68,7 @@ async function _scheduleReconnect() {
                 }
             }
         } catch(e) {
+            _pgError = e.message;
             console.error('  ✗ Reconnection failed:', e.message.slice(0, 100));
             _scheduleReconnect();
         }
@@ -80,10 +82,14 @@ async function initDB() {
             console.log('  ✓ Connected to PostgreSQL (Supabase)');
             return;
         } catch(e) {
+            _pgError = e.message;
             console.error('  ✗ PostgreSQL connection failed:', e.message);
             if (e.message && e.message.includes('timeout')) {
                 console.log('  → Connection timed out. Check if Supabase project is active.');
                 console.log('  → Visit https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi to unpause.');
+            } else if (e.message && e.message.includes('ENOTFOUND')) {
+                console.log('  → User/tenant not found — Supabase project is PAUSED.');
+                console.log('  → MUST UNPAUSE at https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi');
             } else if (e.message && e.message.includes('password')) {
                 console.log('  → Password may be wrong. Verify in Supabase dashboard.');
             }
@@ -235,6 +241,7 @@ function getDbInfo() {
         type: pgPool ? 'postgresql' : 'sqlite',
         connected: pgPool !== null || sqliteDb !== null,
         hasPostgres: pgPool !== null,
+        pgError: pgPool ? null : _pgError,
         timestamp: new Date().toISOString()
     };
 }

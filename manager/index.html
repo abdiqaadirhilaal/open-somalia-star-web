@@ -1422,16 +1422,27 @@
                 if (!badge) return;
                 const isPg = info.type === 'postgresql';
                 badge.className = 'hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium cursor-help ' + (isPg ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 animate-pulse' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400');
-                badge.innerHTML = '<i class="fas fa-circle text-[8px] ' + (isPg ? 'text-green-500' : 'text-red-500') + '"></i> <span>' + (isPg ? 'PostgreSQL' : 'SQLITE! Data at risk') + '</span>';
-                badge.title = isPg ? 'Data is permanent (PostgreSQL)' : 'WARNING: Data may be lost on restart! Contact admin to fix database.';
+                badge.innerHTML = '<i class="fas fa-circle text-[8px] ' + (isPg ? 'text-green-500' : 'text-red-500') + '"></i> <span>' + (isPg ? 'PostgreSQL' : 'SQLITE') + '</span>';
+                badge.title = isPg ? 'Data is permanent (PostgreSQL)' : 'ERROR: ' + (info.pgError || 'PostgreSQL unavailable');
                 if (!isPg) {
                     let warn = document.getElementById('dbWarning');
                     if (!warn) {
                         warn = document.createElement('div');
                         warn.id = 'dbWarning';
-                        warn.className = 'mx-4 md:mx-6 mb-2 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm flex items-center gap-2';
-                        warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>Warning:</strong> Database is using SQLite (temporary). Data will be lost on server restart. <a href="https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi" target="_blank" class="underline font-medium">Unpause Supabase</a> and redeploy.</span>';
+                        warn.className = 'mx-4 md:mx-6 mb-2 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm';
+                        const errMsg = info.pgError || '';
+                        if (errMsg.includes('ENOTFOUND') || errMsg.includes('not found')) {
+                            warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> PostgreSQL SUPABASE IS PAUSED. Data is in temporary SQLite — <strong>will be lost on redeploy!</strong> <a href="https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi" target="_blank" class="underline font-medium">Click here to unpause Supabase</a>, then <strong>redeploy on Render</strong>.</span>';
+                        } else if (errMsg.includes('timeout')) {
+                            warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> PostgreSQL connection timed out. <a href="https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi" target="_blank" class="underline font-medium">Check Supabase status</a> and redeploy.</span>';
+                        } else {
+                            warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> Database is using SQLite (temporary). Data will be lost on server restart. Error: ' + errMsg.substring(0, 100) + '</span>';
+                        }
                         document.querySelector('.p-4.md\\:p-6')?.prepend(warn);
+                    } else {
+                        const errMsg = info.pgError || '';
+                        const link = errMsg.includes('ENOTFOUND') || errMsg.includes('not found') ? '<a href="https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi" target="_blank" class="underline font-medium">Unpause Supabase</a>' : '<a href="https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi" target="_blank" class="underline font-medium">Check Supabase</a>';
+                        warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> SQLite mode — ' + link + ' then redeploy on Render.</span>';
                     }
                 } else {
                     const warn = document.getElementById('dbWarning');
