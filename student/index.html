@@ -328,7 +328,18 @@
                     container.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">No announcements yet</p>';
                     return;
                 }
-                const all = Object.values(annData).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+                let sClass = '';
+                try {
+                    const ss = await db.ref('students/' + studentUid).once('value');
+                    const sd = ss.val();
+                    sClass = sd ? sd.class : '';
+                } catch(e) {}
+                const all = Object.values(annData).filter(a => {
+                    if (a.recipientType === 'all-students') return true;
+                    if (a.recipientType === 'class' && a.recipientValue === sClass) return true;
+                    if (a.recipientType === 'student' && a.recipientValue === studentId) return true;
+                    return false;
+                }).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
                 window._annAudio = window._annAudio || {};
                 const idx = Date.now();
                 window._annAudio[idx] = all.map(a => a.audioUrl || '');

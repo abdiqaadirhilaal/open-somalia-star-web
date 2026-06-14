@@ -131,10 +131,23 @@
                 </div>
 
                 <div id="section-announcements" class="section-content hidden">
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm mb-6">
                         <div class="flex justify-between items-center mb-6">
-                            <h3 class="font-semibold text-gray-900 dark:text-white">Announcements</h3>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Create Announcement</h3>
                         </div>
+                        <form id="teacherAnnounceForm" onsubmit="sendTeacherAnnouncement(event)">
+                            <div class="space-y-4">
+                                <input type="text" id="teacherAnnTitle" class="form-input" placeholder="Announcement title" required>
+                                <textarea id="teacherAnnMessage" class="form-input" placeholder="Message" rows="3" required></textarea>
+                                <select id="teacherAnnClass" class="form-input">
+                                    <option value="">All my classes</option>
+                                </select>
+                                <button type="submit" class="btn-primary px-6 py-2.5 rounded-xl text-white"><i class="fas fa-paper-plane mr-1"></i> Send Announcement</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-6">Announcements</h3>
                         <div id="teacherAnnouncementsList"><p class="text-gray-400 text-sm text-center py-8">Loading announcements...</p></div>
                     </div>
                 </div>
@@ -183,6 +196,7 @@
                             <div>
                                 <div class="space-y-3">
                                     <input type="text" id="lessonTitle" class="form-input" placeholder="Lesson title">
+                                    <textarea id="lessonDesc" class="form-input" placeholder="Description (optional)" rows="2"></textarea>
                                     <select id="lessonType" class="form-input">
                                         <option value="">Select type</option>
                                         <option value="pdf">PDF</option>
@@ -339,7 +353,7 @@
             if (userName.includes(key)) { myClasses = classes; break; }
         }
         function populateTeacherFilters() {
-            ['attClassFilter','markClassFilter','lessonClass'].forEach(id => {
+            ['attClassFilter','markClassFilter','lessonClass','teacherAnnClass'].forEach(id => {
                 const sel = document.getElementById(id);
                 if (!sel) return;
                 sel.innerHTML = myClasses.map(c => `<option value="${c}">${c}</option>`).join('');
@@ -373,39 +387,50 @@
             try {
                 const students = await SOMSTAR.getStudents();
                 const today = SOMSTAR.getToday();
+                // Filter students to only those in this teacher's classes
+                const myStudents = students.filter(s => myClasses.includes(s.class));
                 const attSnap = await db.ref('attendance').orderByChild('date').equalTo(today).once('value');
                 const attData = attSnap.val();
                 const attRecords = attData ? Object.values(attData) : [];
+                // Filter attendance to only this teacher's students
+                const myAttRecords = attRecords.filter(a => myStudents.some(s => s.studentId === a.studentId));
                 const lessonsSnap = await db.ref('lessons').once('value');
                 const lessons = lessonsSnap.val() ? Object.values(lessonsSnap.val()) : [];
+                // Filter lessons to only those uploaded by this teacher
+                const myLessons = lessons.filter(l => l.uploadedBy === (userData.name || ''));
                 const quizzesSnap = await db.ref('quizzes').once('value');
                 const quizzes = quizzesSnap.val() ? Object.values(quizzesSnap.val()) : [];
 
-                document.getElementById('ovStudents').textContent = students.length;
-                document.getElementById('ovPresent').textContent = attRecords.filter(a => a.status === 'present').length;
-                document.getElementById('ovLessons').textContent = lessons.length;
+                document.getElementById('ovStudents').textContent = myStudents.length;
+                document.getElementById('ovPresent').textContent = myAttRecords.filter(a => a.status === 'present').length;
+                document.getElementById('ovLessons').textContent = myLessons.length;
                 document.getElementById('ovQuizzes').textContent = quizzes.length;
 
-                const present = attRecords.filter(a => a.status === 'present').length;
-                const absent = attRecords.filter(a => a.status === 'absent').length;
-                const vacation = attRecords.filter(a => a.status === 'vacation').length;
+                const present = myAttRecords.filter(a => a.status === 'present').length;
+                const absent = myAttRecords.filter(a => a.status === 'absent').length;
+                const vacation = myAttRecords.filter(a => a.status === 'vacation').length;
 
                 document.getElementById('todayAttendance').innerHTML = `
                     <div class="flex justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-xl"><span class="text-sm">Present</span><span class="text-sm font-semibold text-green-600">${present}</span></div>
                     <div class="flex justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-xl"><span class="text-sm">Absent</span><span class="text-sm font-semibold text-red-600">${absent}</span></div>
                     <div class="flex justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl"><span class="text-sm">Vacation</span><span class="text-sm font-semibold text-yellow-600">${vacation}</span></div>
                 `;
+                const recentLessons = myLessons.sort((a,b) => (b.uploadedAt||'').localeCompare(a.uploadedAt||'')).slice(0,3);
                 document.getElementById('teacherActivity').innerHTML = `
-                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"><div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center"><i class="fas fa-users text-green-600 text-sm"></i></div><div><p class="text-sm text-gray-700 dark:text-gray-300">${students.length} total students</p><p class="text-xs text-gray-400">Across all classes</p></div></div>
-                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"><div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center"><i class="fas fa-calendar-check text-blue-600 text-sm"></i></div><div><p class="text-sm text-gray-700 dark:text-gray-300">${attRecords.length} attendance records today</p><p class="text-xs text-gray-400">${today}</p></div></div>
-                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"><div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center"><i class="fas fa-book text-purple-600 text-sm"></i></div><div><p class="text-sm text-gray-700 dark:text-gray-300">${lessons.length} lessons uploaded</p><p class="text-xs text-gray-400">Total resources</p></div></div>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"><div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center"><i class="fas fa-users text-green-600 text-sm"></i></div><div><p class="text-sm text-gray-700 dark:text-gray-300">${myStudents.length} students</p><p class="text-xs text-gray-400">In your classes</p></div></div>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"><div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center"><i class="fas fa-chalkboard text-blue-600 text-sm"></i></div><div><p class="text-sm text-gray-700 dark:text-gray-300">${myClasses.length} classes</p><p class="text-xs text-gray-400">Assigned to you</p></div></div>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"><div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center"><i class="fas fa-book text-purple-600 text-sm"></i></div><div><p class="text-sm text-gray-700 dark:text-gray-300">${myLessons.length} lessons uploaded</p><p class="text-xs text-gray-400">${recentLessons.length > 0 ? 'Latest: ' + recentLessons.map(l => l.title).join(', ') : 'No lessons yet'}</p></div></div>
                 `;
 
-                // Load announcements (show latest in overview)
+                // Load announcements relevant to this teacher
                 const annSnap = await db.ref('announcements').once('value');
                 const annData = annSnap.val();
                 if (annData) {
-                    const allAnnouncements = Object.values(annData).filter(a => a.recipientType !== 'student').sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+                    const allAnnouncements = Object.values(annData).filter(a => {
+                        if (a.recipientType === 'all-teachers' || a.recipientType === 'all-students') return true;
+                        if (a.recipientType === 'class' && myClasses.includes(a.recipientValue)) return true;
+                        return false;
+                    }).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
                     if (allAnnouncements.length > 0) {
                         const latest = allAnnouncements.slice(0,2);
                         window._annAudio = window._annAudio || {};
@@ -470,7 +495,15 @@
                     container.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">No announcements yet</p>';
                     return;
                 }
-                const all = Object.values(annData).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+                const all = Object.values(annData).filter(a => {
+                    if (a.recipientType === 'all-teachers' || a.recipientType === 'all-students') return true;
+                    if (a.recipientType === 'class' && myClasses.includes(a.recipientValue)) return true;
+                    return false;
+                }).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+                if (all.length === 0) {
+                    container.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">No announcements for you yet</p>';
+                    return;
+                }
                 window._annAudio = window._annAudio || {};
                 const idx = Date.now();
                 window._annAudio[idx] = all.map(a => a.audioUrl || '');
@@ -495,6 +528,26 @@
                     </div>`;
                 }).join('');
             } catch(e) { console.error(e); }
+        }
+
+        async function sendTeacherAnnouncement(e) {
+            e.preventDefault();
+            const title = document.getElementById('teacherAnnTitle').value.trim();
+            const message = document.getElementById('teacherAnnMessage').value.trim();
+            const cls = document.getElementById('teacherAnnClass').value;
+            if (!title || !message) { SOMSTAR.showNotification('Fill title and message', 'error'); return; }
+            try {
+                await db.ref('announcements').push({
+                    title, message,
+                    recipientType: cls ? 'class' : 'all-students',
+                    recipientValue: cls || '',
+                    createdBy: userData.name || '',
+                    createdAt: new Date().toISOString()
+                });
+                SOMSTAR.showNotification('Announcement sent!', 'success');
+                document.getElementById('teacherAnnounceForm').reset();
+                loadTeacherAnnouncements();
+            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
         }
 
         async function toggleCheckin() {
@@ -686,6 +739,7 @@
         async function uploadLesson(file) {
             if (!file) return;
             const title = document.getElementById('lessonTitle').value.trim();
+            const desc = document.getElementById('lessonDesc').value.trim();
             const type = document.getElementById('lessonType').value;
             const cls = document.getElementById('lessonClass').value;
             const targetStudent = document.getElementById('lessonStudent').value;
@@ -698,13 +752,15 @@
                 if (!res.ok) throw new Error('Upload failed');
                 const uploadResult = await res.json();
                 await db.ref('lessons').push({
-                    title, class: cls, type, fileName: file.name, fileSize: file.size,
+                    title, description: desc, class: cls, type, fileName: file.name, fileSize: file.size,
                     fileUrl: uploadResult.url, dataUrl: uploadResult.dataUrl,
                     targetStudent: targetStudent || '',
+                    uploadedBy: userData.name || '',
                     uploadedAt: new Date().toISOString()
                 });
                 SOMSTAR.showNotification('Lesson uploaded!', 'success');
                 document.getElementById('lessonTitle').value = '';
+                document.getElementById('lessonDesc').value = '';
                 loadLessons();
             } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
         }
@@ -716,8 +772,11 @@
                 const container = document.getElementById('lessonsList');
                 if (!data) { container.innerHTML = '<p class="text-gray-400 col-span-3 text-center py-8">No lessons uploaded yet</p>'; return; }
 
-                const lessons = Object.keys(data).map(k => ({ key: k, ...data[k] }));
+                const lessons = Object.keys(data).map(k => ({ key: k, ...data[k] }))
+                    .filter(l => l.uploadedBy === (userData.name || ''));
                 const icons = { pdf:'fa-file-pdf text-red-500', video:'fa-video text-blue-500', audio:'fa-music text-green-500', document:'fa-file-alt text-yellow-500', image:'fa-image text-pink-500' };
+
+                if (lessons.length === 0) { container.innerHTML = '<p class="text-gray-400 col-span-3 text-center py-8">You have not uploaded any lessons yet</p>'; return; }
 
                 container.innerHTML = lessons.map(l => `
                     <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600">
@@ -725,10 +784,13 @@
                             <i class="fas ${icons[l.type] || 'fa-file'} text-2xl"></i>
                             <div class="flex-1 min-w-0">
                                 <h5 class="font-medium text-gray-900 dark:text-white text-sm truncate">${l.title}</h5>
-                                <p class="text-xs text-gray-400">${l.class} &middot; ${l.type} (${(l.fileSize/1024).toFixed(0)}KB)</p>
-                                ${l.dataUrl ? `<a href="${l.dataUrl}" download="${l.fileName}" class="text-blue-600 text-xs mt-1 inline-block hover:underline"><i class="fas fa-download mr-1"></i>Download</a>` : ''}
-                                ${l.fileUrl ? `<a href="${l.fileUrl}" download="${l.fileName}" class="text-blue-600 text-xs mt-1 inline-block hover:underline"><i class="fas fa-download mr-1"></i>Download</a>` : ''}
-                                <button onclick="deleteLesson('${l.key}')" class="text-red-600 text-xs mt-1 ml-2 hover:underline"><i class="fas fa-trash mr-1"></i>Delete</button>
+                                <p class="text-xs text-gray-400">${l.class} &middot; ${l.type}${l.fileSize ? ' (' + (l.fileSize/1024).toFixed(0) + 'KB)' : ''}</p>
+                                ${l.description ? `<p class="text-xs text-gray-500 mt-1">${l.description}</p>` : ''}
+                                <div class="flex gap-2 mt-1">
+                                ${l.dataUrl ? `<a href="${l.dataUrl}" download="${l.fileName}" class="text-blue-600 text-xs hover:underline"><i class="fas fa-download mr-1"></i>Download</a>` : ''}
+                                ${l.fileUrl && !l.dataUrl ? `<a href="${l.fileUrl}" download="${l.fileName}" class="text-blue-600 text-xs hover:underline"><i class="fas fa-download mr-1"></i>Download</a>` : ''}
+                                <button onclick="deleteLesson('${l.key}')" class="text-red-600 text-xs hover:underline"><i class="fas fa-trash mr-1"></i>Delete</button>
+                                </div>
                             </div>
                         </div>
                     </div>
