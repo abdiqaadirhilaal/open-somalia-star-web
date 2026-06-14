@@ -65,8 +65,11 @@ app.get('/api/ref/:path(*)', async (req, res) => {
         }
         if (!rows || rows.length === 0) return res.json(null);
         const result = {};
+        const isCollection = !uid && !child;
         rows.forEach(r => {
             const { uid: rowUid, ...data } = r;
+            // Omit bulky fields from collection responses for performance
+            if (isCollection && data.dataUrl) data.dataUrl = undefined;
             result[rowUid] = data;
         });
         res.json(result);

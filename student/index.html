@@ -280,7 +280,7 @@
                 const recent = attRecords.slice(-5).reverse();
                 document.getElementById('recentAttendanceList').innerHTML = recent.length > 0
                     ? recent.map(r => {
-                        const colors = { present: 'text-green-600 bg-green-100 dark:bg-green-900/30', absent: 'text-red-600 bg-red-100 dark:bg-red-900/30', vacation: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30' };
+                        const colors = { present: 'text-white bg-green-600', absent: 'text-white bg-red-600', vacation: 'text-white bg-yellow-600' };
                         return `<div class="flex justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50"><span class="text-sm text-gray-600 dark:text-gray-400">${SOMSTAR.formatDate(r.date)}</span><span class="text-xs font-medium px-2 py-0.5 rounded-full ${colors[r.status] || ''}">${r.status}</span></div>`;
                     }).join('')
                     : '<p class="text-gray-400 text-sm">No attendance records yet</p>';
@@ -365,7 +365,7 @@
                 if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-400 py-8">No records for this period</td></tr>'; return; }
 
                 tbody.innerHTML = filtered.sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(r => {
-                    const colors = { present: 'text-green-600 bg-green-100', absent: 'text-red-600 bg-red-100', vacation: 'text-yellow-600 bg-yellow-100' };
+                    const colors = { present: 'text-white bg-green-600', absent: 'text-white bg-red-600', vacation: 'text-white bg-yellow-600' };
                     return `<tr><td>${SOMSTAR.formatDate(r.date)}</td><td>${r.class || '—'}</td><td><span class="px-2 py-1 rounded-full text-xs font-medium ${colors[r.status] || ''}">${r.status}</span></td></tr>`;
                 }).join('');
             } catch(e) { console.error(e); }
@@ -427,9 +427,24 @@
             } catch(e) { console.error(e); document.getElementById('studentLessonsList').innerHTML = '<p class="text-red-400 col-span-3 text-center py-8">Error loading lessons: ' + e.message + '</p>'; }
         }
 
-        function viewLesson(key) {
-            const l = _lessonsData[key];
-            if (!l) return;
+        async function viewLesson(key) {
+            let l = _lessonsData[key];
+            if (!l) {
+                try {
+                    const snap = await db.ref('lessons/' + key).once('value');
+                    l = snap.val();
+                    if (l) l.key = key;
+                } catch(e) {}
+                if (!l) return;
+            }
+            // If dataUrl was stripped for performance, fetch full item
+            if (!l.fileUrl && !l.dataUrl) {
+                try {
+                    const snap = await db.ref('lessons/' + key).once('value');
+                    const full = snap.val();
+                    if (full) { l.dataUrl = full.dataUrl; l.fileUrl = full.fileUrl; }
+                } catch(e) {}
+            }
             const url = l.fileUrl || l.dataUrl;
             if (!url) return;
             const type = l.type || 'pdf';

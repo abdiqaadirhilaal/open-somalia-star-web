@@ -715,7 +715,7 @@
 
                 tbody.innerHTML = records.map(r => {
                     const student = students.find(s => s.studentId === r.studentId);
-                    const statusColors = { present: 'text-green-600 bg-green-100', absent: 'text-red-600 bg-red-100', vacation: 'text-yellow-600 bg-yellow-100' };
+                    const statusColors = { present: 'text-white bg-green-600', absent: 'text-white bg-red-600', vacation: 'text-white bg-yellow-600' };
                     return `<tr>
                         <td class="font-medium">${r.studentId}</td>
                         <td>${student ? student.fullName : 'N/A'}</td>
