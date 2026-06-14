@@ -1432,17 +1432,18 @@
                         warn.className = 'mx-4 md:mx-6 mb-2 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm';
                         const errMsg = info.pgError || '';
                         if (errMsg.includes('ENOTFOUND') || errMsg.includes('not found')) {
-                            warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> PostgreSQL SUPABASE IS PAUSED. Data is in temporary SQLite — <strong>will be lost on redeploy!</strong> <a href="https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi" target="_blank" class="underline font-medium">Click here to unpause Supabase</a>, then <strong>redeploy on Render</strong>.</span>';
+                            warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> PostgreSQL database paused/not found. Data is in temporary SQLite — <strong>will be lost on redeploy!</strong> Check your database provider dashboard and redeploy.</span>';
                         } else if (errMsg.includes('timeout')) {
-                            warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> PostgreSQL connection timed out. <a href="https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi" target="_blank" class="underline font-medium">Check Supabase status</a> and redeploy.</span>';
+                            warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> PostgreSQL connection timed out. Check your database provider and redeploy.</span>';
                         } else {
                             warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> Database is using SQLite (temporary). Data will be lost on server restart. Error: ' + errMsg.substring(0, 100) + '</span>';
                         }
                         document.querySelector('.p-4.md\\:p-6')?.prepend(warn);
                     } else {
-                        const errMsg = info.pgError || '';
-                        const link = errMsg.includes('ENOTFOUND') || errMsg.includes('not found') ? '<a href="https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi" target="_blank" class="underline font-medium">Unpause Supabase</a>' : '<a href="https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi" target="_blank" class="underline font-medium">Check Supabase</a>';
-                        warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> SQLite mode — ' + link + ' then redeploy on Render.</span>';
+                        const warn = document.getElementById('dbWarning');
+                        if (warn) {
+                            warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> SQLite mode — database not connected.</span>';
+                        }
                     }
                 } else {
                     const warn = document.getElementById('dbWarning');

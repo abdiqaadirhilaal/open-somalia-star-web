@@ -79,7 +79,7 @@ async function initDB() {
     if (isPostgres) {
         try {
             pgPool = await _tryConnectPostgres();
-            console.log('  ✓ Connected to PostgreSQL (Supabase)');
+            console.log('  ✓ Connected to PostgreSQL');
             return;
         } catch(e) {
             _pgError = e.message;
@@ -88,8 +88,8 @@ async function initDB() {
                 console.log('  → Connection timed out. Check if Supabase project is active.');
                 console.log('  → Visit https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi to unpause.');
             } else if (e.message && e.message.includes('ENOTFOUND')) {
-                console.log('  → User/tenant not found — Supabase project is PAUSED.');
-                console.log('  → MUST UNPAUSE at https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi');
+                console.log('  → User/tenant not found — database project may be PAUSED.');
+                console.log('  → Check your database provider dashboard.');
             } else if (e.message && e.message.includes('password')) {
                 console.log('  → Password may be wrong. Verify in Supabase dashboard.');
             }

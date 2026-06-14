@@ -10,6 +10,4 @@ services:
       - key: NODE_VERSION
         value: 18
       - key: DATABASE_URL
-        value: "postgresql://postgres.rlztilksthbcvsioyzxi:somalistar1234@aws-0-eu-west-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
-      # Fallback direct URL (IPv6-only, use only if pooler unavailable):
-      # "postgresql://postgres:somalistar1234@db.rlztilksthbcvsioyzxi.supabase.co:5432/postgres"
+        value: "postgresql://neondb_owner:npg_g3rKkz8oyBJw@ep-silent-hall-at7bpy2s.c-9.us-east-1.aws.neon.tech/neondb"
