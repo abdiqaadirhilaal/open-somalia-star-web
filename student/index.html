@@ -440,22 +440,12 @@
 
         async function viewLesson(key) {
             let l = _lessonsData[key];
-            if (!l) {
-                try {
-                    const snap = await db.ref('lessons/' + key).once('value');
-                    l = snap.val();
-                    if (l) l.key = key;
-                } catch(e) {}
-                if (!l) return;
-            }
-            // If dataUrl was stripped for performance, fetch full item
-            if (!l.fileUrl && !l.dataUrl) {
-                try {
-                    const snap = await db.ref('lessons/' + key).once('value');
-                    const full = snap.val();
-                    if (full) { l.dataUrl = full.dataUrl; l.fileUrl = full.fileUrl; }
-                } catch(e) {}
-            }
+            try {
+                const snap = await db.ref('lessons/' + key).once('value');
+                const full = snap.val();
+                if (full) l = { key, ...full };
+            } catch(e) {}
+            if (!l) return;
             const url = l.fileUrl || l.dataUrl;
             if (!url) return;
             const type = l.type || 'pdf';

@@ -64,6 +64,11 @@ app.get('/api/ref/:path(*)', async (req, res) => {
             rows = await db.getAll(collection);
         }
         if (!rows || rows.length === 0) return res.json(null);
+        // Single item by uid → return data unwrapped (Firebase-compatible)
+        if (uid && !field && rows.length === 1) {
+            const { uid: _u, ...data } = rows[0];
+            return res.json(data);
+        }
         const result = {};
         const isCollection = !uid && !child;
         rows.forEach(r => {
