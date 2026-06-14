@@ -495,18 +495,22 @@
                             <div class="p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-center">
                                 <p class="text-xs text-gray-500 dark:text-gray-400">Bixiyay</p>
                                 <p class="text-xl font-bold text-green-600" id="financePaidCount">0</p>
+                                <p class="text-lg font-semibold text-green-500" id="financePaidAmount">$0</p>
                             </div>
                             <div class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-center">
                                 <p class="text-xs text-gray-500 dark:text-gray-400">Lama Bixin</p>
                                 <p class="text-xl font-bold text-red-600" id="financeUnpaidCount">0</p>
+                                <p class="text-lg font-semibold text-red-500" id="financeUnpaidAmount">$0</p>
                             </div>
                             <div class="p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-center">
                                 <p class="text-xs text-gray-500 dark:text-gray-400">NB</p>
                                 <p class="text-xl font-bold text-yellow-600" id="financeNBCount">0</p>
+                                <p class="text-lg font-semibold text-yellow-500" id="financeNBAmount">$0</p>
                             </div>
                             <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-center">
                                 <p class="text-xs text-gray-500 dark:text-gray-400">Wadarta</p>
                                 <p class="text-xl font-bold text-blue-600" id="financeTotalCount">0</p>
+                                <p class="text-lg font-semibold text-blue-500" id="financeTotalAmount">$0</p>
                             </div>
                             <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-center">
                                 <p class="text-xs text-gray-500 dark:text-gray-400">Remaining</p>
@@ -562,14 +566,17 @@
                             <div class="p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-center">
                                 <p class="text-xs text-gray-500 dark:text-gray-400">Bixiyay</p>
                                 <p class="text-xl font-bold text-green-600" id="reportPaidCount">0</p>
+                                <p class="text-xs text-green-500 font-medium" id="reportPaidAmount">$0</p>
                             </div>
                             <div class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-center">
                                 <p class="text-xs text-gray-500 dark:text-gray-400">Lama Bixin</p>
                                 <p class="text-xl font-bold text-red-600" id="reportUnpaidCount">0</p>
+                                <p class="text-xs text-red-500 font-medium" id="reportUnpaidAmount">$0</p>
                             </div>
                             <div class="p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-center">
                                 <p class="text-xs text-gray-500 dark:text-gray-400">NB</p>
                                 <p class="text-xl font-bold text-yellow-600" id="reportNBCount">0</p>
+                                <p class="text-xs text-yellow-500 font-medium" id="reportNBAmount">$0</p>
                             </div>
                             <div class="p-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 text-center">
                                 <p class="text-xs text-gray-500 dark:text-gray-400">Total Revenue</p>
@@ -1624,22 +1631,32 @@
 
         function updateFinanceSummary() {
             const records = Object.values(_financeRecords);
-            const paid = records.filter(d => d.status === 'bixiyay').length;
-            const unpaid = records.filter(d => d.status === 'lama_bixin').length;
-            const nb = records.filter(d => d.status === 'nb').length;
+            const paidRecs = records.filter(d => d.status === 'bixiyay');
+            const unpaidRecs = records.filter(d => d.status === 'lama_bixin');
+            const nbRecs = records.filter(d => d.status === 'nb');
+            const paid = paidRecs.length;
+            const unpaid = unpaidRecs.length;
+            const nb = nbRecs.length;
             const total = records.length;
-            const unpaidAmount = records.filter(d => d.status === 'lama_bixin').reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
+            const paidAmount = paidRecs.reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
+            const unpaidAmount = unpaidRecs.reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
+            const nbAmount = nbRecs.reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
+            const totalAmount = paidAmount + unpaidAmount + nbAmount;
             document.getElementById('financePaidCount').textContent = paid;
+            document.getElementById('financePaidAmount').textContent = '$' + paidAmount;
             document.getElementById('financeUnpaidCount').textContent = unpaid;
+            document.getElementById('financeUnpaidAmount').textContent = '$' + unpaidAmount;
             document.getElementById('financeNBCount').textContent = nb;
+            document.getElementById('financeNBAmount').textContent = '$' + nbAmount;
             document.getElementById('financeTotalCount').textContent = total;
+            document.getElementById('financeTotalAmount').textContent = '$' + totalAmount;
             document.getElementById('financeRemaining').textContent = '$' + unpaidAmount;
         }
 
         function resetFinanceSummary() {
-            ['financePaidCount','financeUnpaidCount','financeNBCount','financeTotalCount','financeRemaining'].forEach(id => {
+            ['financePaidCount','financePaidAmount','financeUnpaidCount','financeUnpaidAmount','financeNBCount','financeNBAmount','financeTotalCount','financeTotalAmount','financeRemaining'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.textContent = id === 'financeRemaining' ? '$0' : '0';
+                if (el) el.textContent = id.includes('Amount') || id === 'financeRemaining' ? '$0' : '0';
             });
         }
 
@@ -1679,8 +1696,11 @@
                 const revenue = paid.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
 
                 document.getElementById('reportPaidCount').textContent = paid.length;
+                document.getElementById('reportPaidAmount').textContent = '$' + paid.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
                 document.getElementById('reportUnpaidCount').textContent = unpaid.length;
+                document.getElementById('reportUnpaidAmount').textContent = '$' + unpaid.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
                 document.getElementById('reportNBCount').textContent = nb.length;
+                document.getElementById('reportNBAmount').textContent = '$' + nb.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
                 document.getElementById('reportRevenue').textContent = '$' + revenue;
 
                 const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
