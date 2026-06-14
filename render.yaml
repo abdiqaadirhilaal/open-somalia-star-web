@@ -3,7 +3,7 @@ services:
     name: somstar-academy
     env: node
     plan: free
-    buildCommand: npm install && cd backend && npm install
+    buildCommand: npm install
     startCommand: node backend/server.js
     healthCheckPath: /api/health
     envVars:

@@ -41,6 +41,7 @@
                 <a href="#" onclick="showSection('attendance')" class="sidebar-link" data-section="attendance"><i class="fas fa-calendar-check"></i> <span>Attendance</span></a>
                 <a href="#" onclick="showSection('teacheratt')" class="sidebar-link" data-section="teacheratt"><i class="fas fa-user-clock"></i> <span>Teacher Attendance</span></a>
                 <a href="#" onclick="showSection('finance')" class="sidebar-link" data-section="finance"><i class="fas fa-coins"></i> <span>Finance</span></a>
+                <a href="#" onclick="showSection('finance-report')" class="sidebar-link" data-section="finance-report"><i class="fas fa-chart-pie"></i> <span>Finance Report</span></a>
                 <a href="#" onclick="showSection('backup')" class="sidebar-link" data-section="backup"><i class="fas fa-database"></i> <span>Data Backup</span></a>
                 <a href="../student-logins.html" target="_blank" class="sidebar-link"><i class="fas fa-id-card"></i> <span>Student Logins</span></a>
                 <a href="../ids-table.html" target="_blank" class="sidebar-link"><i class="fas fa-table"></i> <span>IDs Table</span></a>
@@ -112,6 +113,45 @@
                                     <h3 class="text-3xl font-bold mt-1" id="totalActive">0</h3>
                                 </div>
                                 <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-check-circle text-xl"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="dashboard-card bg-gradient-to-br from-emerald-500 to-emerald-700 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-emerald-100 text-sm">Payments (This Month)</p>
+                                    <h3 class="text-2xl font-bold mt-1" id="overviewPayments">$0</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-dollar-sign text-lg"></i></div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-rose-500 to-rose-700 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-rose-100 text-sm">Unpaid Students</p>
+                                    <h3 class="text-2xl font-bold mt-1" id="overviewUnpaid">0</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-exclamation-circle text-lg"></i></div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-cyan-500 to-cyan-700 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-cyan-100 text-sm">Paid Students</p>
+                                    <h3 class="text-2xl font-bold mt-1" id="overviewPaid">0</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-check-circle text-lg"></i></div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-amber-500 to-amber-700 text-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-amber-100 text-sm">Outstanding Balance</p>
+                                    <h3 class="text-2xl font-bold mt-1" id="overviewOutstanding">$0</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-hourglass-half text-lg"></i></div>
                             </div>
                         </div>
                     </div>
@@ -348,8 +388,24 @@
                 <div id="section-attendance" class="section-content hidden">
                     <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
                         <h3 class="font-semibold text-gray-900 dark:text-white mb-6">Attendance Records</h3>
-                        <div class="flex gap-2 mb-4">
+                        <div class="flex flex-wrap gap-2 mb-4">
                             <input type="date" id="attendanceDate" class="form-input text-sm w-auto">
+                            <select id="attendanceClassFilter" class="form-input text-sm w-auto" onchange="loadAttendanceRecords()">
+                                <option value="">All classes</option>
+                                <option value="TRY 2:00">TRY 2:00</option>
+                                <option value="Abdishakuur 2:00">Abdishakuur 2:00</option>
+                                <option value="Muktar 2:00">Muktar 2:00</option>
+                                <option value="TRY 3:00">TRY 3:00</option>
+                                <option value="Abdishakuur 3:00">Abdishakuur 3:00</option>
+                                <option value="Muktar 3:00">Muktar 3:00</option>
+                                <option value="TRY 4:00">TRY 4:00</option>
+                                <option value="Abdishakuur 4:00">Abdishakuur 4:00</option>
+                                <option value="Muktar 4:00">Muktar 4:00</option>
+                            </select>
+                            <div class="relative flex-1 min-w-[200px]">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-xs"></i>
+                                <input type="text" id="attendanceStudentSearch" class="form-input text-sm pl-8" placeholder="Search student..." oninput="loadAttendanceRecords()">
+                            </div>
                             <button onclick="loadAttendanceRecords()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm"><i class="fas fa-search mr-1"></i> Search</button>
                         </div>
                         <div class="table-container">
@@ -386,8 +442,8 @@
                             <h3 class="font-semibold text-gray-900 dark:text-white">Finance Management</h3>
                         </div>
 
-                        <div class="flex gap-2 mb-4">
-                            <select id="financeClass" class="form-input" onchange="loadFinanceStudents()">
+                        <div class="grid md:grid-cols-2 gap-3 mb-6">
+                            <select id="financeClass" class="form-input" onchange="onFinanceClassChange()">
                                 <option value="">Select class</option>
                                 <option value="TRY 2:00">TRY 2:00</option>
                                 <option value="Abdishakuur 2:00">Abdishakuur 2:00</option>
@@ -399,7 +455,7 @@
                                 <option value="Abdishakuur 4:00">Abdishakuur 4:00</option>
                                 <option value="Muktar 4:00">Muktar 4:00</option>
                             </select>
-                            <select id="financeMonth" class="form-input">
+                            <select id="financeMonth" class="form-input" onchange="onFinanceClassChange()">
                                 <option value="">This month</option>
                                 <option value="01">January</option><option value="02">February</option><option value="03">March</option>
                                 <option value="04">April</option><option value="05">May</option><option value="06">June</option>
@@ -408,36 +464,127 @@
                             </select>
                         </div>
 
-                        <div class="grid md:grid-cols-4 gap-4 mb-6" id="financeSummary">
-                            <div class="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-center">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Bixiyay</p>
-                                <p class="text-2xl font-bold text-green-600" id="financePaidCount">0</p>
+                        <div class="relative mb-6" id="financeAutocompleteWrap">
+                            <i class="fas fa-search absolute left-3 top-3.5 text-gray-400 text-sm z-10"></i>
+                            <input type="text" id="financeAutocomplete" class="form-input pl-8" placeholder="Type student name..." autocomplete="off" oninput="onFinanceAutocomplete(this.value)" onfocus="onFinanceAutocomplete(this.value)" onblur="setTimeout(()=>hideFinanceDropdown(),200)" onkeydown="onFinanceKeydown(event)">
+                            <div id="financeDropdown" class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 hidden"></div>
+                        </div>
+
+                        <div id="financeSelectedPanel" class="hidden p-5 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/80 dark:to-gray-800/80 border border-gray-200 dark:border-gray-600 mb-6">
+                            <div class="flex flex-wrap items-center gap-4">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs text-gray-400 uppercase tracking-wider">Student</p>
+                                    <p class="text-lg font-bold text-gray-900 dark:text-white truncate" id="financeDisplayName">-</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400" id="financeDisplayInfo">-</p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div>
+                                        <p class="text-xs text-gray-400 mb-1">Amount ($)</p>
+                                        <input type="number" id="financeAmount" class="form-input text-sm w-24" placeholder="0" onchange="autoSaveFinance()">
+                                    </div>
+                                    <button onclick="setFinanceStatus('bixiyay')" id="finBtnBixiyay" class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-green-500 hover:text-white transition-all">Bixiyay</button>
+                                    <button onclick="setFinanceStatus('lama_bixin')" id="finBtnLamaBixin" class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-red-500 hover:text-white transition-all">Lama Bixin</button>
+                                    <button onclick="setFinanceStatus('nb')" id="finBtnNB" class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-yellow-500 hover:text-white transition-all">NB</button>
+                                    <button onclick="savePayment()" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-md transition-all"><i class="fas fa-save mr-1"></i> Save Payment</button>
+                                    <span id="finSaveStatus" class="text-xs text-green-600 font-medium hidden"><i class="fas fa-check-circle"></i> Saved</span>
+                                </div>
                             </div>
-                            <div class="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-center">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Lama Bixin</p>
-                                <p class="text-2xl font-bold text-red-600" id="financeUnpaidCount">0</p>
+                        </div>
+
+                        <div class="grid md:grid-cols-5 gap-3 mb-6" id="financeSummary">
+                            <div class="p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-center">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Bixiyay</p>
+                                <p class="text-xl font-bold text-green-600" id="financePaidCount">0</p>
                             </div>
-                            <div class="p-4 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-center">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">NB</p>
-                                <p class="text-2xl font-bold text-yellow-600" id="financeNBCount">0</p>
+                            <div class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-center">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Lama Bixin</p>
+                                <p class="text-xl font-bold text-red-600" id="financeUnpaidCount">0</p>
                             </div>
-                            <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-center">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Wadarta</p>
-                                <p class="text-2xl font-bold text-blue-600" id="financeTotalCount">0</p>
+                            <div class="p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-center">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">NB</p>
+                                <p class="text-xl font-bold text-yellow-600" id="financeNBCount">0</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-center">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Wadarta</p>
+                                <p class="text-xl font-bold text-blue-600" id="financeTotalCount">0</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-center">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Remaining</p>
+                                <p class="text-xl font-bold text-amber-600" id="financeRemaining">$0</p>
                             </div>
                         </div>
 
                         <div class="table-container">
                             <table class="data-table">
-                                <thead><tr><th>Student ID</th><th>Name</th><th>Class</th><th>Amount</th><th>Bixiyay</th><th>Lama Bixin</th><th>NB</th></tr></thead>
+                                <thead><tr><th>Student ID</th><th>Name</th><th>Amount</th><th>Status</th></tr></thead>
                                 <tbody id="financeTableBody">
-                                    <tr><td colspan="7" class="text-center text-gray-400 py-8">Select class to view students</td></tr>
+                                    <tr><td colspan="4" class="text-center text-gray-400 py-8">Select class to view students</td></tr>
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
 
-                        <button onclick="saveFinance()" class="btn-primary px-6 py-2.5 rounded-xl text-white mt-4"><i class="fas fa-save mr-1"></i> Save</button>
-                        <button onclick="showFinanceReport()" class="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white mt-4 ml-2"><i class="fas fa-chart-bar mr-1"></i> Report</button>
+                <div id="section-finance-report" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Finance Report</h3>
+                            <button onclick="exportFinanceReportPDF()" class="px-4 py-2 bg-red-600 text-white rounded-xl text-sm hover:bg-red-700"><i class="fas fa-file-pdf mr-1"></i> Export PDF</button>
+                        </div>
+
+                        <div class="flex gap-3 mb-6">
+                            <div class="relative flex-1">
+                                <i class="fas fa-search absolute left-3 top-3.5 text-gray-400 text-sm"></i>
+                                <input type="text" id="financeReportSearch" class="form-input pl-8" placeholder="Search by student name or ID..." oninput="loadFinanceReport()">
+                            </div>
+                            <select id="financeReportClass" class="form-input w-auto" onchange="loadFinanceReport()">
+                                <option value="">All classes</option>
+                                <option value="TRY 2:00">TRY 2:00</option>
+                                <option value="Abdishakuur 2:00">Abdishakuur 2:00</option>
+                                <option value="Muktar 2:00">Muktar 2:00</option>
+                                <option value="TRY 3:00">TRY 3:00</option>
+                                <option value="Abdishakuur 3:00">Abdishakuur 3:00</option>
+                                <option value="Muktar 3:00">Muktar 3:00</option>
+                                <option value="TRY 4:00">TRY 4:00</option>
+                                <option value="Abdishakuur 4:00">Abdishakuur 4:00</option>
+                                <option value="Muktar 4:00">Muktar 4:00</option>
+                            </select>
+                            <select id="financeReportMonth" class="form-input w-auto" onchange="loadFinanceReport()">
+                                <option value="">All months</option>
+                                <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
+                                <option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option>
+                                <option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option>
+                                <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+                            </select>
+                        </div>
+
+                        <div class="grid md:grid-cols-4 gap-3 mb-6">
+                            <div class="p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-center">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Bixiyay</p>
+                                <p class="text-xl font-bold text-green-600" id="reportPaidCount">0</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-center">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Lama Bixin</p>
+                                <p class="text-xl font-bold text-red-600" id="reportUnpaidCount">0</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-center">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">NB</p>
+                                <p class="text-xl font-bold text-yellow-600" id="reportNBCount">0</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 text-center">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Total Revenue</p>
+                                <p class="text-xl font-bold text-purple-600" id="reportRevenue">$0</p>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Student ID</th><th>Name</th><th>Class</th><th>Amount</th><th>Month</th><th>Status</th><th>Remaining</th><th>Date</th></tr></thead>
+                                <tbody id="financeReportBody">
+                                    <tr><td colspan="8" class="text-center text-gray-400 py-8">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -516,7 +663,7 @@
             const link = document.querySelector(`[data-section="${section}"]`);
             if (link) link.classList.add('active');
             const titles = { overview:'Overview', students:'Students', teachers:'Teachers', classes:'Classes',
-                credentials:'Credentials', register:'Register Student', reports:'Reports', announcements:'Announcements', attendance:'Attendance Records', teacheratt:'Teacher Attendance', finance:'Finance', backup:'Data Backup' };
+                credentials:'Credentials', register:'Register Student', reports:'Reports', announcements:'Announcements', attendance:'Attendance Records', teacheratt:'Teacher Attendance', finance:'Finance', 'finance-report':'Finance Report', backup:'Data Backup' };
             document.getElementById('pageTitle').textContent = titles[section] || section;
 
             if (section === 'students') loadStudents();
@@ -526,7 +673,8 @@
             if (section === 'announcements') { loadAnnouncements(); setupAnnRecipient(); }
             if (section === 'attendance') loadAttendanceRecords();
             if (section === 'teacheratt') loadTeacherAttendance();
-            if (section === 'finance') loadFinanceStudents();
+            if (section === 'finance') onFinanceClassChange();
+            if (section === 'finance-report') loadFinanceReport();
             if (section === 'overview') loadOverview();
         }
 
@@ -537,6 +685,24 @@
                 document.getElementById('totalStudents').textContent = students.length;
                 document.getElementById('totalTeachers').textContent = teachers.length;
                 document.getElementById('totalActive').textContent = students.filter(s => s.status !== 'disabled').length;
+
+                // Finance overview
+                try {
+                    const finSnap = await db.ref('finance').once('value');
+                    const finData = finSnap.val() || {};
+                    const month = String(new Date().getMonth() + 1).padStart(2, '0');
+                    const year = new Date().getFullYear();
+                    const period = year + '-' + month;
+                    const thisMonth = Object.values(finData).filter(r => r.period === period);
+                    const paid = thisMonth.filter(r => r.status === 'bixiyay');
+                    const unpaid = thisMonth.filter(r => r.status === 'lama_bixin');
+                    const paidAmount = paid.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+                    const unpaidAmount = unpaid.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+                    document.getElementById('overviewPayments').textContent = '$' + paidAmount;
+                    document.getElementById('overviewUnpaid').textContent = unpaid.length;
+                    document.getElementById('overviewPaid').textContent = paid.length;
+                    document.getElementById('overviewOutstanding').textContent = '$' + unpaidAmount;
+                } catch(e) { console.error('Finance overview error:', e); }
 
                 const today = SOMSTAR.getToday();
                 const attSnap = await db.ref('attendance').orderByChild('date').equalTo(today).once('value');
@@ -705,11 +871,22 @@
         async function loadAttendanceRecords() {
             try {
                 const date = document.getElementById('attendanceDate').value || SOMSTAR.getToday();
+                const clsFilter = document.getElementById('attendanceClassFilter').value;
+                const search = (document.getElementById('attendanceStudentSearch').value || '').toLowerCase().trim();
                 const snap = await db.ref('attendance').orderByChild('date').equalTo(date).once('value');
                 const data = snap.val();
-                const records = data ? Object.values(data) : [];
+                let records = data ? Object.values(data) : [];
                 const students = await SOMSTAR.getStudents();
                 const tbody = document.getElementById('attendanceRecordsBody');
+
+                if (clsFilter) records = records.filter(r => r.class === clsFilter);
+
+                if (search) {
+                    records = records.filter(r => {
+                        const s = students.find(st => st.studentId === r.studentId);
+                        return (s && (s.fullName || '').toLowerCase().includes(search)) || (r.studentId || '').toLowerCase().includes(search);
+                    });
+                }
 
                 if (records.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 py-8">No attendance records for this date</td></tr>'; return; }
 
@@ -1240,177 +1417,307 @@
         seedDefaultTeachers();
 
         // ====== FINANCE ======
-        let _financeData = {};
+        let _financeAllStudents = [];
+        let _financeRecords = {};
+        let _financeSelectedUid = null;
+        let _financeSelectedRow = null;
 
-        async function loadFinanceStudents() {
+        function onFinanceClassChange() {
+            _financeSelectedUid = null;
+            document.getElementById('financeSelectedPanel').classList.add('hidden');
+            document.getElementById('financeAutocomplete').value = '';
+            hideFinanceDropdown();
+            loadFinanceData();
+        }
+
+        async function loadFinanceData() {
             const cls = document.getElementById('financeClass').value;
             if (!cls) {
-                document.getElementById('financeTableBody').innerHTML = '<tr><td colspan="7" class="text-center text-gray-400 py-8">Select class to view students</td></tr>';
-                document.getElementById('financePaidCount').textContent = '0';
-                document.getElementById('financeUnpaidCount').textContent = '0';
-                document.getElementById('financeNBCount').textContent = '0';
-                document.getElementById('financeTotalCount').textContent = '0';
+                document.getElementById('financeTableBody').innerHTML = '<tr><td colspan="4" class="text-center text-gray-400 py-8">Select class to view students</td></tr>';
+                resetFinanceSummary();
+                document.getElementById('financeDisplayName').textContent = '-';
+                document.getElementById('financeDisplayInfo').textContent = '-';
                 return;
             }
             try {
                 const students = await SOMSTAR.getStudents();
-                const filtered = students.filter(s => s.class === cls && s.status !== 'disabled');
-                document.getElementById('financeTotalCount').textContent = filtered.length;
+                _financeAllStudents = students.filter(s => s.class === cls && s.status !== 'disabled');
 
                 const snap = await db.ref('finance').once('value');
-                const data = snap.val() || {};
-                _financeData = {};
+                const allFinance = snap.val() || {};
 
                 const month = document.getElementById('financeMonth').value || String(new Date().getMonth() + 1).padStart(2, '0');
                 const year = new Date().getFullYear();
                 const period = `${year}-${month}`;
 
-                const tbody = document.getElementById('financeTableBody');
-                tbody.innerHTML = filtered.map(s => {
-                    const existingKey = Object.keys(data).find(k => data[k].studentId === s.studentId && data[k].period === period);
-                    const existing = existingKey ? data[existingKey] : null;
-                    const status = existing ? existing.status : 'lama_bixin';
-                    const amount = existing ? (existing.amount || '') : '';
-                    const uid = existingKey || s.uid + '_' + period;
-                    _financeData[uid] = { studentId: s.studentId, name: s.fullName, class: cls, period, status, amount: amount || '0', uid };
+                _financeRecords = {};
+                _financeAllStudents.forEach(s => {
+                    const existingKey = Object.keys(allFinance).find(k => allFinance[k].studentId === s.studentId && allFinance[k].period === period);
+                    const existing = existingKey ? { ...allFinance[existingKey], key: existingKey } : null;
+                    _financeRecords[s.uid] = {
+                        studentId: s.studentId, name: s.fullName, class: cls, period,
+                        status: existing ? existing.status : 'lama_bixin',
+                        amount: existing ? (existing.amount || '') : '',
+                        key: existing ? existing.key : null,
+                        uid: s.uid
+                    };
+                });
 
-                    const bixiyayChecked = status === 'bixiyay' ? 'checked' : '';
-                    const lamaBixinChecked = status === 'lama_bixin' ? 'checked' : '';
-                    const nbChecked = status === 'nb' ? 'checked' : '';
-
-                    return `<tr>
-                        <td class="font-medium text-gray-900 dark:text-white">${s.studentId}</td>
-                        <td>${s.fullName}</td>
-                        <td>${s.class}</td>
-                        <td><input type="number" class="form-input text-sm w-24" value="${amount}" onchange="updateFinanceAmount('${uid}', this.value)" placeholder="Amount"></td>
-                        <td class="text-center"><input type="radio" name="fin_${s.studentId}" value="bixiyay" ${bixiyayChecked} onchange="updateFinanceStatus('${uid}','bixiyay')"></td>
-                        <td class="text-center"><input type="radio" name="fin_${s.studentId}" value="lama_bixin" ${lamaBixinChecked} onchange="updateFinanceStatus('${uid}','lama_bixin')"></td>
-                        <td class="text-center"><input type="radio" name="fin_${s.studentId}" value="nb" ${nbChecked} onchange="updateFinanceStatus('${uid}','nb')"></td>
-                    </tr>`;
-                }).join('');
-
+                renderFinanceTable();
                 updateFinanceSummary();
-            } catch(e) { console.error('loadFinanceStudents error:', e); }
+            } catch(e) { console.error('loadFinanceData error:', e); }
         }
 
-        function updateFinanceAmount(uid, amount) {
-            if (_financeData[uid]) {
-                _financeData[uid].amount = amount;
+        function onFinanceAutocomplete(query) {
+            const q = query.trim().toLowerCase();
+            const dropdown = document.getElementById('financeDropdown');
+            if (!q || _financeAllStudents.length === 0) {
+                hideFinanceDropdown();
+                return;
+            }
+            const matches = _financeAllStudents.filter(s =>
+                (s.fullName || '').toLowerCase().includes(q) ||
+                (s.studentId || '').toLowerCase().includes(q)
+            );
+            if (matches.length === 0) {
+                hideFinanceDropdown();
+                return;
+            }
+            dropdown.innerHTML = matches.map(s => {
+                const rec = _financeRecords[s.uid];
+                const statusLabel = rec && rec.status === 'bixiyay' ? '<span class="text-green-600 text-xs">Paid</span>' :
+                    rec && rec.status === 'nb' ? '<span class="text-yellow-600 text-xs">NB</span>' :
+                    '<span class="text-red-600 text-xs">Unpaid</span>';
+                const amountLabel = rec && rec.amount ? ' $' + rec.amount : '';
+                return `<div class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-600 last:border-0 flex items-center justify-between" onmousedown="selectAutocompleteStudent('${s.uid}')">
+                    <div>
+                        <span class="font-medium text-gray-900 dark:text-white">${s.fullName}</span>
+                        <span class="text-gray-500 text-sm ml-2">${s.studentId}</span>
+                    </div>
+                    <div class="text-sm">${amountLabel} ${statusLabel}</div>
+                </div>`;
+            }).join('');
+            dropdown.classList.remove('hidden');
+        }
+
+        function hideFinanceDropdown() {
+            document.getElementById('financeDropdown').classList.add('hidden');
+        }
+
+        function onFinanceKeydown(e) {
+            if (e.key === 'Escape') hideFinanceDropdown();
+        }
+
+        function selectAutocompleteStudent(uid) {
+            hideFinanceDropdown();
+            _financeSelectedUid = uid;
+            const rec = _financeRecords[uid];
+            if (!rec) return;
+            const student = _financeAllStudents.find(s => s.uid === uid);
+            document.getElementById('financeAutocomplete').value = rec.name;
+            document.getElementById('financeDisplayName').textContent = rec.name + ' (' + rec.studentId + ')';
+            document.getElementById('financeDisplayInfo').textContent = 'Class: ' + rec.class + ' | Month: ' + (document.getElementById('financeMonth').value || 'current');
+            document.getElementById('financeAmount').value = rec.amount || '';
+            document.getElementById('financeSelectedPanel').classList.remove('hidden');
+            document.getElementById('finSaveStatus').classList.add('hidden');
+            highlightFinanceBtn(rec.status);
+            _financeSelectedRow = uid;
+            updateFinanceRowHighlight(uid);
+        }
+
+        function highlightFinanceBtn(status) {
+            ['finBtnBixiyay', 'finBtnLamaBixin', 'finBtnNB'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (!btn) return;
+                const isActive =
+                    (id === 'finBtnBixiyay' && status === 'bixiyay') ||
+                    (id === 'finBtnLamaBixin' && status === 'lama_bixin') ||
+                    (id === 'finBtnNB' && status === 'nb');
+                btn.className = 'px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ' + (
+                    isActive ? (
+                        id === 'finBtnBixiyay' ? 'bg-green-500 text-white shadow-md' :
+                        id === 'finBtnLamaBixin' ? 'bg-red-500 text-white shadow-md' :
+                        'bg-yellow-500 text-white shadow-md'
+                    ) : (
+                        'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:brightness-90'
+                    )
+                );
+            });
+        }
+
+        function updateFinanceRowHighlight(uid) {
+            document.querySelectorAll('#financeTableBody tr').forEach(tr => {
+                tr.classList.toggle('bg-blue-50', tr.dataset.uid === uid);
+                tr.classList.toggle('dark:bg-blue-900/20', tr.dataset.uid === uid);
+            });
+        }
+
+        async function setFinanceStatus(status) {
+            if (!_financeSelectedUid) return;
+            const rec = _financeRecords[_financeSelectedUid];
+            if (!rec) return;
+            rec.status = status;
+            highlightFinanceBtn(status);
+            document.getElementById('finSaveStatus').classList.add('hidden');
+        }
+
+        async function savePayment() {
+            if (!_financeSelectedUid) { SOMSTAR.showNotification('Select a student first', 'error'); return; }
+            await autoSaveFinance();
+            SOMSTAR.showNotification('Payment saved!', 'success');
+        }
+
+        async function autoSaveFinance() {
+            if (!_financeSelectedUid) return;
+            const rec = _financeRecords[_financeSelectedUid];
+            if (!rec) return;
+            const amount = document.getElementById('financeAmount').value;
+            rec.amount = amount;
+            const payload = {
+                studentId: rec.studentId,
+                name: rec.name,
+                class: rec.class,
+                period: rec.period,
+                status: rec.status,
+                amount: amount || '0',
+                updatedAt: new Date().toISOString()
+            };
+            try {
+                if (rec.key) {
+                    await db.ref('finance/' + rec.key).update(payload);
+                } else {
+                    const newRef = await db.ref('finance').push(payload);
+                    rec.key = newRef.key;
+                }
+                const statusEl = document.getElementById('finSaveStatus');
+                statusEl.classList.remove('hidden');
+                setTimeout(() => statusEl.classList.add('hidden'), 2000);
+                updateFinanceSummary();
+                renderFinanceTable();
+            } catch(e) {
+                SOMSTAR.showNotification('Save error: ' + e.message, 'error');
             }
         }
 
-        function updateFinanceStatus(uid, status) {
-            if (_financeData[uid]) {
-                _financeData[uid].status = status;
+        function renderFinanceTable() {
+            const tbody = document.getElementById('financeTableBody');
+            if (_financeAllStudents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-400 py-8">No students in this class</td></tr>';
+                return;
             }
-            updateFinanceSummary();
+            tbody.innerHTML = _financeAllStudents.map(s => {
+                const rec = _financeRecords[s.uid];
+                const st = rec ? rec.status : 'lama_bixin';
+                const amt = rec ? (rec.amount || '') : '';
+                const statusBadge = st === 'bixiyay' ? '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Bixiyay</span>' :
+                    st === 'nb' ? '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">NB</span>' :
+                    '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Lama Bixin</span>';
+                const isSelected = _financeSelectedUid === s.uid;
+                return `<tr data-uid="${s.uid}" class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}" onclick="selectAutocompleteStudent('${s.uid}')">
+                    <td class="font-medium text-gray-900 dark:text-white">${s.studentId}</td>
+                    <td>${s.fullName}</td>
+                    <td>${amt ? '$' + amt : '-'}</td>
+                    <td>${statusBadge}</td>
+                </tr>`;
+            }).join('');
         }
 
         function updateFinanceSummary() {
-            const paid = Object.values(_financeData).filter(d => d.status === 'bixiyay').length;
-            const unpaid = Object.values(_financeData).filter(d => d.status === 'lama_bixin').length;
-            const nb = Object.values(_financeData).filter(d => d.status === 'nb').length;
+            const records = Object.values(_financeRecords);
+            const paid = records.filter(d => d.status === 'bixiyay').length;
+            const unpaid = records.filter(d => d.status === 'lama_bixin').length;
+            const nb = records.filter(d => d.status === 'nb').length;
+            const total = records.length;
+            const unpaidAmount = records.filter(d => d.status === 'lama_bixin').reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
             document.getElementById('financePaidCount').textContent = paid;
             document.getElementById('financeUnpaidCount').textContent = unpaid;
             document.getElementById('financeNBCount').textContent = nb;
+            document.getElementById('financeTotalCount').textContent = total;
+            document.getElementById('financeRemaining').textContent = '$' + unpaidAmount;
         }
 
-        async function saveFinance() {
-            const records = Object.values(_financeData).filter(d => d.studentId);
-            if (records.length === 0) { SOMSTAR.showNotification('No data to save', 'info'); return; }
+        function resetFinanceSummary() {
+            ['financePaidCount','financeUnpaidCount','financeNBCount','financeTotalCount','financeRemaining'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = id === 'financeRemaining' ? '$0' : '0';
+            });
+        }
+
+        // ====== FINANCE REPORT ======
+        let _allFinanceRecords = [];
+
+        async function loadFinanceReport() {
             try {
-                for (const rec of records) {
-                    const snap = await db.ref('finance').orderByChild('studentId').equalTo(rec.studentId).once('value');
-                    const data = snap.val();
-                    const existingKey = data ? Object.keys(data).find(k => data[k].period === rec.period) : null;
-                    const payload = {
-                        studentId: rec.studentId,
-                        name: rec.name,
-                        class: rec.class,
-                        period: rec.period,
-                        status: rec.status,
-                        amount: rec.amount || '0',
-                        updatedAt: new Date().toISOString()
-                    };
-                    if (existingKey) {
-                        await db.ref('finance/' + existingKey).update(payload);
-                    } else {
-                        await db.ref('finance').push(payload);
-                    }
+                const snap = await db.ref('finance').once('value');
+                const data = snap.val() || {};
+                _allFinanceRecords = Object.entries(data).map(([key, val]) => ({ ...val, key }));
+
+                const search = (document.getElementById('financeReportSearch').value || '').toLowerCase().trim();
+                const clsFilter = document.getElementById('financeReportClass').value;
+                const monthFilter = document.getElementById('financeReportMonth').value;
+
+                let filtered = _allFinanceRecords;
+                if (search) {
+                    filtered = filtered.filter(r =>
+                        (r.name || '').toLowerCase().includes(search) ||
+                        (r.studentId || '').toLowerCase().includes(search)
+                    );
                 }
-                SOMSTAR.showNotification('Finance saved!', 'success');
-                loadFinanceStudents();
-            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+                if (clsFilter) {
+                    filtered = filtered.filter(r => r.class === clsFilter);
+                }
+                if (monthFilter) {
+                    filtered = filtered.filter(r => {
+                        const parts = (r.period || '').split('-');
+                        return parts.length === 2 && parts[1] === monthFilter;
+                    });
+                }
+
+                const paid = filtered.filter(r => r.status === 'bixiyay');
+                const unpaid = filtered.filter(r => r.status === 'lama_bixin');
+                const nb = filtered.filter(r => r.status === 'nb');
+                const revenue = paid.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+
+                document.getElementById('reportPaidCount').textContent = paid.length;
+                document.getElementById('reportUnpaidCount').textContent = unpaid.length;
+                document.getElementById('reportNBCount').textContent = nb.length;
+                document.getElementById('reportRevenue').textContent = '$' + revenue;
+
+                const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                const tbody = document.getElementById('financeReportBody');
+                if (filtered.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-400 py-8">No records found</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = filtered.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')).map(r => {
+                    const periodParts = (r.period || '').split('-');
+                    const monthLabel = periodParts.length === 2 ? (monthNames[parseInt(periodParts[1])] || periodParts[1]) : r.period;
+                    const dateLabel = r.updatedAt ? new Date(r.updatedAt).toLocaleDateString() : '-';
+                    const amount = parseFloat(r.amount) || 0;
+                    const remaining = r.status === 'bixiyay' ? 0 : amount;
+                    const statusBadge = r.status === 'bixiyay' ? '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Bixiyay</span>' :
+                        r.status === 'nb' ? '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">NB</span>' :
+                        '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Lama Bixin</span>';
+                    return `<tr>
+                        <td class="font-medium text-gray-900 dark:text-white">${r.studentId || '-'}</td>
+                        <td>${r.name || '-'}</td>
+                        <td>${r.class || '-'}</td>
+                        <td>$${amount}</td>
+                        <td>${monthLabel}</td>
+                        <td>${statusBadge}</td>
+                        <td class="${remaining > 0 ? 'text-red-600 font-semibold' : 'text-gray-400'}">$${remaining}</td>
+                        <td class="text-xs text-gray-500">${dateLabel}</td>
+                    </tr>`;
+                }).join('');
+            } catch(e) {
+                console.error('loadFinanceReport error:', e);
+                document.getElementById('financeReportBody').innerHTML = '<tr><td colspan="8" class="text-center text-gray-400 py-8">Error loading report</td></tr>';
+            }
         }
 
-        function showFinanceReport() {
-            const cls = document.getElementById('financeClass').value;
-            if (!cls) { SOMSTAR.showNotification('Select a class first', 'error'); return; }
-
-            const paid = Object.values(_financeData).filter(d => d.status === 'bixiyay');
-            const unpaid = Object.values(_financeData).filter(d => d.status === 'lama_bixin');
-            const nb = Object.values(_financeData).filter(d => d.status === 'nb');
-
-            const month = document.getElementById('financeMonth').value || String(new Date().getMonth() + 1).padStart(2, '0');
-            const monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
-
-            function studentRows(arr, label, color) {
-                if (arr.length === 0) return `<p class="text-sm text-gray-400">No students</p>`;
-                return arr.map(s => `<tr class="border-b dark:border-gray-700">
-                    <td class="py-2 text-sm text-gray-900 dark:text-white">${s.studentId}</td>
-                    <td class="py-2 text-sm text-gray-700 dark:text-gray-300">${s.name}</td>
-                    <td class="py-2 text-sm text-gray-500">${s.class}</td>
-                    <td class="py-2 text-sm text-gray-500">${s.amount || '0'}</td>
-                    <td class="py-2 text-sm"><span class="px-2 py-1 rounded-full text-xs font-medium ${color}">${label}</span></td>
-                </tr>`);
-            }
-
-            const html = `<div class="fixed inset-0 bg-black/50 z-[300] flex items-center justify-center p-4" onclick="if(event.target===this)this.remove()">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-lg text-gray-900 dark:text-white">Finance Report - ${cls}</h3>
-                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
-                    </div>
-                    <p class="text-sm text-gray-500 mb-4">${monthNames[parseInt(month)]} ${new Date().getFullYear()}</p>
-
-                    <div class="grid grid-cols-4 gap-3 mb-6">
-                        <div class="p-3 rounded-xl bg-green-50 dark:bg-green-900/20 text-center">
-                            <p class="text-2xl font-bold text-green-600">${paid.length}</p>
-                            <p class="text-xs text-gray-500">Bixiyay</p>
-                        </div>
-                        <div class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-center">
-                            <p class="text-2xl font-bold text-red-600">${unpaid.length}</p>
-                            <p class="text-xs text-gray-500">Lama Bixin</p>
-                        </div>
-                        <div class="p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 text-center">
-                            <p class="text-2xl font-bold text-yellow-600">${nb.length}</p>
-                            <p class="text-xs text-gray-500">NB</p>
-                        </div>
-                        <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-center">
-                            <p class="text-2xl font-bold text-blue-600">${paid.length + unpaid.length + nb.length}</p>
-                            <p class="text-xs text-gray-500">Wadarta</p>
-                        </div>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div>
-                            <h4 class="font-medium text-gray-900 dark:text-white mb-2"><span class="text-green-600">●</span> Bixiyay (${paid.length})</h4>
-                            <table class="w-full text-sm"><tbody>${studentRows(paid, 'Bixiyay', 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400')}</tbody></table>
-                        </div>
-                        <div>
-                            <h4 class="font-medium text-gray-900 dark:text-white mb-2"><span class="text-red-600">●</span> Lama Bixin (${unpaid.length})</h4>
-                            <table class="w-full text-sm"><tbody>${studentRows(unpaid, 'Lama Bixin', 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400')}</tbody></table>
-                        </div>
-                        <div>
-                            <h4 class="font-medium text-gray-900 dark:text-white mb-2"><span class="text-yellow-600">●</span> NB (${nb.length})</h4>
-                            <table class="w-full text-sm"><tbody>${studentRows(nb, 'NB', 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400')}</tbody></table>
-                        </div>
-                    </div>
-
-                    <button onclick="SOMSTAR.exportToPDF(this.parentElement,'Finance-Report-${cls}.pdf')" class="btn-primary w-full py-2.5 rounded-xl text-white mt-6"><i class="fas fa-file-pdf mr-1"></i> Export PDF</button>
-                </div>
-            </div>`;
-            document.body.insertAdjacentHTML('beforeend', html);
+        function exportFinanceReportPDF() {
+            SOMSTAR.exportToPDF('section-finance-report', 'Finance-Report.pdf');
         }
     </script>
     <script>
