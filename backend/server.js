@@ -289,24 +289,20 @@ app.post('/api/login', async (req, res) => {
         }
 
         if (role === 'student') {
-            const snap = await db.ref('students').orderByChild('studentId').equalTo(userId).once('value');
-            const data = snap.val();
-            if (!data) return res.status(401).json({ error: 'Invalid credentials' });
-            const uid = Object.keys(data)[0];
-            const student = data[uid];
+            const rows = await db.queryByChild('students', 'studentId', userId);
+            if (!rows || rows.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
+            const student = rows[0];
             if (student.password !== password) return res.status(401).json({ error: 'Invalid credentials' });
             if (student.status === 'disabled') return res.status(403).json({ error: 'Account disabled. Contact manager.' });
-            return res.json({ success: true, role: 'student', data: { uid, ...student } });
+            return res.json({ success: true, role: 'student', data: { uid: student.uid, ...student } });
         }
 
         if (role === 'teacher') {
-            const snap = await db.ref('teachers').orderByChild('teacherId').equalTo(userId).once('value');
-            const data = snap.val();
-            if (!data) return res.status(401).json({ error: 'Invalid credentials' });
-            const tid = Object.keys(data)[0];
-            const teacher = data[tid];
+            const rows = await db.queryByChild('teachers', 'teacherId', userId);
+            if (!rows || rows.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
+            const teacher = rows[0];
             if (teacher.password !== password) return res.status(401).json({ error: 'Invalid credentials' });
-            return res.json({ success: true, role: 'teacher', data: { uid: tid, ...teacher } });
+            return res.json({ success: true, role: 'teacher', data: { uid: teacher.uid, ...teacher } });
         }
 
         return res.status(400).json({ error: 'Invalid role' });
@@ -328,20 +324,16 @@ app.post('/api/change-password', async (req, res) => {
         }
 
         if (targetRole === 'student') {
-            const snap = await db.ref('students').orderByChild('studentId').equalTo(targetId).once('value');
-            const data = snap.val();
-            if (!data) return res.status(404).json({ error: 'Student not found' });
-            const uid = Object.keys(data)[0];
-            await db.update('students', uid, { password: newPassword });
+            const rows = await db.queryByChild('students', 'studentId', targetId);
+            if (!rows || rows.length === 0) return res.status(404).json({ error: 'Student not found' });
+            await db.update('students', rows[0].uid, { password: newPassword });
             return res.json({ success: true });
         }
 
         if (targetRole === 'teacher') {
-            const snap = await db.ref('teachers').orderByChild('teacherId').equalTo(targetId).once('value');
-            const data = snap.val();
-            if (!data) return res.status(404).json({ error: 'Teacher not found' });
-            const tid = Object.keys(data)[0];
-            await db.update('teachers', tid, { password: newPassword });
+            const rows = await db.queryByChild('teachers', 'teacherId', targetId);
+            if (!rows || rows.length === 0) return res.status(404).json({ error: 'Teacher not found' });
+            await db.update('teachers', rows[0].uid, { password: newPassword });
             return res.json({ success: true });
         }
 

@@ -11,7 +11,7 @@ const SOMSTAR = {
     },
 
     generateId(index) {
-        const num = Math.min(100 + index, 300);
+        const num = Math.min(100 + index, 400);
         return `SOMSTAR${num}`;
     },
 
