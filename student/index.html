@@ -193,28 +193,37 @@
                     <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
                         <h3 class="font-semibold text-gray-900 dark:text-white mb-6">Student Tools</h3>
                         <div class="grid md:grid-cols-2 gap-6">
-                            <!-- English → Somali Translator -->
+                            <!-- Translator (English ↔ Somali) -->
                             <div class="p-5 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-700 border border-indigo-200 dark:border-gray-600">
                                 <div class="flex items-center gap-2 mb-4">
                                     <i class="fas fa-language text-indigo-600 text-xl"></i>
-                                    <h4 class="font-semibold text-gray-900 dark:text-white">English → Somali Translator</h4>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">Translator</h4>
                                 </div>
-                                <textarea id="englishInput" class="form-input w-full mb-3" rows="3" placeholder="Ku qor English..."></textarea>
-                                <button onclick="translateText()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm w-full mb-3"><i class="fas fa-exchange-alt mr-1"></i> Translate</button>
+                                <textarea id="transInput" class="form-input w-full mb-3" rows="3" placeholder="Ku qor text..." autocomplete="off"></textarea>
+                                <div class="flex gap-2 mb-3">
+                                    <select id="transLangPair" class="form-input text-sm py-1.5 flex-1">
+                                        <option value="en|so">English → Somali</option>
+                                        <option value="so|en">Somali → English</option>
+                                    </select>
+                                    <button onclick="translateText()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm"><i class="fas fa-exchange-alt mr-1"></i> Tarjun</button>
+                                </div>
                                 <div id="translationOutput" class="p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-300 min-h-[60px] hidden">
-                                    <div class="mb-2"><span class="text-xs text-gray-400 font-medium">Somali:</span><p class="text-gray-900 dark:text-white font-medium" id="translatedSomaliText"></p></div>
-                                </div>
-                                <div id="speechControls" class="flex gap-2 hidden">
-                                    <button onclick="speakText()" class="flex-1 px-4 py-2 rounded-xl bg-green-600 text-white text-sm hover:bg-green-700"><i class="fas fa-play mr-1"></i> Fasiix</button>
-                                    <button onclick="pauseSpeech()" class="flex-1 px-4 py-2 rounded-xl bg-yellow-600 text-white text-sm hover:bg-yellow-700"><i class="fas fa-pause mr-1"></i> Hak</button>
-                                    <button onclick="stopSpeech()" class="flex-1 px-4 py-2 rounded-xl bg-red-600 text-white text-sm hover:bg-red-700"><i class="fas fa-stop mr-1"></i> Joogi</button>
+                                    <p id="translatedText" class="text-gray-900 dark:text-white font-medium"></p>
+                                    <button onclick="speakTranslated()" class="mt-2 text-xs text-green-600 hover:underline"><i class="fas fa-volume-up mr-1"></i> Fasiix</button>
                                 </div>
                             </div>
-                            <!-- Info card -->
-                            <div class="p-5 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-700 border border-green-200 dark:border-gray-600 flex flex-col items-center justify-center text-center">
-                                <i class="fas fa-microphone-alt text-green-600 text-5xl mb-4"></i>
-                                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Fasiix (TTS)</h4>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Kadib markaad turjunto, riix <strong>Fasiix</strong> si ay kuu akhrido Soomaaliga.</p>
+                            <!-- Text-to-Speech -->
+                            <div class="p-5 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-700 border border-green-200 dark:border-gray-600">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <i class="fas fa-microphone-alt text-green-600 text-xl"></i>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">Text-to-Speech</h4>
+                                </div>
+                                <textarea id="ttsInput" class="form-input w-full mb-3" rows="3" placeholder="Ku qor text-ka la akhriyayo..."></textarea>
+                                <div class="flex gap-2">
+                                    <button onclick="speakTTS()" class="flex-1 px-4 py-2 rounded-xl bg-green-600 text-white text-sm hover:bg-green-700"><i class="fas fa-play mr-1"></i> Akhri</button>
+                                    <button onclick="pauseTTS()" class="flex-1 px-4 py-2 rounded-xl bg-yellow-600 text-white text-sm hover:bg-yellow-700"><i class="fas fa-pause mr-1"></i> Hak</button>
+                                    <button onclick="stopTTS()" class="flex-1 px-4 py-2 rounded-xl bg-red-600 text-white text-sm hover:bg-red-700"><i class="fas fa-stop mr-1"></i> Joogi</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -687,45 +696,55 @@
             } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
         }
 
-        // Student Tools: English → Somali Translator + Fasiix (TTS)
+        // Student Tools: Translator + TTS
         let _synthUtterance = null;
-        let _lastTranslatedText = '';
 
         async function translateText() {
-            const input = document.getElementById('englishInput').value.trim();
+            const input = document.getElementById('transInput').value.trim();
+            const pair = document.getElementById('transLangPair').value;
             const output = document.getElementById('translationOutput');
-            const controls = document.getElementById('speechControls');
-            if (!input) { SOMSTAR.showNotification('Fadlan ku qor English', 'error'); return; }
+            const textEl = document.getElementById('translatedText');
+            if (!input) { SOMSTAR.showNotification('Fadlan ku qor text', 'error'); return; }
             output.classList.remove('hidden');
-            controls.classList.add('hidden');
-            document.getElementById('translatedSomaliText').textContent = 'Turjimayn...';
+            textEl.textContent = 'Turjimayn...';
             try {
-                const res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(input) + '&langpair=en|so');
+                const res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(input) + '&langpair=' + pair);
                 const data = await res.json();
                 if (data.responseStatus === 200) {
-                    _lastTranslatedText = data.responseData.translatedText;
-                    document.getElementById('translatedSomaliText').textContent = _lastTranslatedText;
-                    controls.classList.remove('hidden');
+                    textEl.textContent = data.responseData.translatedText || '(empty)';
                 } else {
-                    document.getElementById('translatedSomaliText').textContent = 'Error: ' + (data.responseDetails || 'Translation failed');
+                    textEl.textContent = 'Error: ' + (data.responseDetails || 'Translation failed');
                 }
             } catch(e) {
-                document.getElementById('translatedSomaliText').textContent = 'Network error. Check your internet connection.';
+                textEl.textContent = 'Network error. Check your connection.';
             }
         }
 
-        function speakText() {
-            if (!_lastTranslatedText) { SOMSTAR.showNotification('Marka hore turjun', 'error'); return; }
+        function speakTranslated() {
+            const text = document.getElementById('translatedText').textContent;
+            if (!text || text.startsWith('Error') || text === 'Turjimayn...') return;
             if (!window.speechSynthesis) { SOMSTAR.showNotification('Browser-kaagu ma akhriyi karo', 'error'); return; }
             window.speechSynthesis.cancel();
-            _synthUtterance = new SpeechSynthesisUtterance(_lastTranslatedText);
-            _synthUtterance.lang = 'so-SO';
+            const pair = document.getElementById('transLangPair').value;
+            const lang = pair === 'so|en' ? 'en-US' : 'so-SO';
+            _synthUtterance = new SpeechSynthesisUtterance(text);
+            _synthUtterance.lang = lang;
             _synthUtterance.rate = 1;
-            _synthUtterance.pitch = 1;
             window.speechSynthesis.speak(_synthUtterance);
         }
 
-        function pauseSpeech() {
+        function speakTTS() {
+            const text = document.getElementById('ttsInput').value.trim();
+            if (!text) { SOMSTAR.showNotification('Fadlan ku qor text', 'error'); return; }
+            if (!window.speechSynthesis) { SOMSTAR.showNotification('Browser-kaagu ma akhriyi karo', 'error'); return; }
+            window.speechSynthesis.cancel();
+            _synthUtterance = new SpeechSynthesisUtterance(text);
+            _synthUtterance.lang = 'so-SO';
+            _synthUtterance.rate = 1;
+            window.speechSynthesis.speak(_synthUtterance);
+        }
+
+        function pauseTTS() {
             if (window.speechSynthesis) {
                 if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
                     window.speechSynthesis.pause();
@@ -735,10 +754,8 @@
             }
         }
 
-        function stopSpeech() {
-            if (window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-            }
+        function stopTTS() {
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
         }
 
         function playStudentAudio(idx, i) {
