@@ -38,6 +38,7 @@
                 <a href="#" onclick="showSection('lessons')" class="sidebar-link" data-section="lessons"><i class="fas fa-book-open"></i> <span>My Lessons</span></a>
                 <a href="#" onclick="showSection('marks')" class="sidebar-link" data-section="marks"><i class="fas fa-star"></i> <span>Exam Marks</span></a>
                 <a href="#" onclick="showSection('quizzes')" class="sidebar-link" data-section="quizzes"><i class="fas fa-question-circle"></i> <span>Solve Quizzes</span></a>
+                <a href="#" onclick="showSection('student-tools')" class="sidebar-link" data-section="student-tools"><i class="fas fa-tools"></i> <span>Student Tools</span></a>
                 <a href="#" onclick="showSection('profile')" class="sidebar-link" data-section="profile"><i class="fas fa-user-cog"></i> <span>Profile Settings</span></a>
             </nav>
             <div class="p-3 mt-auto border-t border-white/10">
@@ -188,6 +189,37 @@
                     </div>
                 </div>
 
+                <div id="section-student-tools" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-6">Student Tools</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Somali Translator -->
+                            <div class="p-5 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-700 border border-indigo-200 dark:border-gray-600">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <i class="fas fa-language text-indigo-600 text-xl"></i>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">Somali → English Translator</h4>
+                                </div>
+                                <textarea id="somaliInput" class="form-input w-full mb-3" rows="3" placeholder="Ku qor Somali..."></textarea>
+                                <button onclick="translateText()" class="btn-primary px-4 py-2 rounded-xl text-white text-sm w-full mb-3"><i class="fas fa-exchange-alt mr-1"></i> Translate</button>
+                                <div id="translationOutput" class="p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-300 min-h-[60px] hidden"></div>
+                            </div>
+                            <!-- English Text-to-Speech -->
+                            <div class="p-5 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-700 border border-green-200 dark:border-gray-600">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <i class="fas fa-microphone-alt text-green-600 text-xl"></i>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">English Text-to-Speech</h4>
+                                </div>
+                                <textarea id="ttsInput" class="form-input w-full mb-3" rows="3" placeholder="Type English text to read aloud..."></textarea>
+                                <div class="flex gap-2">
+                                    <button onclick="speakText()" class="flex-1 px-4 py-2 rounded-xl bg-green-600 text-white text-sm hover:bg-green-700"><i class="fas fa-play mr-1"></i> Play</button>
+                                    <button onclick="pauseSpeech()" class="flex-1 px-4 py-2 rounded-xl bg-yellow-600 text-white text-sm hover:bg-yellow-700"><i class="fas fa-pause mr-1"></i> Pause</button>
+                                    <button onclick="stopSpeech()" class="flex-1 px-4 py-2 rounded-xl bg-red-600 text-white text-sm hover:bg-red-700"><i class="fas fa-stop mr-1"></i> Stop</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="section-profile" class="section-content hidden">
                     <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-8 shadow-sm">
                         <h3 class="font-semibold text-gray-900 dark:text-white mb-6 text-lg">Profile Settings</h3>
@@ -233,7 +265,7 @@
             document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
             const link = document.querySelector(`[data-section="${section}"]`);
             if (link) link.classList.add('active');
-            const titles = { overview:'Overview', attendance:'My Attendance', announcements:'Announcements', lessons:'My Lessons', marks:'Exam Marks', quizzes:'Solve Quizzes', profile:'Profile Settings' };
+            const titles = { overview:'Overview', attendance:'My Attendance', announcements:'Announcements', lessons:'My Lessons', marks:'Exam Marks', quizzes:'Solve Quizzes', 'student-tools':'Student Tools', profile:'Profile Settings' };
             document.getElementById('pageTitle').textContent = titles[section] || section;
 
             if (section === 'overview') loadStudentOverview();
@@ -653,6 +685,60 @@
                     localStorage.setItem('somstar_user', JSON.stringify(stored));
                 }
             } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
+        }
+
+        // Student Tools: Somali Translator
+        let _synthUtterance = null;
+
+        async function translateText() {
+            const input = document.getElementById('somaliInput').value.trim();
+            const output = document.getElementById('translationOutput');
+            if (!input) { SOMSTAR.showNotification('Fadlan ku qor Somali', 'error'); return; }
+            output.classList.remove('hidden');
+            output.innerHTML = '<i class="fas fa-spinner fa-spin text-gray-400"></i> Translating...';
+            try {
+                const res = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(input) + '&langpair=so|en');
+                const data = await res.json();
+                if (data.responseStatus === 200) {
+                    output.innerHTML = '<div class="mb-2"><span class="text-xs text-gray-400 font-medium">Somali:</span><p class="text-gray-700 dark:text-gray-300">' + input + '</p></div><div class="border-t border-gray-200 dark:border-gray-600 pt-2"><span class="text-xs text-gray-400 font-medium">English:</span><p class="text-gray-900 dark:text-white font-medium">' + data.responseData.translatedText + '</p></div>';
+                } else {
+                    output.innerHTML = '<p class="text-red-500">Error: ' + (data.responseDetails || 'Translation failed') + '</p>';
+                }
+            } catch(e) {
+                output.innerHTML = '<p class="text-red-500">Network error. Check your internet connection.</p>';
+            }
+        }
+
+        // Student Tools: Text-to-Speech
+        function speakText() {
+            const text = document.getElementById('ttsInput').value.trim();
+            if (!text) { SOMSTAR.showNotification('Please enter English text', 'error'); return; }
+            if (!window.speechSynthesis) { SOMSTAR.showNotification('Speech not supported in this browser', 'error'); return; }
+            window.speechSynthesis.cancel();
+            _synthUtterance = new SpeechSynthesisUtterance(text);
+            _synthUtterance.lang = 'en-US';
+            _synthUtterance.rate = 1;
+            _synthUtterance.pitch = 1;
+            const voices = window.speechSynthesis.getVoices();
+            const enVoice = voices.find(v => v.lang.startsWith('en'));
+            if (enVoice) _synthUtterance.voice = enVoice;
+            window.speechSynthesis.speak(_synthUtterance);
+        }
+
+        function pauseSpeech() {
+            if (window.speechSynthesis) {
+                if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+                    window.speechSynthesis.pause();
+                } else if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                }
+            }
+        }
+
+        function stopSpeech() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
         }
 
         function playStudentAudio(idx, i) {

@@ -313,6 +313,13 @@ app.post('/api/login', async (req, res) => {
             return res.json({ success: true, role: 'teacher', data: { uid: teacher.uid, ...teacher } });
         }
 
+        if (role === 'finance') {
+            if (userId === 'Saacid' && password === '@som1234') {
+                return res.json({ success: true, role: 'finance', data: { name: 'Saacid', uid: 'finance-saacid' } });
+            }
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
         return res.status(400).json({ error: 'Invalid role' });
     } catch (e) {
         console.error('Login error:', e);

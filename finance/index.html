@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Assistant - SOMSTAR Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <script>
+        const user = JSON.parse(localStorage.getItem('somstar_user') || '{}');
+        if (!user || user.role !== 'finance') window.location.href = '../login.html';
+        if(localStorage.getItem('somstar_dark')==='true')document.body.classList.add('dark-mode');
+    </script>
+
+    <div class="flex">
+        <aside id="sidebar" class="sidebar fixed md:relative z-50">
+            <div class="p-5 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">F</span>
+                    </div>
+                    <div>
+                        <div class="text-white font-bold">SOMSTAR</div>
+                        <div class="text-amber-300 text-xs">Finance Panel</div>
+                    </div>
+                </div>
+            </div>
+            <nav class="p-3 space-y-1 mt-2">
+                <a href="#" onclick="showSection('payments')" class="sidebar-link active" data-section="payments"><i class="fas fa-credit-card"></i> <span>Payments</span></a>
+            </nav>
+            <div class="p-3 mt-auto border-t border-white/10">
+                <a href="#" onclick="AUTH.logout()" class="sidebar-link logout-btn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+            </div>
+        </aside>
+
+        <main class="flex-1 min-h-screen bg-gray-50 dark:bg-gray-900 transition-all">
+            <div class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 py-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button id="sidebarToggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <h1 class="text-lg font-semibold text-gray-900 dark:text-white" id="pageTitle">Payments</h1>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="SOMSTAR.toggleDarkMode()" id="darkModeToggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <i class="fas fa-moon text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <span id="dbBadge" class="hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 animate-pulse"><i class="fas fa-circle text-[8px] text-green-500"></i> <span>Loading...</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 md:p-6 space-y-6">
+                <div id="section-payments" class="section-content">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Student Payments</h3>
+                            <div class="flex gap-2">
+                                <select id="financeClassFilter" class="form-input text-sm py-1.5 w-40" onchange="loadFinancePayments()">
+                                    <option value="">All Classes</option>
+                                    <option value="TRY 2:00">TRY 2:00</option>
+                                    <option value="TRY 3:00">TRY 3:00</option>
+                                    <option value="TRY 4:00">TRY 4:00</option>
+                                    <option value="Abdishakuur 2:00">Abdishakuur 2:00</option>
+                                    <option value="Abdishakuur 3:00">Abdishakuur 3:00</option>
+                                    <option value="Abdishakuur 4:00">Abdishakuur 4:00</option>
+                                    <option value="Muktar 2:00">Muktar 2:00</option>
+                                    <option value="Muktar 3:00">Muktar 3:00</option>
+                                    <option value="Muktar 4:00">Muktar 4:00</option>
+                                </select>
+                                <select id="financeMonthFilter" class="form-input text-sm py-1.5 w-36" onchange="loadFinancePayments()">
+                                    <option value="">All Months</option>
+                                    <option value="01">January</option>
+                                    <option value="02">February</option>
+                                    <option value="03">March</option>
+                                    <option value="04">April</option>
+                                    <option value="05">May</option>
+                                    <option value="06">June</option>
+                                    <option value="07">July</option>
+                                    <option value="08">August</option>
+                                    <option value="09">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student Name</th>
+                                        <th>Student ID</th>
+                                        <th>Class</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Date Saved</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="financePaymentsBody">
+                                    <tr><td colspan="6" class="text-center text-gray-400 py-8">Loading payments...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        SOMSTAR.loadSidebar();
+        SOMSTAR.setupLogout();
+        SOMSTAR.initDarkMode();
+
+        function showSection(section) {
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+            const el = document.getElementById('section-' + section);
+            if (el) el.classList.remove('hidden');
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            const link = document.querySelector(`[data-section="${section}"]`);
+            if (link) link.classList.add('active');
+            const titles = { payments:'Payments' };
+            document.getElementById('pageTitle').textContent = titles[section] || section;
+            if (section === 'payments') loadFinancePayments();
+        }
+
+        async function loadFinancePayments() {
+            try {
+                const classFilter = document.getElementById('financeClassFilter').value;
+                const monthFilter = document.getElementById('financeMonthFilter').value;
+                const snap = await db.ref('finance').once('value');
+                const data = snap.val();
+                const tbody = document.getElementById('financePaymentsBody');
+
+                if (!data) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-8">No payment records found</td></tr>';
+                    return;
+                }
+
+                let records = Object.values(data);
+
+                if (classFilter) records = records.filter(r => r.class === classFilter);
+                if (monthFilter) records = records.filter(r => r.month === monthFilter);
+
+                records.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+
+                if (records.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-8">No matching payment records</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = records.map(r => {
+                    const statusClass = r.status === 'bixiyay' ? 'bg-green-100 text-green-700' : r.status === 'lama_bixin' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600';
+                    const statusLabel = r.status === 'bixiyay' ? 'Bixiyay' : r.status === 'lama_bixin' ? 'Lama Bixin' : 'NB';
+                    return `<tr>
+                        <td class="font-medium text-gray-900 dark:text-white">${r.studentName || '-'}</td>
+                        <td class="text-gray-700 dark:text-gray-300">${r.studentId || '-'}</td>
+                        <td class="text-gray-700 dark:text-gray-300">${r.class || '-'}</td>
+                        <td class="text-gray-700 dark:text-gray-300">$${parseFloat(r.amount || 0).toFixed(0)}</td>
+                        <td><span class="px-2 py-0.5 rounded-full text-xs font-medium ${statusClass}">${statusLabel}</span></td>
+                        <td class="text-gray-500 text-xs">${r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '-'}</td>
+                    </tr>`;
+                }).join('');
+            } catch(e) {
+                document.getElementById('financePaymentsBody').innerHTML = '<tr><td colspan="6" class="text-center text-red-400 py-8">Error loading payments</td></tr>';
+                console.error('Finance load error:', e);
+            }
+        }
+
+        loadFinancePayments();
+    </script>
+    <script>
+        async function updateDbBadge() {
+            try {
+                const r = await fetch('/api/db-status');
+                const info = await r.json();
+                const badge = document.getElementById('dbBadge');
+                if (!badge) return;
+                const isPg = info.type === 'postgresql';
+                badge.className = 'hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium cursor-help ' + (isPg ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 animate-pulse' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400');
+                badge.innerHTML = '<i class="fas fa-circle text-[8px] ' + (isPg ? 'text-green-500' : 'text-red-500') + '"></i> <span>' + (isPg ? 'PostgreSQL' : 'SQLITE') + '</span>';
+                badge.title = isPg ? 'Data is permanent (PostgreSQL)' : 'ERROR: ' + (info.pgError || 'PostgreSQL unavailable');
+            } catch(e) {}
+        }
+        updateDbBadge();
+        setInterval(updateDbBadge, 60000);
+    </script>
+</body>
+</html>

@@ -26,7 +26,7 @@
                 <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Sign in to your account</p>
             </div>
 
-            <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="grid grid-cols-4 gap-2 mb-6">
                 <div onclick="selectRole('manager',this)" class="role-selector p-3 rounded-xl text-center border border-gray-200 dark:border-gray-600 active">
                     <i class="fas fa-user-cog text-lg text-blue-600 dark:text-blue-400"></i>
                     <div class="text-xs font-medium text-gray-700 dark:text-gray-300 mt-1">Manager</div>
@@ -34,6 +34,10 @@
                 <div onclick="selectRole('teacher',this)" class="role-selector p-3 rounded-xl text-center border border-gray-200 dark:border-gray-600">
                     <i class="fas fa-chalkboard-teacher text-lg text-green-600 dark:text-green-400"></i>
                     <div class="text-xs font-medium text-gray-700 dark:text-gray-300 mt-1">Teacher</div>
+                </div>
+                <div onclick="selectRole('finance',this)" class="role-selector p-3 rounded-xl text-center border border-gray-200 dark:border-gray-600">
+                    <i class="fas fa-coins text-lg text-amber-600 dark:text-amber-400"></i>
+                    <div class="text-xs font-medium text-gray-700 dark:text-gray-300 mt-1">Finance</div>
                 </div>
                 <div onclick="selectRole('student',this)" class="role-selector p-3 rounded-xl text-center border border-gray-200 dark:border-gray-600">
                     <i class="fas fa-user-graduate text-lg text-purple-600 dark:text-purple-400"></i>
@@ -84,6 +88,7 @@
             const label = document.getElementById('idLabel');
             if (role === 'manager') label.textContent = 'Manager ID';
             else if (role === 'teacher') label.textContent = 'Teacher ID';
+            else if (role === 'finance') label.textContent = 'Staff ID';
             else label.textContent = 'Student ID';
         }
 
@@ -113,7 +118,7 @@
                     uid: result.data.uid || 'manager'
                 }));
                 SOMSTAR.showNotification('Welcome ' + displayName + '!', 'success');
-                const paths = { manager: 'manager/', student: 'student/', teacher: 'teacher/' };
+                const paths = { manager: 'manager/', student: 'student/', teacher: 'teacher/', finance: 'finance/' };
                 setTimeout(() => window.location.href = paths[result.role] + 'index.html', 500);
 
             } catch (err) {

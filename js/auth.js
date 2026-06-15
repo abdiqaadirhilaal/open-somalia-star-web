@@ -35,7 +35,7 @@ const AUTH = {
         this.currentUser = null;
         this.userRole = null;
         this.userData = null;
-        const isSubdir = window.location.pathname.includes('/manager/') || window.location.pathname.includes('/teacher/') || window.location.pathname.includes('/student/');
+        const isSubdir = window.location.pathname.includes('/manager/') || window.location.pathname.includes('/teacher/') || window.location.pathname.includes('/student/') || window.location.pathname.includes('/finance/');
         window.location.href = isSubdir ? '../index.html' : 'index.html';
     },
 
@@ -60,6 +60,7 @@ const AUTH = {
             case 'manager': window.location.href = 'manager/index.html'; break;
             case 'teacher': window.location.href = 'teacher/index.html'; break;
             case 'student': window.location.href = 'student/index.html'; break;
+            case 'finance': window.location.href = 'finance/index.html'; break;
             default: window.location.href = 'login.html';
         }
     }
