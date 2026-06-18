@@ -3,76 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - SOMSTAR Academy</title>
+    <title>Login - SOMALI STAR ACADEMY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        .login-page {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 30%, #06b6d4 70%, #0f172a 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .float-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            animation: floatBlob 20s infinite;
+        }
+        @keyframes floatBlob {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            25% { transform: translate(50px, -50px) scale(1.1) rotate(90deg); }
+            50% { transform: translate(-30px, 30px) scale(0.9) rotate(180deg); }
+            75% { transform: translate(40px, 40px) scale(1.05) rotate(270deg); }
+        }
+        .glassmorphism {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        .dark-mode .glassmorphism {
+            background: rgba(15,23,42,0.85);
+            border-color: rgba(255,255,255,0.06);
+        }
+        .input-glass {
+            background: rgba(255,255,255,0.06);
+            border: 1.5px solid rgba(255,255,255,0.12);
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+        }
+        .input-glass:focus {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(6,182,212,0.6);
+            box-shadow: 0 0 0 4px rgba(6,182,212,0.1);
+        }
+        .dark-mode .input-glass {
+            background: rgba(55,65,81,0.6);
+            border-color: rgba(75,85,99,0.5);
+        }
+        .dark-mode .input-glass:focus {
+            border-color: rgba(59,130,246,0.6);
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+        }
+    </style>
 </head>
-<body>
+<body class="login-page min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
     <script>if(localStorage.getItem('somstar_dark')==='true')document.body.classList.add('dark-mode');</script>
 
-    <div class="login-container relative">
-        <div class="absolute inset-0 overflow-hidden opacity-20">
-            <div class="absolute top-10 left-10 w-64 h-64 bg-blue-400 rounded-full blur-3xl animate-pulse"></div>
-            <div class="absolute bottom-10 right-10 w-80 h-80 bg-indigo-400 rounded-full blur-3xl animate-pulse" style="animation-delay:1s"></div>
+    <!-- Floating background shapes -->
+    <div class="float-shape w-96 h-96 top-[-120px] left-[-120px] opacity-30" style="animation-delay:0s"></div>
+    <div class="float-shape w-80 h-80 bottom-[-100px] right-[-100px] opacity-20" style="animation-delay:5s"></div>
+    <div class="float-shape w-64 h-64 top-1/2 right-[-80px] opacity-15" style="animation-delay:10s"></div>
+    <div class="float-shape w-48 h-48 bottom-1/4 left-[-60px] opacity-25" style="animation-delay:15s"></div>
+    <div class="float-shape w-32 h-32 top-1/3 left-1/4 opacity-20" style="animation-delay:3s"></div>
+
+    <!-- Brand badge top-left -->
+    <div class="absolute top-6 left-6 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+            <span class="text-white font-bold text-lg">S</span>
         </div>
+        <div class="hidden sm:block">
+            <span class="text-white font-extrabold text-base tracking-tight">SOMALI <span class="text-cyan-300">STAR</span></span>
+            <div class="text-[10px] text-blue-200/80 uppercase tracking-widest">English Academy</div>
+        </div>
+    </div>
 
-        <div class="login-card relative z-10">
+    <!-- Dark mode toggle top-right -->
+    <div class="absolute top-6 right-6">
+        <button onclick="document.body.classList.toggle('dark-mode');localStorage.setItem('somstar_dark',document.body.classList.contains('dark-mode'))" class="w-10 h-10 rounded-xl glassmorphism flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-all duration-300">
+            <i class="fas fa-moon text-lg"></i>
+        </button>
+    </div>
+
+    <div class="w-full max-w-[420px] relative z-10 animate-fadeIn">
+        <!-- Card -->
+        <div class="glassmorphism rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/20">
+            <!-- Header -->
             <div class="text-center mb-8">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center mx-auto mb-4">
-                    <span class="text-white font-bold text-2xl">S</span>
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center mx-auto mb-5 shadow-xl shadow-amber-500/30">
+                    <i class="fas fa-graduation-cap text-2xl text-white"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Welcome Back</h2>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Sign in to your account</p>
+                <h2 class="text-2xl font-bold text-white mb-1">Welcome Back</h2>
+                <p class="text-blue-200/70 text-sm">Sign in to continue learning</p>
             </div>
 
+            <!-- Role Selector -->
             <div class="grid grid-cols-4 gap-2 mb-6">
-                <div onclick="selectRole('manager',this)" class="role-selector p-3 rounded-xl text-center border border-gray-200 dark:border-gray-600 active">
-                    <i class="fas fa-user-cog text-lg text-blue-600 dark:text-blue-400"></i>
-                    <div class="text-xs font-medium text-gray-700 dark:text-gray-300 mt-1">Manager</div>
+                <div onclick="selectRole('manager',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism active">
+                    <i class="fas fa-user-cog text-base text-blue-300"></i>
+                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Manager</div>
                 </div>
-                <div onclick="selectRole('teacher',this)" class="role-selector p-3 rounded-xl text-center border border-gray-200 dark:border-gray-600">
-                    <i class="fas fa-chalkboard-teacher text-lg text-green-600 dark:text-green-400"></i>
-                    <div class="text-xs font-medium text-gray-700 dark:text-gray-300 mt-1">Teacher</div>
+                <div onclick="selectRole('teacher',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism">
+                    <i class="fas fa-chalkboard-teacher text-base text-green-300"></i>
+                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Teacher</div>
                 </div>
-                <div onclick="selectRole('finance',this)" class="role-selector p-3 rounded-xl text-center border border-gray-200 dark:border-gray-600">
-                    <i class="fas fa-coins text-lg text-amber-600 dark:text-amber-400"></i>
-                    <div class="text-xs font-medium text-gray-700 dark:text-gray-300 mt-1">Finance</div>
+                <div onclick="selectRole('finance',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism">
+                    <i class="fas fa-coins text-base text-amber-300"></i>
+                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Finance</div>
                 </div>
-                <div onclick="selectRole('student',this)" class="role-selector p-3 rounded-xl text-center border border-gray-200 dark:border-gray-600">
-                    <i class="fas fa-user-graduate text-lg text-purple-600 dark:text-purple-400"></i>
-                    <div class="text-xs font-medium text-gray-700 dark:text-gray-300 mt-1">Student</div>
+                <div onclick="selectRole('student',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism">
+                    <i class="fas fa-user-graduate text-base text-purple-300"></i>
+                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Student</div>
                 </div>
             </div>
 
+            <!-- Login Form -->
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" id="idLabel">User ID</label>
-                    <input type="text" id="userId" class="form-input" placeholder="Enter your ID" required>
+                    <label class="block text-sm font-medium text-blue-200 mb-2" id="idLabel">User ID</label>
+                    <div class="relative">
+                        <i class="fas fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-300/50 text-sm"></i>
+                        <input type="text" id="userId" class="input-glass w-full pl-10 pr-4 py-3 rounded-xl text-white placeholder-blue-200/40 text-sm outline-none" placeholder="Enter your ID" required>
+                    </div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
-                    <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                    <label class="block text-sm font-medium text-blue-200 mb-2">Password</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-300/50 text-sm"></i>
+                        <input type="password" id="password" class="input-glass w-full pl-10 pr-12 py-3 rounded-xl text-white placeholder-blue-200/40 text-sm outline-none" placeholder="Enter your password" required>
+                        <button type="button" onclick="togglePassword()" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-blue-300/50 hover:text-blue-200 transition-colors">
+                            <i class="fas fa-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-between mb-6">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" class="w-4 h-4 rounded border-blue-300/30 bg-white/10 text-blue-500 focus:ring-blue-500/30 cursor-pointer">
+                        <span class="text-sm text-blue-200/60 group-hover:text-blue-200 transition-colors">Remember me</span>
                     </label>
-                    <a href="#" class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">Forgot password?</a>
+                    <a href="#" class="text-sm text-cyan-300 hover:text-cyan-200 transition-colors">Forgot password?</a>
                 </div>
 
-                <button type="submit" id="loginBtn" class="btn-primary w-full py-3 rounded-xl text-white font-semibold text-base flex items-center justify-center gap-2">
+                <button type="submit" id="loginBtn" class="w-full py-3.5 rounded-xl text-white font-semibold text-base bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2">
                     <i class="fas fa-sign-in-alt"></i>
                     <span>Sign In</span>
                 </button>
-
-                <div class="text-center mt-6">
-                   
-                </div>
             </form>
+
+            <!-- Footer -->
+            <div class="text-center mt-8">
+                <p class="text-blue-200/40 text-xs">
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    Secured platform for Somali Star Academy
+                </p>
+            </div>
         </div>
     </div>
 
@@ -90,6 +181,18 @@
             else if (role === 'teacher') label.textContent = 'Teacher ID';
             else if (role === 'finance') label.textContent = 'Staff ID';
             else label.textContent = 'Student ID';
+        }
+
+        function togglePassword() {
+            const pwd = document.getElementById('password');
+            const icon = document.getElementById('eyeIcon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                pwd.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
         }
 
         async function handleLogin(e) {
