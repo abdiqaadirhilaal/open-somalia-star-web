@@ -736,19 +736,8 @@
                 // Test 3: Check account status
                 const isActive = accountStatus !== 'disabled';
 
-                // Test 4: Try Firebase Auth login (using email format)
-                let authResult = 'not_configured';
-                try {
-                    const email = studentId.toLowerCase() + '@somstaracademy.com';
-                    const authSnap = await firestore.collection('authLinks').doc(studentId).get();
-                    if (authSnap.exists) {
-                        authResult = 'linked';
-                    } else {
-                        authResult = 'no_auth_record';
-                    }
-                } catch(e) {
-                    authResult = 'firestore_unavailable';
-                }
+                // Test 4: Auth link check (server-side only)
+                let authResult = 'server_managed';
 
                 const elapsed = Date.now() - startTime;
 

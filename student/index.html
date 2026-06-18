@@ -13,6 +13,13 @@
         const user = JSON.parse(localStorage.getItem('somstar_user') || '{}');
         if (!user || user.role !== 'student') window.location.href = '../login.html';
         if(localStorage.getItem('somstar_dark')==='true')document.body.classList.add('dark-mode');
+        function populateUserUI() {
+            const name = user.name || user.id || 'Student';
+            document.getElementById('studentUserName').textContent = name;
+            document.getElementById('profileAvatarInit').textContent = name.charAt(0).toUpperCase();
+            document.getElementById('profileName').textContent = name;
+        }
+        document.addEventListener('DOMContentLoaded', populateUserUI);
         document.addEventListener('contextmenu', e => {
             if (e.target.closest('.fixed, video, audio, img, iframe')) e.preventDefault();
         });
@@ -65,7 +72,7 @@
                         </div>
                         <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <i class="fas fa-user-circle text-xl"></i>
-                            <span class="hidden sm:inline">${user.name || user.id}</span>
+                            <span class="hidden sm:inline" id="studentUserName"></span>
                         </div>
                     </div>
                 </div>
@@ -233,11 +240,11 @@
                     <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-8 shadow-sm">
                         <h3 class="font-semibold text-gray-900 dark:text-white mb-6 text-lg">Profile Settings</h3>
                         <div class="flex items-center gap-4 mb-8 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-2xl font-bold">
-                                ${(user.name || user.id || 'S').charAt(0).toUpperCase()}
+                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white text-2xl font-bold" id="profileAvatarInit">
+                                S
                             </div>
                             <div>
-                                <h4 class="font-semibold text-gray-900 dark:text-white" id="profileName">${user.name || 'Student'}</h4>
+                                <h4 class="font-semibold text-gray-900 dark:text-white" id="profileName">Student</h4>
                                 <p class="text-sm text-gray-500" id="profileId"></p>
                             </div>
                         </div>

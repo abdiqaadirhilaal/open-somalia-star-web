@@ -166,7 +166,7 @@
                         <td class="text-gray-700 dark:text-gray-300">${r.class || '-'}</td>
                         <td class="text-gray-700 dark:text-gray-300">$${parseFloat(r.amount || 0).toFixed(0)}</td>
                         <td><span class="px-2 py-0.5 rounded-full text-xs font-medium ${statusClass}">${statusLabel}</span></td>
-                        <td class="text-gray-500 text-xs">${r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '-'}</td>
+                        <td class="text-gray-500 text-xs">${r.createdAt && !isNaN(new Date(r.createdAt).getTime()) ? new Date(r.createdAt).toLocaleDateString() : '-'}</td>
                     </tr>`;
                 }).join('');
             } catch(e) {

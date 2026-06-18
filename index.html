@@ -3,297 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOMALI STAR ACADEMY - Learn English Online</title>
+    <title>Somali Star Academy - Master English With Confidence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-white">
+<body>
     <script>if(localStorage.getItem('somstar_dark')==='true')document.body.classList.add('dark-mode');</script>
 
-    <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800" id="navbar">
+    <!-- ===== NAVBAR ===== -->
+    <nav class="fixed top-0 w-full z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl border-b border-gray-100/50 dark:border-gray-800/50 transition-all duration-500" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 md:h-20 items-center">
+            <div class="flex justify-between h-20 items-center">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                        <span class="text-white font-bold text-lg">S</span>
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                        <span class="text-white font-black text-xl tracking-tight">S</span>
                     </div>
                     <div>
-                        <span class="text-lg md:text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">SOMALI <span class="text-blue-600">STAR</span></span>
-                        <div class="text-[10px] font-medium text-gray-400 uppercase tracking-widest -mt-0.5">English Academy</div>
+                        <span class="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">Somali <span class="text-blue-600">Star</span></span>
+                        <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.2em] -mt-0.5">English Academy</div>
                     </div>
                 </div>
-                <div class="hidden md:flex items-center gap-8">
-                    <a href="#hero" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Home</a>
-                    <a href="#features" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Features</a>
-                    <a href="#courses" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Courses</a>
-                    <a href="#testimonials" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Testimonials</a>
-                    <a href="#contact" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Contact</a>
+                <div class="hidden lg:flex items-center gap-10">
+                    <a href="#hero" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full">Home</a>
+                    <a href="#features" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full">Why Us</a>
+                    <a href="#courses" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full">Courses</a>
+                    <a href="#testimonials" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full">Testimonials</a>
+                    <a href="#contact" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full">Contact</a>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="document.body.classList.toggle('dark-mode');localStorage.setItem('somstar_dark',document.body.classList.contains('dark-mode'))" class="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 text-gray-600 dark:text-gray-300">
+                <div class="flex items-center gap-4">
+                    <button onclick="document.body.classList.toggle('dark-mode');localStorage.setItem('somstar_dark',document.body.classList.contains('dark-mode'))" class="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 text-gray-500 dark:text-gray-400">
                         <i class="fas fa-moon text-lg"></i>
                     </button>
-                    <a href="login.html" class="btn-primary px-5 py-2.5 rounded-xl text-white font-semibold text-sm shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300">Get Started</a>
+                    <a href="login.html" class="group relative inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+                        <span class="relative z-10">Get Started</span>
+                        <i class="fas fa-arrow-right relative z-10 text-xs group-hover:translate-x-0.5 transition-transform"></i>
+                        <div class="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-800 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section id="hero" class="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900">
+    <!-- ===== HERO SECTION ===== -->
+    <section id="hero" class="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-700 to-blue-900">
         <div class="absolute inset-0">
-            <div class="absolute top-20 left-10 w-96 h-96 bg-cyan-400 rounded-full blur-[100px] opacity-20 animate-float"></div>
-            <div class="absolute bottom-20 right-10 w-[500px] h-[500px] bg-blue-300 rounded-full blur-[120px] opacity-15 animate-float" style="animation-delay:2s"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-400 rounded-full blur-[150px] opacity-10"></div>
+            <div class="absolute top-10 left-10 w-[500px] h-[500px] bg-cyan-400 rounded-full blur-[120px] opacity-20 animate-float"></div>
+            <div class="absolute bottom-20 right-20 w-[600px] h-[600px] bg-blue-300 rounded-full blur-[150px] opacity-15 animate-float" style="animation-delay:3s"></div>
+            <div class="absolute top-1/3 right-1/4 w-80 h-80 bg-indigo-400 rounded-full blur-[100px] opacity-10 animate-float" style="animation-delay:6s"></div>
+            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"></div>
         </div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 relative z-10">
-            <div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20 relative z-10 w-full">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div class="fade-in">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium mb-6">
-                        <i class="fas fa-graduation-cap text-yellow-400"></i>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-sm font-medium mb-8 animate-fadeIn">
+                        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                         <span>#1 English Learning Platform in Somalia</span>
                     </div>
-                    <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight mb-6">
-                        Master <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500">English</span><br>
-                        With <span class="text-cyan-400">Somali Star</span>
+                    <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-[0.95] tracking-tighter mb-8">
+                        Master<br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-300">English</span><br>
+                        <span class="text-cyan-300">With Confidence</span>
                     </h1>
-                    <p class="text-lg md:text-xl text-blue-100/80 leading-relaxed mb-8 max-w-xl">
-                        The most comprehensive English learning platform designed specifically for Somali speakers. Interactive lessons, expert teachers, and a proven method to fluency.
+                    <p class="text-lg md:text-xl text-blue-100/70 leading-relaxed mb-10 max-w-lg">
+                        The most effective English learning platform built for Somali speakers. 
+                        Interactive lessons, native teachers, and a community that helps you succeed.
                     </p>
                     <div class="flex flex-wrap gap-4">
-                        <a href="login.html" class="group inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-gray-900 px-8 py-4 rounded-2xl font-bold text-base hover:shadow-2xl hover:shadow-yellow-400/40 hover:-translate-y-1 transition-all duration-300">
-                            <i class="fas fa-rocket group-hover:rotate-12 transition-transform"></i>
+                        <a href="login.html" class="group inline-flex items-center gap-3 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-gray-900 px-10 py-4 rounded-2xl font-extrabold text-base shadow-2xl shadow-yellow-400/30 hover:shadow-yellow-400/50 hover:-translate-y-1 transition-all duration-300">
+                            <i class="fas fa-rocket group-hover:rotate-12 transition-transform duration-300"></i>
                             Start Learning Today
                             <i class="fas fa-arrow-right text-sm group-hover:translate-x-1 transition-transform"></i>
                         </a>
-                        <a href="#features" class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-semibold border border-white/20 hover:bg-white/20 hover:border-white/30 transition-all duration-300">
-                            <i class="fas fa-play-circle"></i>
+                        <a href="#features" class="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md text-white px-10 py-4 rounded-2xl font-semibold border border-white/20 hover:bg-white/20 hover:border-white/30 transition-all duration-300">
+                            <i class="fas fa-play-circle text-lg"></i>
                             Watch Overview
                         </a>
                     </div>
-                    <div class="flex items-center gap-6 mt-10">
+                    <div class="flex items-center gap-6 mt-12">
                         <div class="flex -space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white flex items-center justify-center text-white text-xs font-bold">A</div>
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 border-2 border-white flex items-center justify-center text-white text-xs font-bold">H</div>
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-white flex items-center justify-center text-white text-xs font-bold">M</div>
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 border-2 border-white flex items-center justify-center text-white text-xs font-bold">S</div>
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-2 border-white flex items-center justify-center text-white text-xs font-bold">+</div>
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-[3px] border-white/30 flex items-center justify-center text-white text-sm font-bold shadow-xl">A</div>
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 border-[3px] border-white/30 flex items-center justify-center text-white text-sm font-bold shadow-xl">H</div>
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-[3px] border-white/30 flex items-center justify-center text-white text-sm font-bold shadow-xl">M</div>
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 border-[3px] border-white/30 flex items-center justify-center text-white text-sm font-bold shadow-xl">S</div>
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-[3px] border-white/30 flex items-center justify-center text-white text-xl font-bold shadow-xl">+</div>
                         </div>
                         <div>
-                            <div class="text-white font-bold text-lg">250+ Students</div>
-                            <div class="text-blue-200 text-sm">Enrolled this year</div>
+                            <div class="text-white font-bold text-xl">5,000+ Students</div>
+                            <div class="text-blue-200/60 text-sm">Enrolled this year</div>
                         </div>
                     </div>
                 </div>
-                <div class="hidden md:flex justify-center items-center fade-in">
+                <div class="hidden lg:flex justify-center items-center fade-in">
                     <div class="relative">
-                        <div class="w-80 h-80 lg:w-96 lg:h-96 rounded-full bg-gradient-to-br from-cyan-400/20 to-blue-500/20 animate-pulse absolute -top-10 -left-10 blur-3xl"></div>
-                        <div class="relative w-72 h-72 lg:w-80 lg:h-80 rounded-[40px] bg-white/5 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-2xl animate-float">
-                            <div class="text-center p-8">
-                                <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-yellow-400/30">
-                                    <i class="fas fa-graduation-cap text-4xl text-white"></i>
+                        <div class="w-[450px] h-[450px] rounded-full bg-gradient-to-br from-cyan-400/10 to-blue-500/10 animate-pulse absolute -top-16 -left-16 blur-3xl"></div>
+                        <div class="relative w-[380px] h-[380px] rounded-[48px] bg-white/5 backdrop-blur-2xl border border-white/20 flex items-center justify-center shadow-2xl animate-float" style="animation-duration:5s">
+                            <div class="text-center p-10">
+                                <div class="w-28 h-28 rounded-[20px] bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-yellow-400/30">
+                                    <i class="fas fa-graduation-cap text-5xl text-white"></i>
                                 </div>
-                                <h3 class="text-2xl font-bold text-white mb-2">Somali Star</h3>
-                                <p class="text-blue-200/80">Excel in English</p>
-                                <div class="mt-6 flex justify-center gap-2">
-                                    <div class="w-2 h-2 rounded-full bg-yellow-400 animate-bounce" style="animation-delay:0s"></div>
-                                    <div class="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style="animation-delay:0.2s"></div>
-                                    <div class="w-2 h-2 rounded-full bg-blue-400 animate-bounce" style="animation-delay:0.4s"></div>
+                                <h3 class="text-3xl font-black text-white mb-2 tracking-tight">Somali Star</h3>
+                                <p class="text-blue-200/70 text-lg mb-6">Excel in English</p>
+                                <div class="flex justify-center gap-3">
+                                    <div class="w-3 h-3 rounded-full bg-yellow-400 animate-bounce" style="animation-delay:0s"></div>
+                                    <div class="w-3 h-3 rounded-full bg-cyan-400 animate-bounce" style="animation-delay:0.2s"></div>
+                                    <div class="w-3 h-3 rounded-full bg-blue-400 animate-bounce" style="animation-delay:0.4s"></div>
                                 </div>
                             </div>
                         </div>
-                        <!-- Floating badges -->
-                        <div class="absolute -top-4 -right-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center shadow-xl animate-float" style="animation-delay:1s">
-                            <i class="fas fa-star text-white text-xl"></i>
+                        <div class="absolute -top-6 -right-6 w-20 h-20 rounded-[20px] bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center shadow-2xl animate-float shadow-yellow-400/30" style="animation-delay:1s;animation-duration:4s">
+                            <i class="fas fa-star text-white text-2xl"></i>
                         </div>
-                        <div class="absolute -bottom-2 -left-6 w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center shadow-xl animate-float" style="animation-delay:1.5s">
-                            <i class="fas fa-book-open text-white text-lg"></i>
+                        <div class="absolute -bottom-4 -left-8 w-16 h-16 rounded-[20px] bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center shadow-2xl animate-float shadow-cyan-400/30" style="animation-delay:2s;animation-duration:3.5s">
+                            <i class="fas fa-book-open text-white text-xl"></i>
+                        </div>
+                        <div class="absolute top-1/3 -right-20 w-16 h-16 rounded-[16px] bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-2xl animate-float shadow-purple-400/30" style="animation-delay:1.5s;animation-duration:4.5s">
+                            <i class="fas fa-globe text-white text-xl"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Wave divider -->
         <div class="absolute bottom-0 left-0 right-0">
-            <svg viewBox="0 0 1440 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
-                <path d="M0 50C240 100 480 0 720 50C960 100 1200 0 1440 50V100H0V50Z" fill="white" class="dark:fill-gray-900"/>
-                <path d="M0 60C240 110 480 10 720 60C960 110 1200 10 1440 60V100H0V60Z" fill="white" class="dark:fill-gray-900" opacity="0.5"/>
+            <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+                <path d="M0 60C240 120 480 0 720 60C960 120 1200 0 1440 60V120H0V60Z" fill="white" class="dark:fill-gray-900"/>
+                <path d="M0 70C240 130 480 10 720 70C960 130 1200 10 1440 70V120H0V70Z" fill="white" class="dark:fill-gray-900" opacity="0.4"/>
             </svg>
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="py-16 md:py-20 bg-white dark:bg-gray-900 relative -mt-1 z-10">
+    <!-- ===== STATS SECTION ===== -->
+    <section class="py-20 bg-white dark:bg-gray-900 relative -mt-1 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-                <div class="stat-card group p-6 md:p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-700 border border-blue-100 dark:border-gray-700 text-center hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-500">
-                    <div class="text-3xl md:text-5xl font-black text-blue-600 dark:text-blue-400 mb-2 counter" data-target="370">0</div>
-                    <div class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-medium">Students Enrolled</div>
-                    <div class="mt-2 w-12 h-1 bg-blue-500 rounded-full mx-auto"></div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+                <div class="group relative p-8 rounded-3xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-gray-800 dark:to-gray-700/50 border border-blue-100/50 dark:border-gray-700/50 text-center hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-700 overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                    <div class="relative">
+                        <div class="text-5xl md:text-6xl font-black bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent mb-2">
+                            <span class="counter" data-target="5000">0</span><span class="text-2xl">+</span>
+                        </div>
+                        <div class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-semibold">Students Enrolled</div>
+                        <div class="mt-3 w-16 h-1 bg-gradient-to-r from-blue-500 to-blue-300 rounded-full mx-auto"></div>
+                    </div>
                 </div>
-                <div class="stat-card group p-6 md:p-8 rounded-2xl bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-gray-800 dark:to-gray-700 border border-cyan-100 dark:border-gray-700 text-center hover:shadow-2xl hover:shadow-cyan-500/10 hover:-translate-y-2 transition-all duration-500">
-                    <div class="text-3xl md:text-5xl font-black text-cyan-600 dark:text-cyan-400 mb-2 counter" data-target="12">0</div>
-                    <div class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-medium">Courses Available</div>
-                    <div class="mt-2 w-12 h-1 bg-cyan-500 rounded-full mx-auto"></div>
+                <div class="group relative p-8 rounded-3xl bg-gradient-to-br from-cyan-50 to-cyan-100/50 dark:from-gray-800 dark:to-gray-700/50 border border-cyan-100/50 dark:border-gray-700/50 text-center hover:shadow-2xl hover:shadow-cyan-500/10 hover:-translate-y-2 transition-all duration-700 overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                    <div class="relative">
+                        <div class="text-5xl md:text-6xl font-black bg-gradient-to-r from-cyan-600 to-cyan-400 bg-clip-text text-transparent mb-2">
+                            <span class="counter" data-target="100">0</span><span class="text-2xl">+</span>
+                        </div>
+                        <div class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-semibold">Interactive Lessons</div>
+                        <div class="mt-3 w-16 h-1 bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full mx-auto"></div>
+                    </div>
                 </div>
-                <div class="stat-card group p-6 md:p-8 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-gray-800 dark:to-gray-700 border border-purple-100 dark:border-gray-700 text-center hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-2 transition-all duration-500">
-                    <div class="text-3xl md:text-5xl font-black text-purple-600 dark:text-purple-400 mb-2 counter" data-target="9">0</div>
-                    <div class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-medium">Expert Teachers</div>
-                    <div class="mt-2 w-12 h-1 bg-purple-500 rounded-full mx-auto"></div>
+                <div class="group relative p-8 rounded-3xl bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-gray-800 dark:to-gray-700/50 border border-purple-100/50 dark:border-gray-700/50 text-center hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-2 transition-all duration-700 overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                    <div class="relative">
+                        <div class="text-5xl md:text-6xl font-black bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent mb-2">
+                            <span class="counter" data-target="20">0</span><span class="text-2xl">+</span>
+                        </div>
+                        <div class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-semibold">Expert Teachers</div>
+                        <div class="mt-3 w-16 h-1 bg-gradient-to-r from-purple-500 to-purple-300 rounded-full mx-auto"></div>
+                    </div>
                 </div>
-                <div class="stat-card group p-6 md:p-8 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 dark:from-gray-800 dark:to-gray-700 border border-amber-100 dark:border-gray-700 text-center hover:shadow-2xl hover:shadow-amber-500/10 hover:-translate-y-2 transition-all duration-500">
-                    <div class="text-3xl md:text-5xl font-black text-amber-600 dark:text-amber-400 mb-2 counter" data-target="99">0<span class="text-2xl">%</span></div>
-                    <div class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-medium">Success Rate</div>
-                    <div class="mt-2 w-12 h-1 bg-amber-500 rounded-full mx-auto"></div>
+                <div class="group relative p-8 rounded-3xl bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-gray-800 dark:to-gray-700/50 border border-amber-100/50 dark:border-gray-700/50 text-center hover:shadow-2xl hover:shadow-amber-500/10 hover:-translate-y-2 transition-all duration-700 overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                    <div class="relative">
+                        <div class="text-5xl md:text-6xl font-black bg-gradient-to-r from-amber-600 to-amber-400 bg-clip-text text-transparent mb-2">
+                            <span class="counter" data-target="95">0</span><span class="text-2xl">%</span>
+                        </div>
+                        <div class="text-sm md:text-base text-gray-600 dark:text-gray-300 font-semibold">Success Rate</div>
+                        <div class="mt-3 w-16 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full mx-auto"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-12 md:mb-16 fade-in">
-                <span class="inline-block px-4 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold mb-4">Why Somali Star?</span>
-                <h2 class="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">Everything You Need to<br>Learn English <span class="text-blue-600">Effectively</span></h2>
-                <p class="text-gray-500 dark:text-gray-400 text-lg">Our platform combines modern technology with proven teaching methods to help you achieve fluency faster.</p>
+    <!-- ===== WHY CHOOSE US / FEATURES ===== -->
+    <section id="features" class="py-24 bg-gray-50/80 dark:bg-gray-800/80 relative">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/30 via-transparent to-transparent dark:from-blue-900/10"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center max-w-3xl mx-auto mb-16 fade-in">
+                <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold mb-6">
+                    <i class="fas fa-star"></i> Why Choose Us
+                </span>
+                <h2 class="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">Why Somali Star<br><span class="text-blue-600">Academy</span>?</h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400">We combine world-class teaching methods with cutting-edge technology to deliver the best English learning experience.</p>
             </div>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                <div class="feature-card group p-6 md:p-8 rounded-2xl bg-white dark:bg-gray-700 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-600">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-5 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-500">
-                        <i class="fas fa-chalkboard-teacher text-2xl text-white"></i>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                <div class="feature-card group relative p-8 rounded-3xl bg-white dark:bg-gray-700 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-600 overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center mb-6 shadow-xl shadow-blue-500/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                            <i class="fas fa-chalkboard-teacher text-2xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Professional Teachers</h3>
+                        <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Learn from certified native and bilingual English teachers with years of experience.</p>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Expert Teachers</h3>
-                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Learn from qualified native and bilingual English teachers with years of experience.</p>
                 </div>
-                <div class="feature-card group p-6 md:p-8 rounded-2xl bg-white dark:bg-gray-700 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-600">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center mb-5 shadow-lg shadow-cyan-500/20 group-hover:scale-110 transition-transform duration-500">
-                        <i class="fas fa-video text-2xl text-white"></i>
+                <div class="feature-card group relative p-8 rounded-3xl bg-white dark:bg-gray-700 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-600 overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-700 flex items-center justify-center mb-6 shadow-xl shadow-cyan-500/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                            <i class="fas fa-laptop-code text-2xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Interactive Lessons</h3>
+                        <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Engaging video lessons, audio exercises, quizzes, and downloadable materials.</p>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Interactive Lessons</h3>
-                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Engaging video lessons, audio exercises, and downloadable materials for every level.</p>
                 </div>
-                <div class="feature-card group p-6 md:p-8 rounded-2xl bg-white dark:bg-gray-700 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-600">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-5 shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform duration-500">
-                        <i class="fas fa-file-alt text-2xl text-white"></i>
+                <div class="feature-card group relative p-8 rounded-3xl bg-white dark:bg-gray-700 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-600 overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center mb-6 shadow-xl shadow-purple-500/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                            <i class="fas fa-calendar-alt text-2xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Flexible Learning</h3>
+                        <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Study at your own pace with 24/7 access to all materials. Learn anytime, anywhere.</p>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Study Materials</h3>
-                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Access PDFs, documents, and comprehensive study guides anytime, anywhere.</p>
                 </div>
-                <div class="feature-card group p-6 md:p-8 rounded-2xl bg-white dark:bg-gray-700 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-600">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center mb-5 shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform duration-500">
-                        <i class="fas fa-question-circle text-2xl text-white"></i>
+                <div class="feature-card group relative p-8 rounded-3xl bg-white dark:bg-gray-700 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-600 overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center mb-6 shadow-xl shadow-amber-500/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                            <i class="fas fa-award text-2xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Certificates</h3>
+                        <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Earn recognized certificates upon completing each course. Boost your career.</p>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Quiz & Assessment</h3>
-                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Test your knowledge with regular quizzes and track your improvement over time.</p>
-                </div>
-                <div class="feature-card group p-6 md:p-8 rounded-2xl bg-white dark:bg-gray-700 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-600">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-5 shadow-lg shadow-green-500/20 group-hover:scale-110 transition-transform duration-500">
-                        <i class="fas fa-calendar-check text-2xl text-white"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Attendance Tracking</h3>
-                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Digital attendance with real-time updates and complete history for every student.</p>
-                </div>
-                <div class="feature-card group p-6 md:p-8 rounded-2xl bg-white dark:bg-gray-700 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-600">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center mb-5 shadow-lg shadow-pink-500/20 group-hover:scale-110 transition-transform duration-500">
-                        <i class="fas fa-chart-line text-2xl text-white"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Progress Reports</h3>
-                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Detailed analytics and reports to monitor your English language development.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Courses Preview Section -->
-    <section id="courses" class="py-16 md:py-24 bg-white dark:bg-gray-900">
+    <!-- ===== COURSES SECTION ===== -->
+    <section id="courses" class="py-24 bg-white dark:bg-gray-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-12 md:mb-16 fade-in">
-                <span class="inline-block px-4 py-1.5 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 text-sm font-semibold mb-4">Our Courses</span>
-                <h2 class="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">Choose Your <span class="text-cyan-600">Learning Path</span></h2>
-                <p class="text-gray-500 dark:text-gray-400 text-lg">Structured courses designed for every level, from beginner to advanced English.</p>
+            <div class="text-center max-w-3xl mx-auto mb-16 fade-in">
+                <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 text-sm font-semibold mb-6">
+                    <i class="fas fa-book"></i> Our Courses
+                </span>
+                <h2 class="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">Choose Your<br><span class="text-cyan-600">Learning Path</span></h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400">Structured courses designed for every level from complete beginner to fluent speaker.</p>
             </div>
-            <div class="grid md:grid-cols-3 gap-6 md:gap-8">
-                <div class="group rounded-2xl bg-white dark:bg-gray-800 shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
-                    <div class="h-48 bg-gradient-to-br from-blue-500 to-blue-700 relative overflow-hidden">
-                        <div class="absolute inset-0 opacity-30">
-                            <i class="fas fa-book-open text-8xl text-white -rotate-12 -top-5 -right-5 absolute"></i>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                <div class="group rounded-3xl bg-white dark:bg-gray-800 shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-3xl hover:-translate-y-3 transition-all duration-700">
+                    <div class="h-52 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_white_0%,_transparent_60%)] opacity-20"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-book-open text-7xl text-white/20 group-hover:scale-125 group-hover:rotate-6 transition-all duration-700"></i>
                         </div>
                         <div class="p-6 relative z-10">
-                            <span class="px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur-sm">Beginner</span>
+                            <span class="px-3 py-1.5 rounded-full bg-white/20 text-white text-xs font-bold backdrop-blur-sm uppercase tracking-wider">Beginner</span>
                         </div>
-                        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-blue-700/80 to-transparent">
-                            <h3 class="text-xl font-bold text-white">English Basics</h3>
+                        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-blue-900/90 to-transparent">
+                            <h3 class="text-2xl font-black text-white group-hover:translate-x-1 transition-transform">Beginner English</h3>
                             <p class="text-blue-200 text-sm">A1 - A2 Level</p>
                         </div>
                     </div>
                     <div class="p-6">
                         <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
-                            <i class="fas fa-clock text-blue-500"></i>
-                            <span>12 Weeks</span>
+                            <i class="fas fa-clock text-blue-500"></i><span>12 Weeks</span>
                             <span class="mx-2">·</span>
-                            <i class="fas fa-video text-blue-500"></i>
-                            <span>24 Lessons</span>
+                            <i class="fas fa-video text-blue-500"></i><span>24 Lessons</span>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-4">Perfect for beginners. Learn alphabet, basic vocabulary, and simple conversations.</p>
-                        <a href="login.html" class="inline-flex items-center gap-2 text-blue-600 font-semibold text-sm group-hover:gap-3 transition-all">
+                        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-5">Perfect for beginners. Learn the alphabet, basic vocabulary, and everyday conversations.</p>
+                        <a href="login.html" class="inline-flex items-center gap-2 text-blue-600 font-bold text-sm group-hover:gap-3 transition-all">
                             Enroll Now <i class="fas fa-arrow-right text-xs"></i>
                         </a>
                     </div>
                 </div>
-                <div class="group rounded-2xl bg-white dark:bg-gray-800 shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
-                    <div class="h-48 bg-gradient-to-br from-cyan-500 to-cyan-700 relative overflow-hidden">
-                        <div class="absolute inset-0 opacity-30">
-                            <i class="fas fa-comments text-8xl text-white -rotate-12 -top-5 -right-5 absolute"></i>
+                <div class="group rounded-3xl bg-white dark:bg-gray-800 shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-3xl hover:-translate-y-3 transition-all duration-700">
+                    <div class="h-52 bg-gradient-to-br from-cyan-500 via-cyan-600 to-cyan-700 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_white_0%,_transparent_60%)] opacity-20"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-comments text-7xl text-white/20 group-hover:scale-125 group-hover:rotate-6 transition-all duration-700"></i>
                         </div>
                         <div class="p-6 relative z-10">
-                            <span class="px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur-sm">Intermediate</span>
+                            <span class="px-3 py-1.5 rounded-full bg-white/20 text-white text-xs font-bold backdrop-blur-sm uppercase tracking-wider">Intermediate</span>
                         </div>
-                        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-cyan-700/80 to-transparent">
-                            <h3 class="text-xl font-bold text-white">Conversational English</h3>
+                        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-cyan-900/90 to-transparent">
+                            <h3 class="text-2xl font-black text-white group-hover:translate-x-1 transition-transform">Intermediate English</h3>
                             <p class="text-cyan-200 text-sm">B1 - B2 Level</p>
                         </div>
                     </div>
                     <div class="p-6">
                         <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
-                            <i class="fas fa-clock text-cyan-500"></i>
-                            <span>10 Weeks</span>
+                            <i class="fas fa-clock text-cyan-500"></i><span>10 Weeks</span>
                             <span class="mx-2">·</span>
-                            <i class="fas fa-video text-cyan-500"></i>
-                            <span>20 Lessons</span>
+                            <i class="fas fa-video text-cyan-500"></i><span>20 Lessons</span>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-4">Develop fluency in daily conversations, interviews, and professional settings.</p>
-                        <a href="login.html" class="inline-flex items-center gap-2 text-cyan-600 font-semibold text-sm group-hover:gap-3 transition-all">
+                        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-5">Develop fluency in daily conversations, interviews, and professional communication.</p>
+                        <a href="login.html" class="inline-flex items-center gap-2 text-cyan-600 font-bold text-sm group-hover:gap-3 transition-all">
                             Enroll Now <i class="fas fa-arrow-right text-xs"></i>
                         </a>
                     </div>
                 </div>
-                <div class="group rounded-2xl bg-white dark:bg-gray-800 shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
-                    <div class="h-48 bg-gradient-to-br from-purple-500 to-purple-700 relative overflow-hidden">
-                        <div class="absolute inset-0 opacity-30">
-                            <i class="fas fa-pen-fancy text-8xl text-white -rotate-12 -top-5 -right-5 absolute"></i>
+                <div class="group rounded-3xl bg-white dark:bg-gray-800 shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-3xl hover:-translate-y-3 transition-all duration-700">
+                    <div class="h-52 bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_white_0%,_transparent_60%)] opacity-20"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-pen-fancy text-7xl text-white/20 group-hover:scale-125 group-hover:rotate-6 transition-all duration-700"></i>
                         </div>
                         <div class="p-6 relative z-10">
-                            <span class="px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur-sm">Advanced</span>
+                            <span class="px-3 py-1.5 rounded-full bg-white/20 text-white text-xs font-bold backdrop-blur-sm uppercase tracking-wider">Advanced</span>
                         </div>
-                        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-purple-700/80 to-transparent">
-                            <h3 class="text-xl font-bold text-white">Academic English</h3>
+                        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-purple-900/90 to-transparent">
+                            <h3 class="text-2xl font-black text-white group-hover:translate-x-1 transition-transform">Advanced English</h3>
                             <p class="text-purple-200 text-sm">C1 - C2 Level</p>
                         </div>
                     </div>
                     <div class="p-6">
                         <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
-                            <i class="fas fa-clock text-purple-500"></i>
-                            <span>14 Weeks</span>
+                            <i class="fas fa-clock text-purple-500"></i><span>14 Weeks</span>
                             <span class="mx-2">·</span>
-                            <i class="fas fa-video text-purple-500"></i>
-                            <span>28 Lessons</span>
+                            <i class="fas fa-video text-purple-500"></i><span>28 Lessons</span>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-4">Master academic writing, presentations, and advanced grammar for exams.</p>
-                        <a href="login.html" class="inline-flex items-center gap-2 text-purple-600 font-semibold text-sm group-hover:gap-3 transition-all">
+                        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-5">Master academic writing, presentations, and complex grammar for exams.</p>
+                        <a href="login.html" class="inline-flex items-center gap-2 text-purple-600 font-bold text-sm group-hover:gap-3 transition-all">
+                            Enroll Now <i class="fas fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="group rounded-3xl bg-white dark:bg-gray-800 shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-3xl hover:-translate-y-3 transition-all duration-700">
+                    <div class="h-52 bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_white_0%,_transparent_60%)] opacity-20"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-microphone-alt text-7xl text-white/20 group-hover:scale-125 group-hover:rotate-6 transition-all duration-700"></i>
+                        </div>
+                        <div class="p-6 relative z-10">
+                            <span class="px-3 py-1.5 rounded-full bg-white/20 text-white text-xs font-bold backdrop-blur-sm uppercase tracking-wider">All Levels</span>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-amber-900/90 to-transparent">
+                            <h3 class="text-2xl font-black text-white group-hover:translate-x-1 transition-transform">Speaking Practice</h3>
+                            <p class="text-amber-200 text-sm">Conversational Skills</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                            <i class="fas fa-clock text-amber-500"></i><span>8 Weeks</span>
+                            <span class="mx-2">·</span>
+                            <i class="fas fa-video text-amber-500"></i><span>16 Sessions</span>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-5">Practice real conversations with teachers and classmates. Build confidence speaking English.</p>
+                        <a href="login.html" class="inline-flex items-center gap-2 text-amber-600 font-bold text-sm group-hover:gap-3 transition-all">
                             Enroll Now <i class="fas fa-arrow-right text-xs"></i>
                         </a>
                     </div>
@@ -302,51 +356,66 @@
         </div>
     </section>
 
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-12 md:mb-16 fade-in">
-                <span class="inline-block px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-sm font-semibold mb-4">Testimonials</span>
-                <h2 class="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">What Our <span class="text-amber-500">Students</span> Say</h2>
-                <p class="text-gray-500 dark:text-gray-400 text-lg">Hear from our students who transformed their English skills with Somali Star.</p>
+    <!-- ===== TESTIMONIALS SECTION ===== -->
+    <section id="testimonials" class="py-24 bg-gray-50/80 dark:bg-gray-800/80 relative">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-amber-100/20 via-transparent to-transparent dark:from-amber-900/10"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center max-w-3xl mx-auto mb-16 fade-in">
+                <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-sm font-semibold mb-6">
+                    <i class="fas fa-star"></i> Testimonials
+                </span>
+                <h2 class="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">What Our <span class="text-amber-500">Students</span> Say</h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400">Hear from students who transformed their English skills with Somali Star Academy.</p>
             </div>
             <div class="grid md:grid-cols-3 gap-6 md:gap-8">
-                <div class="p-6 md:p-8 rounded-2xl bg-white dark:bg-gray-700 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 dark:border-gray-600 fade-in">
-                    <div class="flex items-center gap-1 text-amber-400 mb-4">
+                <div class="group p-8 rounded-3xl bg-white dark:bg-gray-700 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-600 fade-in relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/5 to-transparent rounded-full -mr-10 -mt-10"></div>
+                    <div class="flex items-center gap-1 text-amber-400 mb-5 relative">
                         <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                     </div>
-                    <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed text-sm">"Maanta waxaan ku hadli karaa English si fiican. Barashada Somali Star waxay iga caawisay inaan fahmo luuqadda Ingiriisiga si sahlan."</p>
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold">AH</div>
+                    <div class="relative mb-6">
+                        <i class="fas fa-quote-left text-2xl text-blue-200 dark:text-blue-800 mb-2"></i>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed relative">"Maanta waxaan ku hadli karaa English si fiican. Barashada Somali Star waxay iga caawisay inaan fahmo luuqadda Ingiriisiga si sahlan oo degdeg ah."</p>
+                    <div class="flex items-center gap-4 pt-4 border-t border-gray-100 dark:border-gray-600">
+                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">AH</div>
                         <div>
-                            <div class="font-semibold text-gray-900 dark:text-white text-sm">Ahmed Hassan</div>
-                            <div class="text-xs text-gray-400">Beginner Course Graduate</div>
+                            <div class="font-bold text-gray-900 dark:text-white">Ahmed Hassan</div>
+                            <div class="text-sm text-gray-400">Beginner Course Graduate</div>
                         </div>
                     </div>
                 </div>
-                <div class="p-6 md:p-8 rounded-2xl bg-white dark:bg-gray-700 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 dark:border-gray-600 fade-in">
-                    <div class="flex items-center gap-1 text-amber-400 mb-4">
+                <div class="group p-8 rounded-3xl bg-white dark:bg-gray-700 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-600 fade-in relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-500/5 to-transparent rounded-full -mr-10 -mt-10"></div>
+                    <div class="flex items-center gap-1 text-amber-400 mb-5 relative">
                         <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                     </div>
-                    <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed text-sm">"The teachers are amazing and the lessons are very interactive. I can now speak English confidently at work. Highly recommended!"</p>
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold">FM</div>
+                    <div class="relative mb-6">
+                        <i class="fas fa-quote-left text-2xl text-cyan-200 dark:text-cyan-800 mb-2"></i>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed relative">"The teachers are amazing and the lessons are very interactive. I can now speak English confidently at work. Highly recommended!"</p>
+                    <div class="flex items-center gap-4 pt-4 border-t border-gray-100 dark:border-gray-600">
+                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">FM</div>
                         <div>
-                            <div class="font-semibold text-gray-900 dark:text-white text-sm">Fadumo Mohamed</div>
-                            <div class="text-xs text-gray-400">Intermediate Course Graduate</div>
+                            <div class="font-bold text-gray-900 dark:text-white">Fadumo Mohamed</div>
+                            <div class="text-sm text-gray-400">Intermediate Course Graduate</div>
                         </div>
                     </div>
                 </div>
-                <div class="p-6 md:p-8 rounded-2xl bg-white dark:bg-gray-700 shadow-lg hover:shadow-xl transition-all duration-500 border border-gray-100 dark:border-gray-600 fade-in">
-                    <div class="flex items-center gap-1 text-amber-400 mb-4">
+                <div class="group p-8 rounded-3xl bg-white dark:bg-gray-700 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-600 fade-in relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/5 to-transparent rounded-full -mr-10 -mt-10"></div>
+                    <div class="flex items-center gap-1 text-amber-400 mb-5 relative">
                         <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
                     </div>
-                    <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed text-sm">"Waxaan ku bilowday bilowgeedii, haddana waxaan qori karaa qoraallo English ah oo fiican. Waad ku mahadsan tahay Somali Star!"</p>
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold">CA</div>
+                    <div class="relative mb-6">
+                        <i class="fas fa-quote-left text-2xl text-amber-200 dark:text-amber-800 mb-2"></i>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed relative">"Waxaan ku bilowday bilowgeedii, haddana waxaan qori karaa qoraallo English ah oo fiican. Waad ku mahadsan tahay Somali Star Academy!"</p>
+                    <div class="flex items-center gap-4 pt-4 border-t border-gray-100 dark:border-gray-600">
+                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">CA</div>
                         <div>
-                            <div class="font-semibold text-gray-900 dark:text-white text-sm">Cabdi Ali</div>
-                            <div class="text-xs text-gray-400">Advanced Course Graduate</div>
+                            <div class="font-bold text-gray-900 dark:text-white">Cabdi Ali</div>
+                            <div class="text-sm text-gray-400">Advanced Course Graduate</div>
                         </div>
                     </div>
                 </div>
@@ -354,190 +423,161 @@
         </div>
     </section>
 
-    <!-- Why Choose Us -->
-    <section id="why-us" class="py-16 md:py-24 bg-white dark:bg-gray-900">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
-                <div class="fade-in">
-                    <span class="inline-block px-4 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold mb-4">Why Choose Us</span>
-                    <h2 class="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-6">The <span class="text-blue-600">Somali Star</span> Advantage</h2>
-                    <p class="text-gray-500 dark:text-gray-400 text-lg mb-8 leading-relaxed">We combine technology, expert instruction, and a supportive community to deliver the best English learning experience for Somali speakers.</p>
-                    <div class="space-y-5">
-                        <div class="flex items-start gap-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                            <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-check-circle text-blue-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-900 dark:text-white">Somali-Focused Curriculum</h4>
-                                <p class="text-sm text-gray-500">Lessons designed specifically for Somali native speakers' learning needs.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                            <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-check-circle text-green-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-900 dark:text-white">Flexible Learning Schedule</h4>
-                                <p class="text-sm text-gray-500">Study at your own pace with 24/7 access to all materials and lessons.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                            <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-check-circle text-amber-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-900 dark:text-white">Certified Certificates</h4>
-                                <p class="text-sm text-gray-500">Earn recognized certificates upon completing each course level.</p>
-                            </div>
-                        </div>
-                    </div>
+    <!-- ===== CTA BANNER ===== -->
+    <section class="py-20 bg-white dark:bg-gray-900">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative p-12 md:p-16 rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-700 to-blue-900 overflow-hidden text-center fade-in">
+                <div class="absolute inset-0">
+                    <div class="absolute top-0 right-0 w-96 h-96 bg-cyan-400 rounded-full blur-[100px] opacity-20"></div>
+                    <div class="absolute bottom-0 left-0 w-80 h-80 bg-blue-300 rounded-full blur-[100px] opacity-15"></div>
                 </div>
-                <div class="relative fade-in">
-                    <div class="w-full aspect-square rounded-[40px] bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 p-1">
-                        <div class="w-full h-full rounded-[38px] bg-white dark:bg-gray-800 p-8 flex flex-col items-center justify-center text-center">
-                            <div class="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center mb-6 shadow-2xl">
-                                <i class="fas fa-graduation-cap text-4xl text-white"></i>
-                            </div>
-                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Ready to Start?</h3>
-                            <p class="text-gray-500 mb-6">Join 370+ students already learning English with Somali Star Academy.</p>
-                            <a href="login.html" class="btn-primary px-8 py-3.5 rounded-xl text-white font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300">
-                                <i class="fas fa-rocket mr-2"></i> Get Started Free
-                            </a>
-                        </div>
-                    </div>
-                    <div class="absolute -top-4 -right-4 w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center shadow-xl animate-float" style="animation-delay:0.5s">
-                        <i class="fas fa-users text-white text-2xl"></i>
-                    </div>
+                <div class="relative z-10">
+                    <h2 class="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight">Ready to Start Your<br><span class="text-yellow-400">English Journey</span>?</h2>
+                    <p class="text-lg text-blue-100/70 mb-8 max-w-xl mx-auto">Join 5,000+ students and start speaking English with confidence today.</p>
+                    <a href="login.html" class="inline-flex items-center gap-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-gray-900 px-10 py-4 rounded-2xl font-extrabold text-lg shadow-2xl shadow-yellow-400/30 hover:shadow-yellow-400/50 hover:-translate-y-1 transition-all duration-300">
+                        <i class="fas fa-rocket"></i>
+                        Get Started Free
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
+    <!-- ===== CONTACT SECTION ===== -->
+    <section id="contact" class="py-24 bg-gray-50/80 dark:bg-gray-800/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-12 md:mb-16 fade-in">
-                <span class="inline-block px-4 py-1.5 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 text-sm font-semibold mb-4">Get In Touch</span>
-                <h2 class="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">Contact <span class="text-cyan-600">Us</span></h2>
-                <p class="text-gray-500 dark:text-gray-400 text-lg">Have questions? We'd love to hear from you. Send us a message and we'll respond shortly.</p>
+            <div class="text-center max-w-3xl mx-auto mb-16 fade-in">
+                <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 text-sm font-semibold mb-6">
+                    <i class="fas fa-paper-plane"></i> Get In Touch
+                </span>
+                <h2 class="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">Contact <span class="text-cyan-600">Us</span></h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400">Have questions? We'd love to hear from you. Send us a message and we'll respond within 24 hours.</p>
             </div>
-            <div class="grid md:grid-cols-2 gap-8 lg:gap-12">
+            <div class="grid md:grid-cols-2 gap-10 lg:gap-16">
                 <div class="fade-in">
-                    <form id="contactForm" class="p-6 md:p-8 rounded-2xl bg-white dark:bg-gray-700 shadow-xl border border-gray-100 dark:border-gray-600">
-                        <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <form id="contactForm" class="p-8 md:p-10 rounded-3xl bg-white dark:bg-gray-700 shadow-2xl border border-gray-100 dark:border-gray-600">
+                        <div class="grid md:grid-cols-2 gap-5 mb-5">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
-                                <input type="text" class="form-input" placeholder="Your name" required>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2" for="contactName">Full Name</label>
+                                <input type="text" id="contactName" name="contactName" class="form-input" placeholder="Your full name" required>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
-                                <input type="email" class="form-input" placeholder="your@email.com" required>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2" for="contactEmail">Email Address</label>
+                                <input type="email" id="contactEmail" name="contactEmail" class="form-input" placeholder="your@email.com" required>
                             </div>
                         </div>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subject</label>
-                            <input type="text" class="form-input" placeholder="How can we help?">
+                        <div class="mb-5">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2" for="contactSubject">Subject</label>
+                            <input type="text" id="contactSubject" name="contactSubject" class="form-input" placeholder="How can we help you?">
                         </div>
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Message</label>
-                            <textarea class="form-input" rows="4" placeholder="Write your message..." required></textarea>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2" for="contactMessage">Message</label>
+                            <textarea id="contactMessage" name="contactMessage" class="form-input" rows="5" placeholder="Write your message here..." required></textarea>
                         </div>
-                        <button type="submit" class="btn-primary w-full py-3.5 rounded-xl text-white font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300">
-                            <i class="fas fa-paper-plane mr-2"></i> Send Message
+                        <button type="submit" class="w-full py-4 rounded-2xl text-white font-bold text-base bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-3">
+                            <i class="fas fa-paper-plane"></i>
+                            Send Message
                         </button>
                     </form>
                 </div>
                 <div class="space-y-6 fade-in">
-                    <div class="p-6 rounded-2xl bg-white dark:bg-gray-700 shadow-lg border border-gray-100 dark:border-gray-600 flex items-start gap-4 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan-500/20">
-                            <i class="fas fa-phone text-white text-xl"></i>
+                    <div class="group p-8 rounded-3xl bg-white dark:bg-gray-700 shadow-xl border border-gray-100 dark:border-gray-600 flex items-start gap-5 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center flex-shrink-0 shadow-xl shadow-cyan-500/20 group-hover:scale-110 transition-transform duration-500">
+                            <i class="fas fa-phone text-white text-2xl"></i>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-gray-900 dark:text-white mb-1">Phone</h4>
-                            <p class="text-gray-500 dark:text-gray-400">+252 61 8106247</p>
-                            <p class="text-xs text-gray-400 mt-1">Available 8 AM - 5 PM</p>
+                            <h4 class="font-bold text-gray-900 dark:text-white text-lg mb-1">Phone</h4>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg font-medium">+252 61 8106247</p>
+                            <p class="text-sm text-gray-400 mt-1">Available 8 AM - 5 PM, Sunday - Thursday</p>
                         </div>
                     </div>
-                    <div class="p-6 rounded-2xl bg-white dark:bg-gray-700 shadow-lg border border-gray-100 dark:border-gray-600 flex items-start gap-4 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/20">
-                            <i class="fas fa-envelope text-white text-xl"></i>
+                    <div class="group p-8 rounded-3xl bg-white dark:bg-gray-700 shadow-xl border border-gray-100 dark:border-gray-600 flex items-start gap-5 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-xl shadow-blue-500/20 group-hover:scale-110 transition-transform duration-500">
+                            <i class="fas fa-envelope text-white text-2xl"></i>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-gray-900 dark:text-white mb-1">Email</h4>
-                            <p class="text-gray-500 dark:text-gray-400">info@somalistaracademy.com</p>
-                            <p class="text-xs text-gray-400 mt-1">We reply within 24 hours</p>
+                            <h4 class="font-bold text-gray-900 dark:text-white text-lg mb-1">Email</h4>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg font-medium">info@somalistaracademy.com</p>
+                            <p class="text-sm text-gray-400 mt-1">We reply within 24 hours</p>
                         </div>
                     </div>
-                    <div class="p-6 rounded-2xl bg-white dark:bg-gray-700 shadow-lg border border-gray-100 dark:border-gray-600 flex items-start gap-4 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/20">
-                            <i class="fas fa-map-marker-alt text-white text-xl"></i>
+                    <div class="group p-8 rounded-3xl bg-white dark:bg-gray-700 shadow-xl border border-gray-100 dark:border-gray-600 flex items-start gap-5 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center flex-shrink-0 shadow-xl shadow-amber-500/20 group-hover:scale-110 transition-transform duration-500">
+                            <i class="fas fa-map-marker-alt text-white text-2xl"></i>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-gray-900 dark:text-white mb-1">Address</h4>
-                            <p class="text-gray-500 dark:text-gray-400">Mogadishu, Somalia</p>
-                            <p class="text-xs text-gray-400 mt-1">Hodan District, Peace Road</p>
+                            <h4 class="font-bold text-gray-900 dark:text-white text-lg mb-1">Address</h4>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg font-medium">Mogadishu, Somalia</p>
+                            <p class="text-sm text-gray-400 mt-1">Hodan District, Peace Road</p>
                         </div>
                     </div>
-                    <div class="rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-600 h-48">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d16240.847299363992!2d45.324409!3d2.046934!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3d58425955c0f0c1%3A0x7a8e40d63f2b6d2a!2sMogadishu%2C%20Somalia!5e0!3m2!1sen!2s!4v1" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    <div class="rounded-3xl overflow-hidden shadow-xl border border-gray-100 dark:border-gray-600 h-56">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d16240.847299363992!2d45.324409!3d2.046934!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3d58425955c0f0c1%3A0x7a8e40d63f2b6d2a!2sMogadishu%2C%20Somalia!5e0!3m2!1sen!2s!4v1" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Somali Star Academy Location"></iframe>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 dark:bg-gray-950 text-gray-400 pt-16 pb-8">
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-gray-950 dark:bg-gray-950 text-gray-400 pt-20 pb-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-8 lg:gap-12 mb-12">
-                <div class="md:col-span-1">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center">
-                            <span class="text-white font-bold text-lg">S</span>
+            <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-12 mb-14">
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-xl shadow-blue-500/20">
+                            <span class="text-white font-black text-xl">S</span>
                         </div>
-                        <span class="text-lg font-bold text-white">Somali Star</span>
+                        <div>
+                            <span class="text-xl font-extrabold text-white tracking-tight">Somali <span class="text-blue-400">Star</span></span>
+                            <div class="text-[10px] font-semibold text-gray-500 uppercase tracking-[0.2em]">English Academy</div>
+                        </div>
                     </div>
-                    <p class="text-sm text-gray-500 leading-relaxed mb-6">Empowering Somali speakers to master English through innovative technology and expert instruction.</p>
+                    <p class="text-sm text-gray-500 leading-relaxed max-w-md mb-7">Empowering Somali speakers to master English through innovative technology and expert instruction. Join 5,000+ successful students.</p>
                     <div class="flex gap-3">
-                        <a href="#" class="w-10 h-10 rounded-xl bg-gray-800 hover:bg-blue-600 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="w-10 h-10 rounded-xl bg-gray-800 hover:bg-cyan-500 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="w-10 h-10 rounded-xl bg-gray-800 hover:bg-pink-600 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="w-10 h-10 rounded-xl bg-gray-800 hover:bg-red-600 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300"><i class="fab fa-youtube"></i></a>
+                        <a href="https://facebook.com/somstaracademy" target="_blank" rel="noopener" class="w-12 h-12 rounded-2xl bg-gray-800 hover:bg-blue-600 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1"><i class="fab fa-facebook-f text-lg"></i></a>
+                        <a href="https://twitter.com/somstaracademy" target="_blank" rel="noopener" class="w-12 h-12 rounded-2xl bg-gray-800 hover:bg-cyan-500 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1"><i class="fab fa-twitter text-lg"></i></a>
+                        <a href="https://instagram.com/somstaracademy" target="_blank" rel="noopener" class="w-12 h-12 rounded-2xl bg-gray-800 hover:bg-pink-600 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1"><i class="fab fa-instagram text-lg"></i></a>
+                        <a href="https://youtube.com/@somstaracademy" target="_blank" rel="noopener" class="w-12 h-12 rounded-2xl bg-gray-800 hover:bg-red-600 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1"><i class="fab fa-youtube text-lg"></i></a>
+                        <a href="https://linkedin.com/company/somstaracademy" target="_blank" rel="noopener" class="w-12 h-12 rounded-2xl bg-gray-800 hover:bg-blue-500 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300 hover:shadow-xl hover:-translate-y-1"><i class="fab fa-linkedin-in text-lg"></i></a>
                     </div>
                 </div>
                 <div>
-                    <h4 class="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Quick Links</h4>
-                    <ul class="space-y-3 text-sm">
-                        <li><a href="#hero" class="hover:text-white transition-colors">Home</a></li>
-                        <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
-                        <li><a href="#courses" class="hover:text-white transition-colors">Courses</a></li>
-                        <li><a href="#testimonials" class="hover:text-white transition-colors">Testimonials</a></li>
-                        <li><a href="#contact" class="hover:text-white transition-colors">Contact</a></li>
+                    <h4 class="text-white font-bold mb-6 text-sm uppercase tracking-widest">Quick Links</h4>
+                    <ul class="space-y-4 text-sm">
+                        <li><a href="#hero" class="hover:text-white transition-colors flex items-center gap-2 group"><span class="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors"></span> Home</a></li>
+                        <li><a href="#features" class="hover:text-white transition-colors flex items-center gap-2 group"><span class="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors"></span> Why Us</a></li>
+                        <li><a href="#courses" class="hover:text-white transition-colors flex items-center gap-2 group"><span class="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors"></span> Courses</a></li>
+                        <li><a href="#testimonials" class="hover:text-white transition-colors flex items-center gap-2 group"><span class="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors"></span> Testimonials</a></li>
+                        <li><a href="#contact" class="hover:text-white transition-colors flex items-center gap-2 group"><span class="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors"></span> Contact</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="text-white font-semibold mb-4 text-sm uppercase tracking-wider">For Students</h4>
-                    <ul class="space-y-3 text-sm">
-                        <li><a href="login.html" class="hover:text-white transition-colors">Student Login</a></li>
-                        <li><a href="login.html" class="hover:text-white transition-colors">Teacher Login</a></li>
-                        <li><a href="login.html" class="hover:text-white transition-colors">Manager Login</a></li>
-                        <li><a href="login.html" class="hover:text-white transition-colors">Finance Login</a></li>
+                    <h4 class="text-white font-bold mb-6 text-sm uppercase tracking-widest">Account Access</h4>
+                    <ul class="space-y-4 text-sm">
+                        <li><a href="login.html" class="hover:text-white transition-colors flex items-center gap-2 group"><span class="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors"></span> Student Login</a></li>
+                        <li><a href="login.html" class="hover:text-white transition-colors flex items-center gap-2 group"><span class="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors"></span> Teacher Login</a></li>
+                        <li><a href="login.html" class="hover:text-white transition-colors flex items-center gap-2 group"><span class="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors"></span> Manager Login</a></li>
+                        <li><a href="login.html" class="hover:text-white transition-colors flex items-center gap-2 group"><span class="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors"></span> Finance Login</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Support</h4>
-                    <ul class="space-y-3 text-sm">
-                        <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
+                    <h4 class="text-white font-bold mb-6 text-sm uppercase tracking-widest">Support</h4>
+                    <ul class="space-y-4 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors flex items-center gap-2 group"><span class="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors"></span> Help Center</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors flex items-center gap-2 group"><span class="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors"></span> Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors flex items-center gap-2 group"><span class="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors"></span> Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors flex items-center gap-2 group"><span class="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors"></span> FAQ</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="text-sm text-gray-500">&copy; 2026 Somali Star Academy. All rights reserved.</div>
-                <div class="flex items-center gap-4 text-sm text-gray-500">
-                    <span>Made with <i class="fas fa-heart text-red-500 mx-1"></i> in Somalia</span>
+            <div class="border-t border-gray-800/50 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="text-sm text-gray-600">&copy; 2026 Somali Star Academy. All rights reserved.</div>
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <span>Made with</span>
+                    <i class="fas fa-heart text-red-500/80 animate-pulse"></i>
+                    <span>in Somalia</span>
                 </div>
             </div>
         </div>
@@ -547,7 +587,7 @@
     <script>
         SOMSTAR.initDarkMode();
 
-        // Intersection Observer for fade-in animations
+        // Intersection Observer
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -557,24 +597,20 @@
             });
         }, { threshold: 0.1 });
 
-        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-        // Feature cards observer
-        document.querySelectorAll('.feature-card').forEach(el => observer.observe(el));
+        document.querySelectorAll('.fade-in, .feature-card').forEach(el => observer.observe(el));
 
         // Counter animation
+        function animateCounters() {
             document.querySelectorAll('.counter').forEach(counter => {
                 const target = parseInt(counter.dataset.target);
                 if (isNaN(target)) return;
-                const start = parseInt(counter.textContent) || 0;
                 const duration = 2000;
                 const startTime = Date.now();
-
                 function update() {
                     const elapsed = Date.now() - startTime;
                     const progress = Math.min(elapsed / duration, 1);
                     const easeOut = 1 - Math.pow(1 - progress, 3);
-                    const current = Math.floor(start + (target - start) * easeOut);
+                    const current = Math.floor(progress * target);
                     counter.textContent = current.toLocaleString();
                     if (progress < 1) requestAnimationFrame(update);
                 }
@@ -591,25 +627,19 @@
             });
         }, { threshold: 0.5 });
 
-        const statsSection = document.querySelector('.stat-card');
-        if (statsSection) statObserver.observe(statsSection.closest('.grid') || statsSection);
+        const statsGrid = document.querySelector('.grid.grid-cols-2');
+        if (statsGrid) statObserver.observe(statsGrid);
 
-        // Navbar scroll effect
+        // Navbar scroll
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                navbar.classList.add('shadow-lg');
-                navbar.classList.remove('shadow-sm');
-            } else {
-                navbar.classList.remove('shadow-lg');
-                navbar.classList.add('shadow-sm');
-            }
+            navbar.classList.toggle('shadow-lg', window.scrollY > 50);
         });
 
-        // Contact form handler (no backend change)
+        // Contact form
         document.getElementById('contactForm')?.addEventListener('submit', function(e) {
             e.preventDefault();
-            SOMSTAR.showNotification('Thank you! We will get back to you soon.', 'success');
+            SOMSTAR.showNotification('Thank you! We will get back to you within 24 hours.', 'success');
             this.reset();
         });
     </script>
