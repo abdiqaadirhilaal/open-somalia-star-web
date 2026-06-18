@@ -323,7 +323,7 @@ app.post('/api/login', async (req, res) => {
         return res.status(400).json({ error: 'Invalid role' });
     } catch (e) {
         console.error('Login error:', e);
-        res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ error: 'Server error' });
     }
 });
 

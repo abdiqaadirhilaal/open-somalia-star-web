@@ -210,7 +210,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId, password, role: currentRole })
                 });
-                const result = await res.json();
+                let result;
+                try { result = await res.json(); } catch(e) { result = {}; }
                 if (!res.ok) throw new Error(result.error || 'Invalid credentials');
 
                 const displayName = result.data.fullName || result.data.name || userId;
