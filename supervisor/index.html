@@ -157,7 +157,7 @@
                         </div>
                         <div class="table-container">
                             <table class="data-table">
-                                <thead><tr><th>Teacher</th><th>Class</th><th>Date</th><th>Present</th><th>Absent</th><th>Vacation</th><th>Late</th><th>Total</th></tr></thead>
+                                <thead><tr><th>Attendance Details</th></tr></thead>
                                 <tbody id="attendanceBody"><tr><td colspan="8" class="text-center text-gray-400 py-8">Loading...</td></tr></tbody>
                             </table>
                         </div>
@@ -404,39 +404,59 @@
             const date = document.getElementById('attDateFilter').value;
             const search = (document.getElementById('attSearch').value || '').toLowerCase();
             const tbody = document.getElementById('attendanceBody');
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-400 py-8">Loading...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="2" class="text-center text-gray-400 py-8">Loading...</td></tr>';
             try {
                 const snap = await db.ref('attendance').once('value');
                 const data = snap.val();
-                if (!data) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-400 py-8">No attendance records</td></tr>'; return; }
+                if (!data) { tbody.innerHTML = '<tr><td colspan="2" class="text-center text-gray-400 py-8">No attendance records</td></tr>'; return; }
                 let records = Object.values(data);
                 if (teacher) records = records.filter(r => r.teacherName === teacher);
                 if (cls) records = records.filter(r => r.class === cls);
                 if (date) records = records.filter(r => r.date === date);
                 if (search) records = records.filter(r => (r.studentName||r.studentId||'').toLowerCase().includes(search));
-                if (records.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-400 py-8">No matching records</td></tr>'; return; }
+                if (records.length === 0) { tbody.innerHTML = '<tr><td colspan="2" class="text-center text-gray-400 py-8">No matching records</td></tr>'; return; }
                 const grouped = {};
                 records.forEach(r => {
                     const key = `${r.teacherName||'?'}|${r.class||'?'}|${r.date||'?'}`;
-                    if (!grouped[key]) grouped[key] = { teacher: r.teacherName||'?', class: r.class||'?', date: r.date||'?', present: 0, absent: 0, vacation: 0, late: 0, total: 0, students: [] };
-                    grouped[key].total++;
+                    if (!grouped[key]) grouped[key] = { teacher: r.teacherName||'?', class: r.class||'?', date: r.date||'?', present: [], absent: [], vacation: [], late: [] };
                     const status = r.status || 'present';
-                    if (grouped[key][status] !== undefined) grouped[key][status]++;
-                    grouped[key].students.push(r.studentName||r.studentId||'?');
+                    const name = r.studentName || r.studentId || '?';
+                    if (grouped[key][status]) grouped[key][status].push(name);
                 });
-                tbody.innerHTML = Object.values(grouped).map(g =>
-                    `<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        <td class="text-sm font-medium text-gray-900 dark:text-white">${g.teacher}</td>
-                        <td class="text-sm text-gray-500">${g.class}</td>
-                        <td class="text-sm text-gray-500">${g.date}</td>
-                        <td class="text-sm text-green-600 font-medium">${g.present}</td>
-                        <td class="text-sm text-red-600 font-medium">${g.absent||0}</td>
-                        <td class="text-sm text-yellow-600 font-medium">${g.vacation||0}</td>
-                        <td class="text-sm text-orange-600 font-medium">${g.late||0}</td>
-                        <td class="text-sm text-gray-500">${g.total}</td>
-                    </tr>`
-                ).join('');
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-red-400 py-8">Error loading</td></tr>'; }
+                tbody.innerHTML = Object.values(grouped).map(g => {
+                    const presentList = g.present.length ? g.present.join(', ') : 'none';
+                    const absentList = g.absent.length ? g.absent.join(', ') : 'none';
+                    const vacationList = g.vacation.length ? g.vacation.join(', ') : 'none';
+                    const lateList = g.late.length ? g.late.join(', ') : 'none';
+                    return `<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="font-semibold text-gray-900 dark:text-white">${g.teacher}</span>
+                                <span class="text-sm text-gray-500">${g.class}</span>
+                                <span class="text-xs text-gray-400">${g.date}</span>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-2 text-xs">
+                                <div class="p-2 rounded-lg bg-green-50 dark:bg-green-900/20">
+                                    <span class="font-semibold text-green-700 dark:text-green-300">Present (${g.present.length}):</span>
+                                    <span class="text-green-600 dark:text-green-400">${presentList}</span>
+                                </div>
+                                <div class="p-2 rounded-lg bg-red-50 dark:bg-red-900/20">
+                                    <span class="font-semibold text-red-700 dark:text-red-300">Absent (${g.absent.length}):</span>
+                                    <span class="text-red-600 dark:text-red-400">${absentList}</span>
+                                </div>
+                                <div class="p-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
+                                    <span class="font-semibold text-yellow-700 dark:text-yellow-300">Vacation (${g.vacation.length}):</span>
+                                    <span class="text-yellow-600 dark:text-yellow-400">${vacationList}</span>
+                                </div>
+                                <div class="p-2 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                                    <span class="font-semibold text-orange-700 dark:text-orange-300">Late (${g.late.length}):</span>
+                                    <span class="text-orange-600 dark:text-orange-400">${lateList}</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="2" class="text-center text-red-400 py-8">Error loading</td></tr>'; }
         }
 
         // ===================== STUDENT RESULTS =====================
