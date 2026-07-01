@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisor Dashboard - SOMSTAR Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <script>
+        const user = JSON.parse(localStorage.getItem('somstar_user') || '{}');
+        if (!user || user.role !== 'supervisor') window.location.href = '../login.html';
+        if(localStorage.getItem('somstar_dark')==='true')document.body.classList.add('dark-mode');
+    </script>
+
+    <div class="flex">
+        <aside id="sidebar" class="sidebar fixed md:relative z-50">
+            <div class="p-5 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">S</span>
+                    </div>
+                    <div>
+                        <div class="text-white font-bold">SOMSTAR</div>
+                        <div class="text-red-300 text-xs">Supervisor Panel</div>
+                    </div>
+                </div>
+            </div>
+            <nav class="p-3 space-y-1 mt-2" id="sidebarNav">
+                <a href="#" onclick="showSection('overview')" class="sidebar-link active" data-section="overview"><i class="fas fa-home"></i> <span>Overview</span></a>
+                <a href="#" onclick="showSection('teachers')" class="sidebar-link" data-section="teachers"><i class="fas fa-chalkboard-teacher"></i> <span>Teachers</span></a>
+                <a href="#" onclick="showSection('classes')" class="sidebar-link" data-section="classes"><i class="fas fa-door-open"></i> <span>Classes</span></a>
+                <a href="#" onclick="showSection('students')" class="sidebar-link" data-section="students"><i class="fas fa-user-graduate"></i> <span>Students</span></a>
+                <a href="#" onclick="showSection('attendance')" class="sidebar-link" data-section="attendance"><i class="fas fa-calendar-check"></i> <span>Attendance</span></a>
+                <a href="#" onclick="showSection('results')" class="sidebar-link" data-section="results"><i class="fas fa-star"></i> <span>Student Results</span></a>
+                <a href="#" onclick="showSection('discipline')" class="sidebar-link" data-section="discipline"><i class="fas fa-clipboard-list"></i> <span>Discipline Reports</span></a>
+                <a href="#" onclick="showSection('notifications')" class="sidebar-link" data-section="notifications"><i class="fas fa-bell"></i> <span>Notifications <span id="notifBadge" class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full ml-1 hidden">0</span></span></a>
+            </nav>
+            <div class="p-3 mt-auto border-t border-white/10">
+                <a href="#" onclick="AUTH.logout()" class="sidebar-link logout-btn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+            </div>
+        </aside>
+
+        <main class="flex-1 min-h-screen bg-gray-50 dark:bg-gray-900 transition-all">
+            <div class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 py-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button onclick="document.getElementById('sidebar').classList.toggle('-translate-x-full')" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <h1 class="text-lg font-semibold text-gray-900 dark:text-white" id="pageTitle">Overview</h1>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="SOMSTAR.toggleDarkMode()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <i class="fas fa-moon text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <div id="dbBadge" class="hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-help" title="Database status">
+                            <i class="fas fa-circle text-[8px] text-gray-400"></i>
+                            <span>...</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <i class="fas fa-user-circle text-xl"></i>
+                            <span class="hidden sm:inline">Cabaas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 md:p-6 space-y-6">
+                <!-- Overview -->
+                <div id="section-overview" class="section-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="dashboard-card bg-gradient-to-br from-blue-500 to-blue-700 text-white">
+                            <div><p class="text-blue-100 text-sm">Total Teachers</p><h3 class="text-3xl font-bold mt-1" id="totalTeachers">0</h3></div>
+                            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-chalkboard-teacher text-xl"></i></div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-green-500 to-green-700 text-white">
+                            <div><p class="text-green-100 text-sm">Total Students</p><h3 class="text-3xl font-bold mt-1" id="totalStudents">0</h3></div>
+                            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-user-graduate text-xl"></i></div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-purple-500 to-purple-700 text-white">
+                            <div><p class="text-purple-100 text-sm">Total Classes</p><h3 class="text-3xl font-bold mt-1" id="totalClasses">0</h3></div>
+                            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-door-open text-xl"></i></div>
+                        </div>
+                        <div class="dashboard-card bg-gradient-to-br from-amber-500 to-amber-700 text-white">
+                            <div><p class="text-amber-100 text-sm">Discipline Reports</p><h3 class="text-3xl font-bold mt-1" id="totalReports">0</h3></div>
+                            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i class="fas fa-clipboard-list text-xl"></i></div>
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Today's Attendance</h3>
+                            <div id="todayAttendanceSummary"><p class="text-gray-400 text-sm">Loading...</p></div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Recent Discipline Reports</h3>
+                            <div id="recentDisciplineList"><p class="text-gray-400 text-sm">Loading...</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teachers (view only) -->
+                <div id="section-teachers" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">All Teachers</h3>
+                            <input type="text" id="teacherSearch" class="form-input max-w-[250px]" placeholder="Search teachers..." oninput="loadTeachers()">
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Teacher ID</th><th>Name</th><th>Subject</th><th>Contact</th><th>Assigned Class</th></tr></thead>
+                                <tbody id="teachersBody"><tr><td colspan="5" class="text-center text-gray-400 py-8">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classes (view only) -->
+                <div id="section-classes" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">All Classes</h3>
+                        <div class="grid md:grid-cols-3 gap-4" id="classesGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Students (view only) -->
+                <div id="section-students" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">All Students</h3>
+                            <input type="text" id="studentSearch" class="form-input max-w-[250px]" placeholder="Search by name or ID..." oninput="loadStudents()">
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Student ID</th><th>Name</th><th>Class</th><th>Status</th></tr></thead>
+                                <tbody id="studentsBody"><tr><td colspan="4" class="text-center text-gray-400 py-8">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Monitoring (view only, filterable) -->
+                <div id="section-attendance" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Attendance Records</h3>
+                        <div class="grid md:grid-cols-4 gap-3 mb-4">
+                            <select id="attTeacherFilter" class="form-input" onchange="loadAttendanceRecords()">
+                                <option value="">All Teachers</option>
+                            </select>
+                            <select id="attClassFilter" class="form-input" onchange="loadAttendanceRecords()">
+                                <option value="">All Classes</option>
+                            </select>
+                            <input type="date" id="attDateFilter" class="form-input" onchange="loadAttendanceRecords()">
+                            <input type="text" id="attSearch" class="form-input" placeholder="Search student..." oninput="loadAttendanceRecords()">
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Teacher</th><th>Class</th><th>Date</th><th>Present</th><th>Absent</th><th>Vacation</th><th>Late</th><th>Total</th></tr></thead>
+                                <tbody id="attendanceBody"><tr><td colspan="8" class="text-center text-gray-400 py-8">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-xs text-blue-700 dark:text-blue-300">
+                            <i class="fas fa-info-circle mr-1"></i> Monitor mode: Can view attendance data from all teachers
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Student Results (Enter marks) -->
+                <div id="section-results" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Student Examination Results</h3>
+                        <div class="grid md:grid-cols-3 gap-3 mb-4">
+                            <select id="resultClass" class="form-input" onchange="loadResultStudents()">
+                                <option value="">Select Class</option>
+                            </select>
+                            <select id="resultSubject" class="form-input" onchange="loadResultStudents()">
+                                <option value="">Select Subject</option>
+                            </select>
+                            <button onclick="loadResultStudents()" class="btn-primary px-4 py-2.5 rounded-xl text-white text-sm"><i class="fas fa-search mr-1"></i> Load Students</button>
+                        </div>
+                        <div id="resultEntryArea">
+                            <p class="text-gray-400 text-sm text-center py-8">Select a class and subject to enter marks</p>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm mt-6">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Saved Results</h3>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Class</th><th>Subject</th><th>Student</th><th>Marks</th><th>Date</th></tr></thead>
+                                <tbody id="savedResultsBody"><tr><td colspan="5" class="text-center text-gray-400 py-8">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discipline Reports -->
+                <div id="section-discipline" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Discipline Reports</h3>
+                        <div class="grid md:grid-cols-4 gap-3 mb-4">
+                            <select id="discTeacherFilter" class="form-input" onchange="loadDisciplineReports()">
+                                <option value="">All Teachers</option>
+                            </select>
+                            <select id="discClassFilter" class="form-input" onchange="loadDisciplineReports()">
+                                <option value="">All Classes</option>
+                            </select>
+                            <input type="date" id="discDateFilter" class="form-input" onchange="loadDisciplineReports()">
+                            <select id="discTypeFilter" class="form-input" onchange="loadDisciplineReports()">
+                                <option value="">All Types</option>
+                                <option value="late">Late</option>
+                                <option value="speaking_somali">Speaking Somali</option>
+                            </select>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead><tr><th>Teacher</th><th>Student</th><th>Class</th><th>Date</th><th>Type</th><th>Details</th></tr></thead>
+                                <tbody id="disciplineBody"><tr><td colspan="6" class="text-center text-gray-400 py-8">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <div id="section-notifications" class="section-content hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                            <button onclick="markAllRead()" class="text-sm text-blue-600 hover:text-blue-800"><i class="fas fa-check-double mr-1"></i> Mark All Read</button>
+                        </div>
+                        <div id="notificationsList"><p class="text-gray-400 text-sm text-center py-8">Loading...</p></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        SOMSTAR.loadSidebar();
+        SOMSTAR.setupLogout();
+        SOMSTAR.initDarkMode();
+
+        let notifInterval = null;
+
+        function showSection(section) {
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+            const el = document.getElementById('section-' + section);
+            if (el) el.classList.remove('hidden');
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            const link = document.querySelector(`[data-section="${section}"]`);
+            if (link) link.classList.add('active');
+            const titles = { overview:'Overview', teachers:'Teachers', classes:'Classes', students:'Students', attendance:'Attendance', results:'Student Results', discipline:'Discipline Reports', notifications:'Notifications' };
+            document.getElementById('pageTitle').textContent = titles[section] || section;
+            if (section === 'overview') loadOverview();
+            if (section === 'teachers') loadTeachers();
+            if (section === 'classes') loadClassesView();
+            if (section === 'students') loadStudents();
+            if (section === 'attendance') { loadAttendanceFilters(); loadAttendanceRecords(); }
+            if (section === 'results') { loadResultFilters(); loadSavedResults(); }
+            if (section === 'discipline') { loadDisciplineFilters(); loadDisciplineReports(); }
+            if (section === 'notifications') loadNotifications();
+        }
+
+        // ===================== OVERVIEW =====================
+        async function loadOverview() {
+            try {
+                const [tSnap, sSnap, cSnap, dSnap] = await Promise.all([
+                    db.ref('teachers').once('value'),
+                    db.ref('students').once('value'),
+                    db.ref('classes').once('value'),
+                    db.ref('discipline_reports').once('value')
+                ]);
+                const teachers = tSnap.val(); const students = sSnap.val(); const classes = cSnap.val(); const reports = dSnap.val();
+                document.getElementById('totalTeachers').textContent = teachers ? Object.keys(teachers).length : 0;
+                document.getElementById('totalStudents').textContent = students ? Object.keys(students).length : 0;
+                document.getElementById('totalClasses').textContent = classes ? Object.keys(classes).length : 0;
+                document.getElementById('totalReports').textContent = reports ? Object.keys(reports).length : 0;
+
+                // Today's attendance
+                const today = SOMSTAR.getToday();
+                const attSnap = await db.ref('attendance').once('value');
+                const attData = attSnap.val();
+                let todayAtt = [];
+                if (attData) {
+                    todayAtt = Object.values(attData).filter(a => a.date === today);
+                }
+                const attSummary = document.getElementById('todayAttendanceSummary');
+                if (todayAtt.length === 0) {
+                    attSummary.innerHTML = '<p class="text-gray-400 text-sm">No attendance records for today</p>';
+                } else {
+                    const grouped = {};
+                    todayAtt.forEach(a => {
+                        const key = a.teacherName || a.class || 'Unknown';
+                        if (!grouped[key]) grouped[key] = { total: 0, present: 0, absent: 0, vacation: 0, late: 0 };
+                        grouped[key].total++;
+                        grouped[key][a.status || 'present']++;
+                    });
+                    attSummary.innerHTML = Object.entries(grouped).map(([teacher, stats]) =>
+                        `<div class="flex justify-between items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 mb-1 text-sm">
+                            <span class="font-medium text-gray-900 dark:text-white">${teacher}</span>
+                            <span class="text-gray-500">P:${stats.present} A:${stats.absent||0} V:${stats.vacation||0} L:${stats.late||0}</span>
+                        </div>`
+                    ).join('');
+                }
+
+                // Recent discipline
+                const discContainer = document.getElementById('recentDisciplineList');
+                if (reports) {
+                    const recent = Object.values(reports).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,5);
+                    discContainer.innerHTML = recent.map(r =>
+                        `<div class="flex justify-between items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50 mb-1 text-sm">
+                            <span class="text-gray-900 dark:text-white">${r.studentName}</span>
+                            <span class="text-xs ${r.type === 'late' ? 'text-orange-500' : 'text-red-500'}">${r.type === 'late' ? 'Late' : 'Somali'}</span>
+                        </div>`
+                    ).join('');
+                } else {
+                    discContainer.innerHTML = '<p class="text-gray-400 text-sm">No discipline reports</p>';
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        // ===================== TEACHERS =====================
+        async function loadTeachers() {
+            const search = (document.getElementById('teacherSearch').value || '').toLowerCase();
+            const tbody = document.getElementById('teachersBody');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 py-8">Loading...</td></tr>';
+            try {
+                const snap = await db.ref('teachers').once('value');
+                const data = snap.val();
+                if (!data) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 py-8">No teachers</td></tr>'; return; }
+                let list = Object.values(data);
+                if (search) list = list.filter(t => (t.name||'').toLowerCase().includes(search) || (t.teacherId||'').toLowerCase().includes(search));
+                tbody.innerHTML = list.map(t => `<tr>
+                    <td class="text-sm font-medium text-gray-900 dark:text-white">${t.teacherId||'-'}</td>
+                    <td class="text-sm text-gray-700 dark:text-gray-300">${t.name||'-'}</td>
+                    <td class="text-sm text-gray-500">${t.subject||'-'}</td>
+                    <td class="text-sm text-gray-500">${t.contact||'-'}</td>
+                    <td class="text-sm text-gray-500">${t.assignedClass||'-'}</td>
+                </tr>`).join('');
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-red-400 py-8">Error loading</td></tr>'; }
+        }
+
+        // ===================== CLASSES =====================
+        async function loadClassesView() {
+            const grid = document.getElementById('classesGrid');
+            try {
+                const snap = await db.ref('classes').once('value');
+                const data = snap.val();
+                if (!data) { grid.innerHTML = '<p class="text-gray-400 text-sm col-span-3 text-center py-8">No classes</p>'; return; }
+                const colors = ['bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-700 border-blue-200 dark:border-gray-600 text-blue-600 dark:text-blue-400',
+                    'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-700 dark:to-gray-700 border-green-200 dark:border-gray-600 text-green-600 dark:text-green-400',
+                    'bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-gray-700 dark:to-gray-700 border-yellow-200 dark:border-gray-600 text-yellow-600 dark:text-yellow-400',
+                    'bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-700 border-purple-200 dark:border-gray-600 text-purple-600 dark:text-purple-400'];
+                grid.innerHTML = Object.values(data).map((c, i) =>
+                    `<div class="p-4 rounded-xl ${colors[i%colors.length]} border">
+                        <div class="text-center"><i class="fas fa-chalkboard-teacher text-2xl mb-1"></i><h4 class="font-semibold text-sm text-gray-900 dark:text-white">${c.name}</h4><p class="text-xs text-gray-500">${c.teacher||c.time||''}</p></div>
+                    </div>`
+                ).join('');
+            } catch(e) { grid.innerHTML = '<p class="text-red-400 text-sm col-span-3 text-center py-8">Error loading</p>'; }
+        }
+
+        // ===================== STUDENTS =====================
+        async function loadStudents() {
+            const search = (document.getElementById('studentSearch').value || '').toLowerCase();
+            const tbody = document.getElementById('studentsBody');
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-400 py-8">Loading...</td></tr>';
+            try {
+                const snap = await db.ref('students').once('value');
+                const data = snap.val();
+                if (!data) { tbody.innerHTML = '<tr><td colspan="4" class="text-center text-gray-400 py-8">No students</td></tr>'; return; }
+                let list = Object.values(data);
+                if (search) list = list.filter(s => (s.studentId||'').toLowerCase().includes(search) || (s.fullName||s.name||'').toLowerCase().includes(search));
+                tbody.innerHTML = list.map(s => `<tr>
+                    <td class="text-sm font-medium text-gray-900 dark:text-white">${s.studentId||'-'}</td>
+                    <td class="text-sm text-gray-700 dark:text-gray-300">${s.fullName||s.name||'-'}</td>
+                    <td class="text-sm text-gray-500">${s.class||'-'}</td>
+                    <td class="text-sm">${s.status === 'disabled' ? '<span class="text-red-600 bg-red-100 dark:bg-red-900/30 px-2 py-0.5 rounded-full text-xs">Disabled</span>' : '<span class="text-green-600 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full text-xs">Active</span>'}</td>
+                </tr>`).join('');
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="text-center text-red-400 py-8">Error loading</td></tr>'; }
+        }
+
+        // ===================== ATTENDANCE =====================
+        async function loadAttendanceFilters() {
+            try {
+                const [tSnap, cSnap] = await Promise.all([db.ref('teachers').once('value'), db.ref('classes').once('value')]);
+                const teachers = tSnap.val(); const classes = cSnap.val();
+                const tSel = document.getElementById('attTeacherFilter');
+                tSel.innerHTML = '<option value="">All Teachers</option>';
+                if (teachers) Object.values(teachers).forEach(t => { tSel.innerHTML += `<option value="${t.name}">${t.name}</option>`; });
+                const cSel = document.getElementById('attClassFilter');
+                cSel.innerHTML = '<option value="">All Classes</option>';
+                if (classes) Object.values(classes).forEach(c => { cSel.innerHTML += `<option value="${c.name}">${c.name}</option>`; });
+                document.getElementById('attDateFilter').value = SOMSTAR.getToday();
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadAttendanceRecords() {
+            const teacher = document.getElementById('attTeacherFilter').value;
+            const cls = document.getElementById('attClassFilter').value;
+            const date = document.getElementById('attDateFilter').value;
+            const search = (document.getElementById('attSearch').value || '').toLowerCase();
+            const tbody = document.getElementById('attendanceBody');
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-400 py-8">Loading...</td></tr>';
+            try {
+                const snap = await db.ref('attendance').once('value');
+                const data = snap.val();
+                if (!data) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-400 py-8">No attendance records</td></tr>'; return; }
+                let records = Object.values(data);
+                if (teacher) records = records.filter(r => r.teacherName === teacher);
+                if (cls) records = records.filter(r => r.class === cls);
+                if (date) records = records.filter(r => r.date === date);
+                if (search) records = records.filter(r => (r.studentName||r.studentId||'').toLowerCase().includes(search));
+                if (records.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-400 py-8">No matching records</td></tr>'; return; }
+                const grouped = {};
+                records.forEach(r => {
+                    const key = `${r.teacherName||'?'}|${r.class||'?'}|${r.date||'?'}`;
+                    if (!grouped[key]) grouped[key] = { teacher: r.teacherName||'?', class: r.class||'?', date: r.date||'?', present: 0, absent: 0, vacation: 0, late: 0, total: 0, students: [] };
+                    grouped[key].total++;
+                    const status = r.status || 'present';
+                    if (grouped[key][status] !== undefined) grouped[key][status]++;
+                    grouped[key].students.push(r.studentName||r.studentId||'?');
+                });
+                tbody.innerHTML = Object.values(grouped).map(g =>
+                    `<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="text-sm font-medium text-gray-900 dark:text-white">${g.teacher}</td>
+                        <td class="text-sm text-gray-500">${g.class}</td>
+                        <td class="text-sm text-gray-500">${g.date}</td>
+                        <td class="text-sm text-green-600 font-medium">${g.present}</td>
+                        <td class="text-sm text-red-600 font-medium">${g.absent||0}</td>
+                        <td class="text-sm text-yellow-600 font-medium">${g.vacation||0}</td>
+                        <td class="text-sm text-orange-600 font-medium">${g.late||0}</td>
+                        <td class="text-sm text-gray-500">${g.total}</td>
+                    </tr>`
+                ).join('');
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-red-400 py-8">Error loading</td></tr>'; }
+        }
+
+        // ===================== STUDENT RESULTS =====================
+        async function loadResultFilters() {
+            try {
+                const [cSnap, subSnap] = await Promise.all([db.ref('classes').once('value'), db.ref('subjects').once('value')]);
+                const classes = cSnap.val(); const subjects = subSnap.val();
+                const cSel = document.getElementById('resultClass');
+                cSel.innerHTML = '<option value="">Select Class</option>';
+                if (classes) Object.values(classes).forEach(c => { cSel.innerHTML += `<option value="${c.name}">${c.name}</option>`; });
+                const subSel = document.getElementById('resultSubject');
+                subSel.innerHTML = '<option value="">Select Subject</option>';
+                if (subjects) Object.values(subjects).forEach(s => { subSel.innerHTML += `<option value="${s.name}">${s.name}</option>`; });
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadResultStudents() {
+            const cls = document.getElementById('resultClass').value;
+            const subject = document.getElementById('resultSubject').value;
+            const area = document.getElementById('resultEntryArea');
+            if (!cls || !subject) { area.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">Select a class and subject to enter marks</p>'; return; }
+            area.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">Loading students...</p>';
+            try {
+                const snap = await db.ref('students').once('value');
+                const data = snap.val();
+                if (!data) { area.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">No students found</p>'; return; }
+                const students = Object.values(data).filter(s => s.class === cls);
+                if (students.length === 0) { area.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">No students in this class</p>'; return; }
+                let html = `<div class="table-container"><table class="data-table"><thead><tr><th>Student ID</th><th>Name</th><th>Marks (0-100)</th></tr></thead><tbody>`;
+                students.forEach(s => {
+                    const sid = s.studentId || '';
+                    const name = s.fullName || s.name || '';
+                    html += `<tr><td class="text-sm font-medium text-gray-900 dark:text-white">${sid}</td><td class="text-sm text-gray-700">${name}</td>
+                        <td><input type="number" min="0" max="100" class="form-input w-24 mark-input" data-student="${sid}" data-name="${name}" placeholder="Marks"></td></tr>`;
+                });
+                html += `</tbody></table></div>
+                    <button onclick="saveAllResults()" class="btn-primary px-6 py-2.5 rounded-xl text-white text-sm mt-4"><i class="fas fa-save mr-1"></i> Save All Marks</button>`;
+                area.innerHTML = html;
+                area.dataset.class = cls;
+                area.dataset.subject = subject;
+            } catch(e) { area.innerHTML = '<p class="text-red-400 text-sm text-center py-8">Error: ' + e.message + '</p>'; }
+        }
+
+        async function saveAllResults() {
+            const cls = document.getElementById('resultEntryArea').dataset.class;
+            const subject = document.getElementById('resultEntryArea').dataset.subject;
+            const inputs = document.querySelectorAll('.mark-input');
+            let saved = 0;
+            for (const input of inputs) {
+                const marks = input.value.trim();
+                if (marks === '' || isNaN(marks)) continue;
+                const studentId = input.dataset.student;
+                const studentName = input.dataset.name;
+                try {
+                    await db.ref('exam_results').push({
+                        class: cls,
+                        subject: subject,
+                        studentId: studentId,
+                        studentName: studentName,
+                        marks: parseInt(marks),
+                        enteredBy: 'Cabaas',
+                        createdAt: new Date().toISOString()
+                    });
+                    saved++;
+                } catch(e) { console.error(e); }
+            }
+            SOMSTAR.showNotification(`Saved ${saved} results!`, 'success');
+            loadSavedResults();
+            document.getElementById('resultEntryArea').innerHTML = '<p class="text-gray-400 text-sm text-center py-8">Select a class and subject to enter marks</p>';
+        }
+
+        async function loadSavedResults() {
+            const tbody = document.getElementById('savedResultsBody');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 py-8">Loading...</td></tr>';
+            try {
+                const snap = await db.ref('exam_results').once('value');
+                const data = snap.val();
+                if (!data) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-400 py-8">No results saved yet</td></tr>'; return; }
+                const list = Object.values(data).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+                tbody.innerHTML = list.map(r => `<tr>
+                    <td class="text-sm text-gray-500">${r.class||'-'}</td>
+                    <td class="text-sm text-gray-500">${r.subject||'-'}</td>
+                    <td class="text-sm font-medium text-gray-900 dark:text-white">${r.studentName||r.studentId||'-'}</td>
+                    <td class="text-sm"><span class="font-semibold ${parseInt(r.marks) >= 50 ? 'text-green-600' : 'text-red-600'}">${r.marks||0}</span></td>
+                    <td class="text-sm text-gray-500">${r.createdAt ? SOMSTAR.formatDate(r.createdAt) : '-'}</td>
+                </tr>`).join('');
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-red-400 py-8">Error loading</td></tr>'; }
+        }
+
+        // ===================== DISCIPLINE REPORTS =====================
+        async function loadDisciplineFilters() {
+            try {
+                const [tSnap, cSnap] = await Promise.all([db.ref('teachers').once('value'), db.ref('classes').once('value')]);
+                const teachers = tSnap.val(); const classes = cSnap.val();
+                const tSel = document.getElementById('discTeacherFilter');
+                tSel.innerHTML = '<option value="">All Teachers</option>';
+                if (teachers) Object.values(teachers).forEach(t => { tSel.innerHTML += `<option value="${t.name}">${t.name}</option>`; });
+                const cSel = document.getElementById('discClassFilter');
+                cSel.innerHTML = '<option value="">All Classes</option>';
+                if (classes) Object.values(classes).forEach(c => { cSel.innerHTML += `<option value="${c.name}">${c.name}</option>`; });
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadDisciplineReports() {
+            const teacher = document.getElementById('discTeacherFilter').value;
+            const cls = document.getElementById('discClassFilter').value;
+            const date = document.getElementById('discDateFilter').value;
+            const type = document.getElementById('discTypeFilter').value;
+            const tbody = document.getElementById('disciplineBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-8">Loading...</td></tr>';
+            try {
+                const snap = await db.ref('discipline_reports').once('value');
+                const data = snap.val();
+                if (!data) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-8">No reports</td></tr>'; return; }
+                let list = Object.values(data);
+                if (teacher) list = list.filter(r => r.teacherName === teacher);
+                if (cls) list = list.filter(r => r.class === cls);
+                if (date) list = list.filter(r => r.date === date);
+                if (type) list = list.filter(r => r.type === type);
+                list.sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+                if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-8">No matching reports</td></tr>'; return; }
+                tbody.innerHTML = list.map(r => {
+                    const typeLabel = r.type === 'late' ? '<span class="text-orange-600 bg-orange-100 dark:bg-orange-900/30 px-2 py-0.5 rounded-full text-xs">Late</span>' : '<span class="text-red-600 bg-red-100 dark:bg-red-900/30 px-2 py-0.5 rounded-full text-xs">Somali</span>';
+                    const details = r.type === 'late' ? `${r.time} - ${r.reason}` : (r.description||r.violation||'');
+                    return `<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="text-sm text-gray-500">${r.teacherName||'-'}</td>
+                        <td class="text-sm font-medium text-gray-900 dark:text-white">${r.studentName}</td>
+                        <td class="text-sm text-gray-500">${r.class}</td>
+                        <td class="text-sm text-gray-500">${r.date}</td>
+                        <td>${typeLabel}</td>
+                        <td class="text-sm text-gray-500 max-w-[200px] truncate">${details}</td>
+                    </tr>`;
+                }).join('');
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-400 py-8">Error loading</td></tr>'; }
+        }
+
+        // ===================== NOTIFICATIONS =====================
+        async function loadNotifications() {
+            const container = document.getElementById('notificationsList');
+            try {
+                const snap = await db.ref('notifications').once('value');
+                const data = snap.val();
+                if (!data) { container.innerHTML = '<p class="text-gray-400 text-sm text-center py-8">No notifications</p>'; return; }
+                const list = Object.values(data).sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+                container.innerHTML = list.map(n => `
+                    <div class="flex items-start gap-3 p-3 rounded-xl ${n.read ? 'bg-gray-50 dark:bg-gray-700/30' : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'} mb-2">
+                        <div class="w-8 h-8 rounded-full ${n.type === 'discipline' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-green-100 dark:bg-green-900/30'} flex items-center justify-center flex-shrink-0">
+                            <i class="fas ${n.type === 'discipline' ? 'fa-clipboard-list text-red-500' : 'fa-calendar-check text-green-500'} text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">${n.from||'System'}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">${n.message||''}</p>
+                            <p class="text-[10px] text-gray-400 mt-1">${n.createdAt ? SOMSTAR.formatDate(n.createdAt) : ''}</p>
+                        </div>
+                        ${!n.read ? `<button onclick="markNotifRead('${n.uid||''}')" class="text-xs text-blue-600 hover:text-blue-800 flex-shrink-0"><i class="fas fa-check"></i></button>` : ''}
+                    </div>
+                `).join('');
+            } catch(e) { container.innerHTML = '<p class="text-red-400 text-sm text-center py-8">Error loading</p>'; }
+        }
+
+        async function markNotifRead(uid) {
+            if (!uid) return;
+            try { await db.ref('notifications/' + uid).update({ read: true }); loadNotifications(); updateNotifBadge(); } catch(e) {}
+        }
+
+        async function markAllRead() {
+            try {
+                const snap = await db.ref('notifications').once('value');
+                const data = snap.val();
+                if (!data) return;
+                for (const [uid, n] of Object.entries(data)) {
+                    if (!n.read) await db.ref('notifications/' + uid).update({ read: true });
+                }
+                SOMSTAR.showNotification('All marked as read', 'success');
+                loadNotifications(); updateNotifBadge();
+            } catch(e) {}
+        }
+
+        async function updateNotifBadge() {
+            try {
+                const snap = await db.ref('notifications').once('value');
+                const data = snap.val();
+                const badge = document.getElementById('notifBadge');
+                if (!data) { badge.classList.add('hidden'); return; }
+                const unread = Object.values(data).filter(n => !n.read).length;
+                if (unread > 0) { badge.textContent = unread; badge.classList.remove('hidden'); }
+                else { badge.classList.add('hidden'); }
+            } catch(e) {}
+        }
+
+        // Real-time polling for notifications (every 10 seconds)
+        function startNotifPolling() {
+            if (notifInterval) clearInterval(notifInterval);
+            notifInterval = setInterval(() => {
+                updateNotifBadge();
+            }, 10000);
+        }
+
+        showSection('overview');
+        startNotifPolling();
+    </script>
+</body>
+</html>

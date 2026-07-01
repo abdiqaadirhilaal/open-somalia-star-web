@@ -75,7 +75,7 @@
     <!-- Brand badge top-left -->
     <div class="absolute top-6 left-6 flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-            <span class="text-white font-bold text-lg">S</span>
+            <span class="text-white font-bold text-lg"><img height="20px" width="60px" src="./image.png" alt=""></span>
         </div>
         <div class="hidden sm:block">
             <span class="text-white font-extrabold text-base tracking-tight">SOMALI <span class="text-cyan-300">STAR</span></span>
@@ -103,7 +103,7 @@
             </div>
 
             <!-- Role Selector -->
-            <div class="grid grid-cols-4 gap-2 mb-6">
+            <div class="grid grid-cols-3 gap-2 mb-4">
                 <div onclick="selectRole('manager',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism active">
                     <i class="fas fa-user-cog text-base text-blue-300"></i>
                     <div class="text-[10px] font-medium text-white/70 mt-0.5">Manager</div>
@@ -112,13 +112,21 @@
                     <i class="fas fa-chalkboard-teacher text-base text-green-300"></i>
                     <div class="text-[10px] font-medium text-white/70 mt-0.5">Teacher</div>
                 </div>
+                <div onclick="selectRole('student',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism">
+                    <i class="fas fa-user-graduate text-base text-purple-300"></i>
+                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Student</div>
+                </div>
                 <div onclick="selectRole('finance',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism">
                     <i class="fas fa-coins text-base text-amber-300"></i>
                     <div class="text-[10px] font-medium text-white/70 mt-0.5">Finance</div>
                 </div>
-                <div onclick="selectRole('student',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism">
-                    <i class="fas fa-user-graduate text-base text-purple-300"></i>
-                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Student</div>
+                <div onclick="selectRole('supervisor',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism">
+                    <i class="fas fa-eye text-base text-red-300"></i>
+                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Supervisor</div>
+                </div>
+                <div onclick="selectRole('practice-teacher',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism">
+                    <i class="fas fa-hand-holding-heart text-base text-pink-300"></i>
+                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Practice</div>
                 </div>
             </div>
 
@@ -180,6 +188,8 @@
             if (role === 'manager') label.textContent = 'Manager ID';
             else if (role === 'teacher') label.textContent = 'Teacher ID';
             else if (role === 'finance') label.textContent = 'Staff ID';
+            else if (role === 'supervisor') label.textContent = 'Supervisor ID';
+            else if (role === 'practice-teacher') label.textContent = 'Practice Teacher ID';
             else label.textContent = 'Student ID';
         }
 
@@ -222,7 +232,7 @@
                     uid: result.data.uid || 'manager'
                 }));
                 SOMSTAR.showNotification('Welcome ' + displayName + '!', 'success');
-                const paths = { manager: 'manager/', student: 'student/', teacher: 'teacher/', finance: 'finance/' };
+                const paths = { manager: 'manager/', student: 'student/', teacher: 'teacher/', finance: 'finance/', supervisor: 'supervisor/', 'practice-teacher': 'practice-teacher/' };
                 setTimeout(() => window.location.href = paths[result.role] + 'index.html', 500);
 
             } catch (err) {

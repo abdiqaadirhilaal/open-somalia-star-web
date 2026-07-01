@@ -210,7 +210,7 @@ app.get('/uploads/:filename', async (req, res) => {
 // Export/Import
 app.get('/api/export', async (req, res) => {
     try {
-        const tables = ['students', 'teachers', 'attendance', 'teacherAttendance', 'marks', 'lessons', 'quizzes', 'announcements', 'classes', 'finance'];
+        const tables = ['students', 'teachers', 'attendance', 'teacherAttendance', 'marks', 'lessons', 'quizzes', 'announcements', 'classes', 'finance', 'discipline_reports', 'exam_results', 'subjects', 'notifications'];
         const data = {};
         for (const t of tables) {
             const rows = await db.getAll(t);
@@ -232,7 +232,7 @@ app.post('/api/import', async (req, res) => {
     try {
         const data = req.body;
         if (!data || typeof data !== 'object') return res.status(400).json({ error: 'Invalid data' });
-        const tables = ['students', 'teachers', 'attendance', 'teacherAttendance', 'marks', 'lessons', 'quizzes', 'announcements', 'classes', 'finance'];
+        const tables = ['students', 'teachers', 'attendance', 'teacherAttendance', 'marks', 'lessons', 'quizzes', 'announcements', 'classes', 'finance', 'discipline_reports', 'exam_results', 'subjects', 'notifications'];
         for (const t of tables) {
             if (data[t]) {
                 const existing = await db.getAll(t);
@@ -248,17 +248,47 @@ app.post('/api/import', async (req, res) => {
     }
 });
 
-// Seed default teachers
+// Seed default teachers, classes, subjects
 async function seedDefaults() {
-    const existing = await db.getAll('teachers');
-    if (existing.length > 0) return;
-    const teachers = [
-        { name: 'Try', subject: 'General', teacherId: 'TCH001', contact: '', password: '@som1234' },
-        { name: 'C.Shakuur', subject: 'General', teacherId: 'TCH002', contact: '', password: '@som1234' },
-        { name: 'Muqtaar', subject: 'General', teacherId: 'TCH003', contact: '', password: '@som1234' }
-    ];
-    for (const t of teachers) await db.insert('teachers', t);
-    console.log('  ✓ Default teachers seeded');
+    const existingTeachers = await db.getAll('teachers');
+    if (existingTeachers.length === 0) {
+        const teachers = [
+            { name: 'Try', subject: 'General', teacherId: 'TCH001', contact: '', password: '@som1234' },
+            { name: 'C.Shakuur', subject: 'General', teacherId: 'TCH002', contact: '', password: '@som1234' },
+            { name: 'Muqtaar', subject: 'General', teacherId: 'TCH003', contact: '', password: '@som1234' },
+            { name: 'Aadan', subject: 'Mathematics', teacherId: 'TCH004', contact: '', password: '@som1234', assignedClass: 'Class 10', teachingTime: '3:00 PM' },
+            { name: 'Cabdalah', subject: '', teacherId: 'TCH005', contact: '', password: '@som1234', role: 'practice-teacher', disciplineOnly: true }
+        ];
+        for (const t of teachers) await db.insert('teachers', t);
+        console.log('  ✓ Default teachers seeded');
+    }
+    const existingClasses = await db.getAll('classes');
+    if (existingClasses.length === 0) {
+        const classes = [
+            { name: 'TRY 2:00', teacher: 'Try' },
+            { name: 'TRY 3:00', teacher: 'Try' },
+            { name: 'TRY 4:00', teacher: 'Try' },
+            { name: 'C.Shakuur 2:00', teacher: 'C.Shakuur' },
+            { name: 'C.Shakuur 3:00', teacher: 'C.Shakuur' },
+            { name: 'C.Shakuur 4:00', teacher: 'C.Shakuur' },
+            { name: 'Muqtaar 2:00', teacher: 'Muqtaar' },
+            { name: 'Muqtaar 3:00', teacher: 'Muqtaar' },
+            { name: 'Muqtaar 4:00', teacher: 'Muqtaar' },
+            { name: 'Class 10', teacher: 'Aadan', time: '3:00 PM' }
+        ];
+        for (const c of classes) await db.insert('classes', c);
+        console.log('  ✓ Default classes seeded');
+    }
+    const existingSubjects = await db.getAll('subjects');
+    if (existingSubjects.length === 0) {
+        const subjects = [
+            { name: 'English' },
+            { name: 'Mathematics' },
+            { name: 'Science' }
+        ];
+        for (const s of subjects) await db.insert('subjects', s);
+        console.log('  ✓ Default subjects seeded');
+    }
 }
 
 // Health check
@@ -316,6 +346,26 @@ app.post('/api/login', async (req, res) => {
         if (role === 'finance') {
             if (userId === 'Saacid' && password === '@som1234') {
                 return res.json({ success: true, role: 'finance', data: { name: 'Saacid', uid: 'finance-saacid' } });
+            }
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        if (role === 'supervisor') {
+            if (userId === 'Cabaas' && password === '@som1234') {
+                return res.json({ success: true, role: 'supervisor', data: { name: 'Cabaas', uid: 'supervisor-cabaas' } });
+            }
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        if (role === 'practice-teacher') {
+            if (userId === 'Cabdalah' && password === '@som1234') {
+                return res.json({ success: true, role: 'practice-teacher', data: { name: 'Cabdalah', uid: 'practice-cabdalah' } });
+            }
+            const ptRows = await db.queryByChild('teachers', 'teacherId', userId);
+            if (ptRows && ptRows.length > 0 && ptRows[0].role === 'practice-teacher') {
+                if (ptRows[0].password === password) {
+                    return res.json({ success: true, role: 'practice-teacher', data: { uid: ptRows[0].uid, ...ptRows[0] } });
+                }
             }
             return res.status(401).json({ error: 'Invalid credentials' });
         }
