@@ -248,7 +248,7 @@
                             </div>
                         </div>
                         <div class="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-200 dark:border-yellow-800">
-                            <p class="text-sm text-yellow-800 dark:text-yellow-200"><i class="fas fa-info-circle mr-1"></i> 10 classes — TRY, Abdishakuur, and Muktar each teach at 2:00, 3:00, and 4:00, plus Class 10 (Aadan - Mathematics).</p>
+                            <p class="text-sm text-yellow-800 dark:text-yellow-200"><i class="fas fa-info-circle mr-1"></i> Classes: TRY (2:00, 3:00, 4:00, 7:00), Abdishakuur (2:00, 3:00, 4:00), Muktar (2:00, 3:00, 4:00).</p>
                         </div>
                     </div>
                 </div>
@@ -290,6 +290,7 @@
                                         <option value="TRY 4:00">TRY 4:00</option>
                                         <option value="Abdishakuur 4:00">Abdishakuur 4:00</option>
                                         <option value="Muktar 4:00">Muktar 4:00</option>
+                                        <option value="TRY 7:00">TRY 7:00</option>
                                     </select>
                                 </div>
                                 <div>
@@ -900,7 +901,7 @@
                 const attData = attSnap.val();
                 const attRecords = attData ? Object.values(attData) : [];
 
-                const rooms = ['TRY 2:00', 'Abdishakuur 2:00', 'Muktar 2:00', 'TRY 3:00', 'Abdishakuur 3:00', 'Muktar 3:00', 'TRY 4:00', 'Abdishakuur 4:00', 'Muktar 4:00'];
+                const rooms = ['TRY 2:00', 'Abdishakuur 2:00', 'Muktar 2:00', 'TRY 3:00', 'Abdishakuur 3:00', 'Muktar 3:00', 'TRY 4:00', 'Abdishakuur 4:00', 'Muktar 4:00', 'TRY 7:00'];
                 const tbody = document.getElementById('reportTableBody');
                 tbody.innerHTML = rooms.map(room => {
                     const roomStudents = students.filter(s => s.class === room);
@@ -1030,7 +1031,7 @@
             const sel = document.getElementById('annRecipientValue');
             sel.classList.remove('hidden');
             if (type === 'class') {
-                sel.innerHTML = '<option value="">Select class</option>TRY 2:00,Abdishakuur 2:00,Muktar 2:00,TRY 3:00,Abdishakuur 3:00,Muktar 3:00,TRY 4:00,Abdishakuur 4:00,Muktar 4:00'.split(',').map(c => `<option value="${c}">${c}</option>`).join('');
+                sel.innerHTML = '<option value="">Select class</option>TRY 2:00,Abdishakuur 2:00,Muktar 2:00,TRY 3:00,Abdishakuur 3:00,Muktar 3:00,TRY 4:00,Abdishakuur 4:00,Muktar 4:00,TRY 7:00'.split(',').map(c => `<option value="${c}">${c}</option>`).join('');
             } else if (type === 'teacher') {
                 sel.innerHTML = '<option value="">Select teacher</option>';
                 SOMSTAR.getTeachers().then(teachers => {
@@ -1344,7 +1345,7 @@
             if (!s) return;
             const name = prompt('Enter new name:', s.fullName || '');
             if (name === null) return;
-            const cls = prompt('Enter class (TRY 2:00, Abdishakuur 2:00, Muktar 2:00, TRY 3:00, etc.):', s.class || 'TRY 2:00');
+            const cls = prompt('Enter class (TRY 2:00, Abdishakuur 2:00, Muktar 2:00, TRY 3:00, TRY 7:00, etc.):', s.class || 'TRY 2:00');
             if (cls === null) return;
             try {
                 if (name.trim()) await db.ref('students/' + uid + '/fullName').set(name.trim());

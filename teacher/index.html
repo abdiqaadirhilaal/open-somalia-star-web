@@ -168,6 +168,7 @@
                                     <option value="TRY 4:00">TRY 4:00</option>
                                     <option value="Abdishakuur 4:00">Abdishakuur 4:00</option>
                                     <option value="Muktar 4:00">Muktar 4:00</option>
+                                    <option value="TRY 7:00">TRY 7:00</option>
                                 </select>
                             </div>
                         </div>
@@ -299,7 +300,7 @@
                 <div class="space-y-4">
                     <div><label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Quiz Title</label><input type="text" id="quizTitle" class="form-input" required></div>
                     <div><label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Class</label>
-                        <select id="quizClass" class="form-input" required><option value="">Select</option><option value="TRY 2:00">TRY 2:00</option><option value="Abdishakuur 2:00">Abdishakuur 2:00</option><option value="Muktar 2:00">Muktar 2:00</option><option value="TRY 3:00">TRY 3:00</option><option value="Abdishakuur 3:00">Abdishakuur 3:00</option><option value="Muktar 3:00">Muktar 3:00</option><option value="TRY 4:00">TRY 4:00</option><option value="Abdishakuur 4:00">Abdishakuur 4:00</option><option value="Muktar 4:00">Muktar 4:00</option></select>
+                        <select id="quizClass" class="form-input" required><option value="">Select</option><option value="TRY 2:00">TRY 2:00</option><option value="Abdishakuur 2:00">Abdishakuur 2:00</option><option value="Muktar 2:00">Muktar 2:00</option><option value="TRY 3:00">TRY 3:00</option><option value="Abdishakuur 3:00">Abdishakuur 3:00</option><option value="Muktar 3:00">Muktar 3:00</option><option value="TRY 4:00">TRY 4:00</option><option value="Abdishakuur 4:00">Abdishakuur 4:00</option><option value="Muktar 4:00">Muktar 4:00</option><option value="TRY 7:00">TRY 7:00</option></select>
                     </div>
                     <div id="questionsContainer">
                         <div class="question-item p-4 border rounded-xl mb-3 dark:border-gray-600">
@@ -340,7 +341,7 @@
         document.getElementById('myattMonth').value = new Date().toISOString().slice(0, 7);
 
         const teacherClasses = {
-            'try': ['TRY 2:00','TRY 3:00','TRY 4:00'],
+            'try': ['TRY 2:00','TRY 3:00','TRY 4:00','TRY 7:00'],
             'abdishakuur': ['Abdishakuur 2:00','Abdishakuur 3:00','Abdishakuur 4:00'],
             'c.shakuur': ['Abdishakuur 2:00','Abdishakuur 3:00','Abdishakuur 4:00'],
             'muqtaar': ['Muktar 2:00','Muktar 3:00','Muktar 4:00'],
@@ -1012,7 +1013,7 @@
         async function loadTeacherReports() {
             try {
                 const students = await SOMSTAR.getStudents();
-                const rooms = ['TRY 2:00','Abdishakuur 2:00','Muktar 2:00','TRY 3:00','Abdishakuur 3:00','Muktar 3:00','TRY 4:00','Abdishakuur 4:00','Muktar 4:00'];
+                const rooms = ['TRY 2:00','Abdishakuur 2:00','Muktar 2:00','TRY 3:00','Abdishakuur 3:00','Muktar 3:00','TRY 4:00','Abdishakuur 4:00','Muktar 4:00','TRY 7:00'];
 
                 if (window.t1) window.t1.destroy();
                 if (window.t2) window.t2.destroy();
