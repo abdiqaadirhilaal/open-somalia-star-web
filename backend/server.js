@@ -277,18 +277,26 @@ async function seedDefaults() {
         console.log('  ✓ Teachers seeded');
     }
 
-    // Classes
+    // Classes — 10 general + 4 TRY
+    const requiredClasses = [
+        { name: 'Class 1', grade: '1' }, { name: 'Class 2', grade: '2' },
+        { name: 'Class 3', grade: '3' }, { name: 'Class 4', grade: '4' },
+        { name: 'Class 5', grade: '5' }, { name: 'Class 6', grade: '6' },
+        { name: 'Class 7', grade: '7' }, { name: 'Class 8', grade: '8' },
+        { name: 'Class 9', grade: '9' }, { name: 'Class 10', grade: '10' },
+        { name: 'TRY 2:00', teacherId: 'TCH001' },
+        { name: 'TRY 3:00', teacherId: 'TCH001' },
+        { name: 'TRY 4:00', teacherId: 'TCH001' },
+        { name: 'TRY 7:00', teacherId: 'TCH001' }
+    ];
     const existingClasses = await db.getAll('classes');
-    if (existingClasses.length === 0) {
-        const classes = [
-            { name: 'TRY 2:00', teacherId: 'TCH001' },
-            { name: 'TRY 3:00', teacherId: 'TCH001' },
-            { name: 'TRY 4:00', teacherId: 'TCH001' },
-            { name: 'TRY 7:00', teacherId: 'TCH001' }
-        ];
-        for (const c of classes) await db.insert('classes', c);
-        console.log('  ✓ Classes seeded');
+    const existingNames = new Set(existingClasses.map(c => c.name));
+    for (const c of requiredClasses) {
+        if (!existingNames.has(c.name)) {
+            await db.insert('classes', c);
+        }
     }
+    console.log(`  ✓ Classes: ${existingClasses.length} existing + new added`);
 
     // Subjects
     const existingSubjects = await db.getAll('subjects');
