@@ -14,12 +14,26 @@ app.use(cors());
 app.use(express.json({ limit: '200mb' }));
 app.use(express.urlencoded({ extended: true, limit: '200mb' }));
 
-// Serve static files from parent directory
+// Serve static files from project root
 app.use(express.static(path.join(__dirname, '..')));
 
+// DB init helper
+let _dbInit = null;
+function _ensureDB() {
+    if (!_dbInit) {
+        _dbInit = db.initDB().then(async () => {
+            await db.migrateIfNeeded();
+            await seedDefaults();
+            await migrateLessonFiles();
+        });
+    }
+    return _dbInit;
+}
+
 // File upload config
+const uploadDir = path.join(__dirname, 'data', 'uploads');
 const storage = multer.diskStorage({
-    destination: path.join(__dirname, 'data', 'uploads'),
+    destination: uploadDir,
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
         cb(null, Date.now() + '-' + Math.random().toString(36).substr(2, 6) + ext);
@@ -31,7 +45,6 @@ const upload = multer({
 });
 
 // Ensure upload dir exists
-const uploadDir = path.join(__dirname, 'data', 'uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -248,47 +261,33 @@ app.post('/api/import', async (req, res) => {
     }
 });
 
-// Seed default teachers, classes, subjects
+// Seed default teachers
 async function seedDefaults() {
-    const existingTeachers = await db.getAll('teachers');
-    if (existingTeachers.length === 0) {
-        const teachers = [
-            { name: 'Try', subject: 'General', teacherId: 'TCH001', contact: '', password: '@som1234' },
-            { name: 'C.Shakuur', subject: 'General', teacherId: 'TCH002', contact: '', password: '@som1234' },
-            { name: 'Muqtaar', subject: 'General', teacherId: 'TCH003', contact: '', password: '@som1234' },
-            { name: 'Aadan', subject: 'Mathematics', teacherId: 'TCH004', contact: '', password: '@som1234', assignedClass: 'Class 10', teachingTime: '3:00 PM' },
-            { name: 'Cabdalah', subject: '', teacherId: 'TCH005', contact: '', password: '@som1234', role: 'practice-teacher', disciplineOnly: true }
-        ];
-        for (const t of teachers) await db.insert('teachers', t);
-        console.log('  ✓ Default teachers seeded');
-    }
-    const existingClasses = await db.getAll('classes');
-    if (existingClasses.length === 0) {
-        const classes = [
-            { name: 'TRY 2:00', teacher: 'Try' },
-            { name: 'TRY 3:00', teacher: 'Try' },
-            { name: 'TRY 4:00', teacher: 'Try' },
-            { name: 'C.Shakuur 2:00', teacher: 'C.Shakuur' },
-            { name: 'C.Shakuur 3:00', teacher: 'C.Shakuur' },
-            { name: 'C.Shakuur 4:00', teacher: 'C.Shakuur' },
-            { name: 'Muqtaar 2:00', teacher: 'Muqtaar' },
-            { name: 'Muqtaar 3:00', teacher: 'Muqtaar' },
-            { name: 'Muqtaar 4:00', teacher: 'Muqtaar' },
-            { name: 'Class 10', teacher: 'Aadan', time: '3:00 PM' }
-        ];
-        for (const c of classes) await db.insert('classes', c);
-        console.log('  ✓ Default classes seeded');
-    }
-    const existingSubjects = await db.getAll('subjects');
-    if (existingSubjects.length === 0) {
-        const subjects = [
-            { name: 'English' },
-            { name: 'Mathematics' },
-            { name: 'Science' }
-        ];
-        for (const s of subjects) await db.insert('subjects', s);
-        console.log('  ✓ Default subjects seeded');
-    }
+    const existing = await db.getAll('teachers');
+    if (existing.length > 0) return;
+    const teachers = [
+        { name: 'Try', subject: 'General', teacherId: 'TCH001', contact: '', password: '@som1234' },
+        { name: 'C.Shakuur', subject: 'General', teacherId: 'TCH002', contact: '', password: '@som1234' },
+        { name: 'Muqtaar', subject: 'General', teacherId: 'TCH003', contact: '', password: '@som1234' },
+        { name: 'Aadan', subject: 'Mathematics', teacherId: 'TCH004', contact: '', password: '@som1234' },
+        { name: 'Cabdalah', subject: 'General', teacherId: 'TCH005', contact: '', password: '@som1234', role: 'practice-teacher', disciplineOnly: true }
+    ];
+    for (const t of teachers) await db.insert('teachers', t);
+    const classes = [
+        { name: 'Class 1', grade: '1' }, { name: 'Class 2', grade: '2' },
+        { name: 'Class 3', grade: '3' }, { name: 'Class 4', grade: '4' },
+        { name: 'Class 5', grade: '5' }, { name: 'Class 6', grade: '6' },
+        { name: 'Class 7', grade: '7' }, { name: 'Class 8', grade: '8' },
+        { name: 'Class 9', grade: '9' }, { name: 'Class 10', grade: '10' }
+    ];
+    for (const c of classes) await db.insert('classes', c);
+    const subjects = [
+        { name: 'English', code: 'ENG' },
+        { name: 'Mathematics', code: 'MATH' },
+        { name: 'Science', code: 'SCI' }
+    ];
+    for (const s of subjects) await db.insert('subjects', s);
+    console.log('  ✓ Default data seeded (teachers, classes, subjects)');
 }
 
 // Health check
@@ -360,12 +359,6 @@ app.post('/api/login', async (req, res) => {
         if (role === 'practice-teacher') {
             if (userId === 'Cabdalah' && password === '@som1234') {
                 return res.json({ success: true, role: 'practice-teacher', data: { name: 'Cabdalah', uid: 'practice-cabdalah' } });
-            }
-            const ptRows = await db.queryByChild('teachers', 'teacherId', userId);
-            if (ptRows && ptRows.length > 0 && ptRows[0].role === 'practice-teacher') {
-                if (ptRows[0].password === password) {
-                    return res.json({ success: true, role: 'practice-teacher', data: { uid: ptRows[0].uid, ...ptRows[0] } });
-                }
             }
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -442,52 +435,33 @@ process.on('unhandledRejection', (reason) => {
 });
 
 // Start server
-db.initDB().then(async () => {
-    await db.migrateIfNeeded();
-    await seedDefaults();
-    await migrateLessonFiles();
-    // First keepalive after 5 minutes, then every 6 hours
+_ensureDB().then(() => {
     setTimeout(() => db.keepAlive(), 5 * 60 * 1000);
     startKeepalive();
-    if (!process.env.DATABASE_URL) {
-        let networkIP = 'Not found';
-        const ifaces = os.networkInterfaces();
-        for (const name of Object.keys(ifaces)) {
-            for (const iface of ifaces[name]) {
-                if (iface.family === 'IPv4' && !iface.internal) {
-                    networkIP = iface.address;
-                    break;
-                }
+    let networkIP = 'Not found';
+    const ifaces = os.networkInterfaces();
+    for (const name of Object.keys(ifaces)) {
+        for (const iface of ifaces[name]) {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                networkIP = iface.address;
+                break;
             }
-            if (networkIP !== 'Not found') break;
         }
-        app.listen(PORT, '', () => {
-            console.log('========================================');
-            console.log('  SOMSTAR Academy Backend Server');
-            console.log('========================================');
-            console.log(`  Local:    http://localhost:${PORT}`);
-            console.log(`  Network:  http://${networkIP}:${PORT}`);
-            console.log('========================================');
-            console.log('  Share the Network URL to access from');
-            console.log('  your mobile phone or other devices');
-            console.log('  on the same Wi-Fi network.');
-            console.log('========================================');
-        });
-    } else {
-        app.listen(PORT, '0.0.0.0', () => {
-            const dbType = db.isUsingPostgres() ? 'PostgreSQL' : 'SQLite (PostgreSQL unavailable)';
-            console.log('========================================');
-            console.log('  SOMSTAR Academy - Production');
-            console.log('========================================');
-            console.log(`  Server running on port ${PORT}`);
-            console.log(`  Database: ${dbType}`);
-            console.log('========================================');
-        });
+        if (networkIP !== 'Not found') break;
     }
+    app.listen(PORT, '', () => {
+        const dbType = db.isUsingPostgres() ? 'PostgreSQL' : 'SQLite';
+        console.log('========================================');
+        console.log('  SOMSTAR Academy Backend Server');
+        console.log('========================================');
+        console.log(`  Database: ${dbType}`);
+        console.log(`  Local:    http://localhost:${PORT}`);
+        console.log(`  Network:  http://${networkIP}:${PORT}`);
+        console.log('========================================');
+    });
 }).catch(err => {
     console.error('Failed to initialize database:', err);
-    console.log('Starting server without database — some features may not work');
-    app.listen(PORT, '0.0.0.0', () => {
+    app.listen(PORT, '', () => {
         console.log(`Server running on port ${PORT} (limited mode)`);
     });
 });

@@ -91,7 +91,9 @@
     </div>
 
     <div class="w-full max-w-[420px] relative z-10 animate-fadeIn">
+        <!-- Card -->
         <div class="glassmorphism rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/20">
+            <!-- Header -->
             <div class="text-center mb-8">
                 <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center mx-auto mb-5 shadow-xl shadow-amber-500/30">
                     <i class="fas fa-graduation-cap text-2xl text-white"></i>
@@ -100,9 +102,38 @@
                 <p class="text-blue-200/70 text-sm">Sign in to continue learning</p>
             </div>
 
+            <!-- Role Selector -->
+            <div class="grid grid-cols-3 gap-2 mb-6">
+                <div onclick="selectRole('manager',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism active">
+                    <i class="fas fa-user-cog text-base text-blue-300"></i>
+                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Manager</div>
+                </div>
+                <div onclick="selectRole('teacher',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism">
+                    <i class="fas fa-chalkboard-teacher text-base text-green-300"></i>
+                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Teacher</div>
+                </div>
+                <div onclick="selectRole('supervisor',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism">
+                    <i class="fas fa-eye text-base text-teal-300"></i>
+                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Supervisor</div>
+                </div>
+                <div onclick="selectRole('practice-teacher',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism">
+                    <i class="fas fa-clipboard-list text-base text-orange-300"></i>
+                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Practice T.</div>
+                </div>
+                <div onclick="selectRole('finance',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism">
+                    <i class="fas fa-coins text-base text-amber-300"></i>
+                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Finance</div>
+                </div>
+                <div onclick="selectRole('student',this)" class="role-selector p-2.5 rounded-xl text-center glassmorphism">
+                    <i class="fas fa-user-graduate text-base text-purple-300"></i>
+                    <div class="text-[10px] font-medium text-white/70 mt-0.5">Student</div>
+                </div>
+            </div>
+
+            <!-- Login Form -->
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-blue-200 mb-2">User ID / Student ID</label>
+                    <label class="block text-sm font-medium text-blue-200 mb-2" id="idLabel">User ID</label>
                     <div class="relative">
                         <i class="fas fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-300/50 text-sm"></i>
                         <input type="text" id="userId" class="input-glass w-full pl-10 pr-4 py-3 rounded-xl text-white placeholder-blue-200/40 text-sm outline-none" placeholder="Enter your ID" required>
@@ -120,12 +151,21 @@
                     </div>
                 </div>
 
+                <div class="flex items-center justify-between mb-6">
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" class="w-4 h-4 rounded border-blue-300/30 bg-white/10 text-blue-500 focus:ring-blue-500/30 cursor-pointer">
+                        <span class="text-sm text-blue-200/60 group-hover:text-blue-200 transition-colors">Remember me</span>
+                    </label>
+                    <a href="#" class="text-sm text-cyan-300 hover:text-cyan-200 transition-colors">Forgot password?</a>
+                </div>
+
                 <button type="submit" id="loginBtn" class="w-full py-3.5 rounded-xl text-white font-semibold text-base bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2">
                     <i class="fas fa-sign-in-alt"></i>
                     <span>Sign In</span>
                 </button>
             </form>
 
+            <!-- Footer -->
             <div class="text-center mt-8">
                 <p class="text-blue-200/40 text-xs">
                     <i class="fas fa-shield-alt mr-1"></i>
@@ -138,21 +178,31 @@
     <script src="js/firebase-config.js"></script>
     <script src="js/app.js"></script>
     <script>
-        function detectRole(userId) {
-            const id = userId.toUpperCase();
-            if (id === 'MANAGER') return 'manager';
-            if (id === 'SAACID') return 'finance';
-            if (id === 'CABAAS') return 'supervisor';
-            if (id === 'CABDALAH') return 'practice-teacher';
-            if (id.startsWith('TCH')) return 'teacher';
-            return 'student';
+        let currentRole = 'manager';
+
+        function selectRole(role, el) {
+            currentRole = role;
+            document.querySelectorAll('.role-selector').forEach(r => r.classList.remove('active'));
+            el.classList.add('active');
+            const label = document.getElementById('idLabel');
+            if (role === 'manager') label.textContent = 'Manager ID';
+            else if (role === 'teacher') label.textContent = 'Teacher ID';
+            else if (role === 'supervisor') label.textContent = 'Supervisor ID';
+            else if (role === 'practice-teacher') label.textContent = 'Staff ID';
+            else if (role === 'finance') label.textContent = 'Staff ID';
+            else label.textContent = 'Student ID';
         }
 
         function togglePassword() {
             const pwd = document.getElementById('password');
             const icon = document.getElementById('eyeIcon');
-            pwd.type = pwd.type === 'password' ? 'text' : 'password';
-            icon.className = pwd.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                pwd.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
         }
 
         async function handleLogin(e) {
@@ -160,7 +210,6 @@
             const btn = document.getElementById('loginBtn');
             const userId = document.getElementById('userId').value.trim();
             const password = document.getElementById('password').value.trim();
-            const role = detectRole(userId);
 
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
@@ -169,7 +218,7 @@
                 const res = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId, password, role })
+                    body: JSON.stringify({ userId, password, role: currentRole })
                 });
                 let result;
                 try { result = await res.json(); } catch(e) { result = {}; }

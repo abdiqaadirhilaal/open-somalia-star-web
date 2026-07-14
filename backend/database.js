@@ -4,8 +4,6 @@ const fs = require('fs');
 const isPostgres = !!process.env.DATABASE_URL;
 let pgPool = null;
 let sqliteDb = null;
-let _reconnectTimer = null;
-let _pgError = null;
 
 const DB_PATH = path.join(__dirname, 'data', 'somstar.db');
 const dataDir = path.dirname(DB_PATH);
@@ -40,39 +38,23 @@ async function _tryConnectPostgres() {
     return pool;
 }
 
-async function _scheduleReconnect() {
-    if (_reconnectTimer) clearTimeout(_reconnectTimer);
-    _reconnectTimer = setTimeout(async () => {
-        console.log('  → Attempting PostgreSQL reconnection...');
-        try {
-            const pool = await _tryConnectPostgres();
-            pgPool = pool;
-            _reconnectTimer = null;
-            console.log('  ✓ PostgreSQL reconnected successfully');
-
-            // Migrate any SQLite data to PostgreSQL
-            if (sqliteDb) {
-                try {
-                    const stmt = sqliteDb.prepare('SELECT collection, uid, json, createdAt FROM data ORDER BY collection, createdAt');
-                    while (stmt.step()) {
-                        const row = stmt.getAsObject();
-                        await pgPool.query(
-                            'INSERT INTO data (collection, uid, json, "createdAt") VALUES ($1, $2, $3, $4) ON CONFLICT (collection, uid) DO NOTHING',
-                            [row.collection, row.uid, row.json, row.createdAt]
-                        );
-                    }
-                    stmt.free();
-                    console.log('  ✓ SQLite data migrated to PostgreSQL');
-                } catch(e) {
-                    console.error('  ✗ Migration error:', e.message);
-                }
-            }
-        } catch(e) {
-            _pgError = e.message;
-            console.error('  ✗ Reconnection failed:', e.message.slice(0, 100));
-            _scheduleReconnect();
+async function _migrateSQLiteToPg() {
+    try {
+        const stmt = sqliteDb.prepare('SELECT collection, uid, json, createdAt FROM data ORDER BY collection, createdAt');
+        let count = 0;
+        while (stmt.step()) {
+            const row = stmt.getAsObject();
+            await pgPool.query(
+                'INSERT INTO data (collection, uid, json, "createdAt") VALUES ($1, $2, $3, $4) ON CONFLICT (collection, uid) DO NOTHING',
+                [row.collection, row.uid, row.json, row.createdAt]
+            );
+            count++;
         }
-    }, 30000); // Try again in 30 seconds
+        stmt.free();
+        console.log(`  ✓ Migrated ${count} records from SQLite to PostgreSQL`);
+    } catch(e) {
+        console.error('  ✗ Migration error:', e.message);
+    }
 }
 
 async function initDB() {
@@ -80,23 +62,23 @@ async function initDB() {
         try {
             pgPool = await _tryConnectPostgres();
             console.log('  ✓ Connected to PostgreSQL');
+            const initSqlJs = require('sql.js');
+            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+            if (fs.existsSync(DB_PATH)) {
+                sqliteDb = new (await initSqlJs()).Database(fs.readFileSync(DB_PATH));
+                await _migrateSQLiteToPg();
+            } else {
+                sqliteDb = new (await initSqlJs()).Database();
+                sqliteDb.exec(`CREATE TABLE IF NOT EXISTS data (collection TEXT NOT NULL, uid TEXT NOT NULL, json TEXT NOT NULL, createdAt TEXT DEFAULT (datetime('now')), PRIMARY KEY (collection, uid)); CREATE INDEX IF NOT EXISTS idx_collection ON data(collection); CREATE INDEX IF NOT EXISTS idx_collection_created ON data(collection, createdAt);`);
+                saveSQLite();
+            }
             return;
         } catch(e) {
-            _pgError = e.message;
-            console.error('  ✗ PostgreSQL connection failed:', e.message);
-            if (e.message && e.message.includes('timeout')) {
-                console.log('  → Connection timed out. Check if Supabase project is active.');
-                console.log('  → Visit https://supabase.com/dashboard/project/rlztilksthbcvsioyzxi to unpause.');
-            } else if (e.message && e.message.includes('ENOTFOUND')) {
-                console.log('  → User/tenant not found — database project may be PAUSED.');
-                console.log('  → Check your database provider dashboard.');
-            } else if (e.message && e.message.includes('password')) {
-                console.log('  → Password may be wrong. Verify in Supabase dashboard.');
-            }
-            console.log('  → Falling back to SQLite temporarily. Will retry PostgreSQL every 30s.');
+            console.error('  ✗ PostgreSQL connection failed:', e.message.slice(0, 100));
             pgPool = null;
         }
     }
+
     const initSqlJs = require('sql.js');
     if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
     if (fs.existsSync(DB_PATH)) {
@@ -116,28 +98,6 @@ async function initDB() {
         CREATE INDEX IF NOT EXISTS idx_collection_created ON data(collection, createdAt);
     `);
     saveSQLite();
-    if (isPostgres) {
-        _scheduleReconnect();
-    }
-}
-
-async function runQuery(sql, params) {
-    if (pgPool) {
-        const res = await pgPool.query(sql, params);
-        return res;
-    }
-    if (!sqliteDb) return null;
-    if (sql.trim().toUpperCase().startsWith('SELECT')) {
-        const stmt = sqliteDb.prepare(sql);
-        stmt.bind(params);
-        const rows = [];
-        while (stmt.step()) rows.push(stmt.getAsObject());
-        stmt.free();
-        return { rows };
-    }
-    sqliteDb.run(sql, params);
-    saveSQLite();
-    return null;
 }
 
 async function getAll(collection) {
@@ -176,19 +136,21 @@ async function getByUid(collection, uid) {
     return null;
 }
 
+function _saveToSQLite(collection, uid, json, now) {
+    if (!sqliteDb) return;
+    try { sqliteDb.run('INSERT OR REPLACE INTO data (collection, uid, json, createdAt) VALUES (?, ?, ?, ?)', [collection, uid, json, now]); saveSQLite(); } catch(e) {}
+}
+
 async function insert(collection, data) {
     const uid = data.uid || 'k' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
     const { uid: _u, ...rest } = data;
     const json = JSON.stringify(rest);
     const now = new Date().toISOString();
     if (pgPool) {
-        await pgPool.query(
-            'INSERT INTO data (collection, uid, json, "createdAt") VALUES ($1, $2, $3, $4) ON CONFLICT (collection, uid) DO UPDATE SET json = $3',
-            [collection, uid, json, now]
-        );
+        await pgPool.query('INSERT INTO data (collection, uid, json, "createdAt") VALUES ($1, $2, $3, $4) ON CONFLICT (collection, uid) DO UPDATE SET json = $3', [collection, uid, json, now]);
+        _saveToSQLite(collection, uid, json, now);
     } else {
-        sqliteDb.run('INSERT OR REPLACE INTO data (collection, uid, json, createdAt) VALUES (?, ?, ?, ?)',
-            [collection, uid, json, now]);
+        sqliteDb.run('INSERT OR REPLACE INTO data (collection, uid, json, createdAt) VALUES (?, ?, ?, ?)', [collection, uid, json, now]);
         saveSQLite();
     }
     return uid;
@@ -203,6 +165,7 @@ async function update(collection, uid, data) {
     const json = JSON.stringify(merged);
     if (pgPool) {
         await pgPool.query('UPDATE data SET json = $1 WHERE collection = $2 AND uid = $3', [json, collection, uid]);
+        _saveToSQLite(collection, uid, json, merged.createdAt);
     } else {
         sqliteDb.run('UPDATE data SET json = ? WHERE collection = ? AND uid = ?', [json, collection, uid]);
         saveSQLite();
@@ -212,10 +175,9 @@ async function update(collection, uid, data) {
 async function remove(collection, uid) {
     if (pgPool) {
         await pgPool.query('DELETE FROM data WHERE collection = $1 AND uid = $2', [collection, uid]);
-    } else {
-        sqliteDb.run('DELETE FROM data WHERE collection = ? AND uid = ?', [collection, uid]);
-        saveSQLite();
     }
+    sqliteDb.run('DELETE FROM data WHERE collection = ? AND uid = ?', [collection, uid]);
+    saveSQLite();
 }
 
 async function queryByChild(collection, childKey, childValue) {
@@ -225,29 +187,12 @@ async function queryByChild(collection, childKey, childValue) {
 
 async function keepAlive() {
     if (pgPool) {
-        try {
-            await pgPool.query('SELECT 1');
-            console.log('  ✓ Database keepalive ping');
-        } catch(e) {
-            console.error('  ✗ Keepalive failed:', e.message.slice(0, 100));
-            pgPool = null;
-            _scheduleReconnect();
-        }
+        try { await pgPool.query('SELECT 1'); console.log('  ✓ Database keepalive ping'); } catch(e) { console.error('  ✗ Keepalive failed:', e.message.slice(0, 100)); }
     }
 }
 
-function getDbInfo() {
-    return {
-        type: pgPool ? 'postgresql' : 'sqlite',
-        connected: pgPool !== null || sqliteDb !== null,
-        hasPostgres: pgPool !== null,
-        pgError: pgPool ? null : _pgError,
-        timestamp: new Date().toISOString()
-    };
-}
-
 async function migrateIfNeeded() {
-    if (pgPool) return; // No migration needed for active PG database
+    if (pgPool) return;
     const tables = sqliteDb.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT IN ('data', 'sqlite_sequence')");
     if (!tables || tables.length === 0 || !tables[0].values) return;
     const oldTables = tables[0].values.map(v => v[0]);
@@ -272,4 +217,4 @@ async function migrateIfNeeded() {
     saveSQLite();
 }
 
-module.exports = { initDB, getDB: () => sqliteDb, getAll, getByUid, insert, update, remove, queryByChild, migrateIfNeeded, isUsingPostgres: () => pgPool !== null, keepAlive, getDbInfo };
+module.exports = { initDB, getDB: () => sqliteDb, getAll, getByUid, insert, update, remove, queryByChild, migrateIfNeeded, isUsingPostgres: () => pgPool !== null, keepAlive, getDbInfo: () => ({ type: pgPool ? 'postgresql' : 'sqlite', connected: pgPool !== null || sqliteDb !== null, timestamp: new Date().toISOString() }) };

@@ -3,308 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Practice Teacher - SOMSTAR Academy</title>
+    <title>Practice Teacher - SOMALI STAR ACADEMY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
+<body class="bg-gray-900 min-h-screen">
+    <nav class="bg-gray-800/80 backdrop-blur-md border-b border-gray-700/50 px-4 py-2.5">
+        <div class="flex items-center justify-between max-w-7xl mx-auto">
+            <div class="flex items-center gap-3">
+                <img src="../image.png" class="h-8">
+                <span class="text-white font-bold">Practice Teacher</span>
+            </div>
+            <button onclick="logout()" class="px-4 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 text-sm">
+                <i class="fas fa-sign-out-alt mr-1"></i>Logout
+            </button>
+        </div>
+    </nav>
+    <div class="max-w-7xl mx-auto p-6">
+        <div class="text-center py-20">
+            <i class="fas fa-clipboard-list text-6xl text-orange-400 mb-6"></i>
+            <h1 class="text-3xl font-bold text-white mb-4">Practice Teacher Dashboard</h1>
+            <p class="text-gray-400">Coming soon. Use Manager account for now.</p>
+            <a href="../manager/" class="inline-block mt-6 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700">Go to Manager</a>
+        </div>
+    </div>
     <script>
         const user = JSON.parse(localStorage.getItem('somstar_user') || '{}');
-        if (!user || (user.role !== 'practice-teacher')) window.location.href = '../login.html';
-        if(localStorage.getItem('somstar_dark')==='true')document.body.classList.add('dark-mode');
-    </script>
-
-    <div class="flex">
-        <aside id="sidebar" class="sidebar fixed md:relative z-50">
-            <div class="p-5 border-b border-white/10">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-pink-700 flex items-center justify-center">
-                        <span class="text-white font-bold text-lg">P</span>
-                    </div>
-                    <div>
-                        <div class="text-white font-bold">SOMSTAR</div>
-                        <div class="text-pink-300 text-xs">Practice Teacher</div>
-                    </div>
-                </div>
-            </div>
-            <nav class="p-3 space-y-1 mt-2">
-                <a href="#" onclick="showSection('discipline')" class="sidebar-link active" data-section="discipline"><i class="fas fa-clipboard-list"></i> <span>Discipline Report</span></a>
-                <a href="#" onclick="showSection('history')" class="sidebar-link" data-section="history"><i class="fas fa-history"></i> <span>Report History</span></a>
-            </nav>
-            <div class="p-3 mt-auto border-t border-white/10">
-                <a href="#" onclick="AUTH.logout()" class="sidebar-link logout-btn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
-            </div>
-        </aside>
-
-        <main class="flex-1 min-h-screen bg-gray-50 dark:bg-gray-900 transition-all">
-            <div class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 py-3">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <button onclick="document.getElementById('sidebar').classList.toggle('-translate-x-full')" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-                            <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
-                        </button>
-                        <h1 class="text-lg font-semibold text-gray-900 dark:text-white" id="pageTitle">Discipline Report</h1>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <button onclick="SOMSTAR.toggleDarkMode()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-                            <i class="fas fa-moon text-gray-600 dark:text-gray-300"></i>
-                        </button>
-                        <div id="dbBadge" class="hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-help" title="Database status">
-                            <i class="fas fa-circle text-[8px] text-gray-400"></i>
-                            <span>...</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                            <i class="fas fa-user-circle text-xl"></i>
-                            <span class="hidden sm:inline">Cabdalah</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="p-4 md:p-6 space-y-6">
-                <div id="section-discipline" class="section-content">
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <!-- Late Students -->
-                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-                            <h3 class="font-semibold text-gray-900 dark:text-white mb-4"><i class="fas fa-clock text-orange-500 mr-2"></i> Late Students</h3>
-                            <form id="lateForm" onsubmit="submitLateReport(event)">
-                                <div class="space-y-3">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Student Name</label>
-                                        <input type="text" id="lateStudentName" class="form-input" placeholder="Enter student name" required>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Class</label>
-                                        <select id="lateClass" class="form-input" required>
-                                            <option value="">Select class</option>
-                                        </select>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                                            <input type="date" id="lateDate" class="form-input" required>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
-                                            <input type="time" id="lateTime" class="form-input" required>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reason</label>
-                                        <textarea id="lateReason" class="form-input" rows="2" placeholder="Reason for being late" required></textarea>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn-primary w-full py-2.5 rounded-xl text-white text-sm mt-4"><i class="fas fa-save mr-1"></i> Save Late Report</button>
-                            </form>
-                        </div>
-
-                        <!-- Speaking Somali -->
-                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-                            <h3 class="font-semibold text-gray-900 dark:text-white mb-4"><i class="fas fa-language text-red-500 mr-2"></i> Speaking Somali</h3>
-                            <form id="somaliForm" onsubmit="submitSomaliReport(event)">
-                                <div class="space-y-3">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Student Name</label>
-                                        <input type="text" id="somaliStudentName" class="form-input" placeholder="Enter student name" required>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Class</label>
-                                        <select id="somaliClass" class="form-input" required>
-                                            <option value="">Select class</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                                        <input type="date" id="somaliDate" class="form-input" required>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                                        <textarea id="somaliDescription" class="form-input" rows="2" placeholder="Describe what happened" required></textarea>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Violation</label>
-                                        <input type="text" id="somaliViolation" class="form-input" value="Speaking Somali" readonly>
-                                    </div>
-                                </div>
-                                <button type="submit" class="w-full py-2.5 rounded-xl text-white text-sm mt-4 bg-red-600 hover:bg-red-700"><i class="fas fa-save mr-1"></i> Save Report</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="section-history" class="section-content hidden">
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Report History</h3>
-                        <div class="mb-4 flex gap-3 flex-wrap">
-                            <select id="historyFilter" class="form-input max-w-[200px]" onchange="loadHistory()">
-                                <option value="all">All Reports</option>
-                                <option value="late">Late Students</option>
-                                <option value="speaking_somali">Speaking Somali</option>
-                            </select>
-                            <input type="date" id="historyDate" class="form-input max-w-[200px]" onchange="loadHistory()">
-                        </div>
-                        <div class="table-container">
-                            <table class="data-table">
-                                <thead><tr><th>Student</th><th>Class</th><th>Date</th><th>Type</th><th>Details</th><th>Action</th></tr></thead>
-                                <tbody id="historyBody"><tr><td colspan="6" class="text-center text-gray-400 py-8">Loading...</td></tr></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <script src="../js/firebase-config.js"></script>
-    <script src="../js/app.js"></script>
-    <script src="../js/auth.js"></script>
-    <script>
-        const teacherId = user.id || 'Cabdalah';
-        const teacherUid = user.uid || 'practice-cabdalah';
-
-        SOMSTAR.loadSidebar();
-        SOMSTAR.setupLogout();
-        SOMSTAR.initDarkMode();
-
-        document.getElementById('lateDate').value = SOMSTAR.getToday();
-        document.getElementById('somaliDate').value = SOMSTAR.getToday();
-        document.getElementById('historyDate').value = '';
-
-        function showSection(section) {
-            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
-            const el = document.getElementById('section-' + section);
-            if (el) el.classList.remove('hidden');
-            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-            const link = document.querySelector(`[data-section="${section}"]`);
-            if (link) link.classList.add('active');
-            const titles = { discipline: 'Discipline Report', history: 'Report History' };
-            document.getElementById('pageTitle').textContent = titles[section] || section;
-            if (section === 'history') loadHistory();
-        }
-
-        async function loadClasses() {
-            try {
-                const snap = await db.ref('classes').once('value');
-                const data = snap.val();
-                if (!data) return;
-                const classes = Object.values(data);
-                const selects = ['lateClass', 'somaliClass'];
-                selects.forEach(id => {
-                    const sel = document.getElementById(id);
-                    sel.innerHTML = '<option value="">Select class</option>';
-                    classes.forEach(c => {
-                        sel.innerHTML += `<option value="${c.name}">${c.name}</option>`;
-                    });
-                });
-            } catch(e) { console.error(e); }
-        }
-
-        async function submitLateReport(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-            try {
-                const data = {
-                    teacherName: 'Cabdalah',
-                    studentName: document.getElementById('lateStudentName').value.trim(),
-                    class: document.getElementById('lateClass').value,
-                    date: document.getElementById('lateDate').value,
-                    time: document.getElementById('lateTime').value,
-                    reason: document.getElementById('lateReason').value.trim(),
-                    type: 'late',
-                    createdAt: new Date().toISOString()
-                };
-                await db.ref('discipline_reports').push(data);
-                await db.ref('notifications').push({
-                    type: 'discipline',
-                    from: 'Cabdalah',
-                    message: `Late: ${data.studentName} (${data.class}) - ${data.reason}`,
-                    reportType: 'late',
-                    read: false,
-                    createdAt: new Date().toISOString()
-                });
-                SOMSTAR.showNotification('Late report saved!', 'success');
-                document.getElementById('lateForm').reset();
-                document.getElementById('lateDate').value = SOMSTAR.getToday();
-            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
-            btn.disabled = false; btn.innerHTML = '<i class="fas fa-save mr-1"></i> Save Late Report';
-        }
-
-        async function submitSomaliReport(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-            try {
-                const data = {
-                    teacherName: 'Cabdalah',
-                    studentName: document.getElementById('somaliStudentName').value.trim(),
-                    class: document.getElementById('somaliClass').value,
-                    date: document.getElementById('somaliDate').value,
-                    description: document.getElementById('somaliDescription').value.trim(),
-                    violation: 'Speaking Somali',
-                    type: 'speaking_somali',
-                    createdAt: new Date().toISOString()
-                };
-                await db.ref('discipline_reports').push(data);
-                await db.ref('notifications').push({
-                    type: 'discipline',
-                    from: 'Cabdalah',
-                    message: `Speaking Somali: ${data.studentName} (${data.class})`,
-                    reportType: 'speaking_somali',
-                    read: false,
-                    createdAt: new Date().toISOString()
-                });
-                SOMSTAR.showNotification('Report saved!', 'success');
-                document.getElementById('somaliForm').reset();
-                document.getElementById('somaliDate').value = SOMSTAR.getToday();
-            } catch(e) { SOMSTAR.showNotification('Error: ' + e.message, 'error'); }
-            btn.disabled = false; btn.innerHTML = '<i class="fas fa-save mr-1"></i> Save Report';
-        }
-
-        async function loadHistory() {
-            const filter = document.getElementById('historyFilter').value;
-            const dateFilter = document.getElementById('historyDate').value;
-            const tbody = document.getElementById('historyBody');
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-8">Loading...</td></tr>';
-            try {
-                const snap = await db.ref('discipline_reports').once('value');
-                const data = snap.val();
-                if (!data) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-8">No reports yet</td></tr>'; return; }
-                let reports = Object.values(data).filter(r => r.teacherName === 'Cabdalah');
-                if (filter !== 'all') reports = reports.filter(r => r.type === filter);
-                if (dateFilter) reports = reports.filter(r => r.date === dateFilter);
-                reports.sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
-                if (reports.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-400 py-8">No matching reports</td></tr>'; return; }
-                tbody.innerHTML = reports.map(r => {
-                    const isLate = r.type === 'late';
-                    const details = isLate ? `${r.time} - ${r.reason}` : r.description;
-                    const typeLabel = isLate ? '<span class="text-orange-600 bg-orange-100 dark:bg-orange-900/30 px-2 py-0.5 rounded-full text-xs">Late</span>' : '<span class="text-red-600 bg-red-100 dark:bg-red-900/30 px-2 py-0.5 rounded-full text-xs">Somali</span>';
-                    return `<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        <td class="text-sm font-medium text-gray-900 dark:text-white">${r.studentName}</td>
-                        <td class="text-sm text-gray-500">${r.class}</td>
-                        <td class="text-sm text-gray-500">${r.date}</td>
-                        <td>${typeLabel}</td>
-                        <td class="text-sm text-gray-500 max-w-[200px] truncate">${details}</td>
-                        <td><button onclick="deleteReport('${r.uid||''}')" class="text-red-600 hover:text-red-800 text-xs"><i class="fas fa-trash"></i></button></td>
-                    </tr>`;
-                }).join('');
-            } catch(e) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-400 py-8">Error loading reports</td></tr>';
-            }
-        }
-
-        async function deleteReport(uid) {
-            if (!uid || !confirm('Delete this report?')) return;
-            try {
-                await db.ref('discipline_reports/' + uid).remove();
-                SOMSTAR.showNotification('Report deleted', 'success');
-                loadHistory();
-            } catch(e) { SOMSTAR.showNotification('Error deleting', 'error'); }
-        }
-
-        loadClasses();
-        showSection('discipline');
+        if (!user.id) window.location.href = '../login.html';
+        function logout() { localStorage.removeItem('somstar_user'); window.location.href = '../login.html'; }
     </script>
 </body>
 </html>
