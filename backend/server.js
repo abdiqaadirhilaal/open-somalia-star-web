@@ -313,57 +313,39 @@ app.get('/api/db-status', (req, res) => {
 // POST /api/login — authenticate user and return user data (server-side)
 app.post('/api/login', async (req, res) => {
     try {
-        const { userId, password, role } = req.body;
-        if (!userId || !password || !role) {
-            return res.status(400).json({ error: 'userId, password, and role required' });
+        const { userId, password } = req.body;
+        if (!userId || !password) {
+            return res.status(400).json({ error: 'userId and password required' });
         }
 
-        if (role === 'manager') {
-            if (userId === 'MANAGER' && password === 'somalistar12345') {
-                return res.json({ success: true, role: 'manager', data: { name: 'Manager', uid: 'manager' } });
-            }
-            return res.status(401).json({ error: 'Invalid credentials' });
+        // Hardcoded accounts
+        if (userId === 'MANAGER' && password === 'somalistar12345')
+            return res.json({ success: true, role: 'manager', data: { name: 'Manager', uid: 'manager' } });
+        if (userId === 'Saacid' && password === '@som1234')
+            return res.json({ success: true, role: 'finance', data: { name: 'Saacid', uid: 'finance-saacid' } });
+        if (userId === 'Cabaas' && password === '@som1234')
+            return res.json({ success: true, role: 'supervisor', data: { name: 'Cabaas', uid: 'supervisor-cabaas' } });
+        if (userId === 'Cabdalah' && password === '@som1234')
+            return res.json({ success: true, role: 'practice-teacher', data: { name: 'Cabdalah', uid: 'practice-cabdalah' } });
+
+        // Check teachers
+        const teachers = await db.queryByChild('teachers', 'teacherId', userId);
+        if (teachers.length > 0 && teachers[0].password === password) {
+            const t = teachers[0];
+            if (t.role === 'practice-teacher')
+                return res.json({ success: true, role: 'practice-teacher', data: { uid: t.uid, ...t } });
+            return res.json({ success: true, role: 'teacher', data: { uid: t.uid, ...t } });
         }
 
-        if (role === 'student') {
-            const rows = await db.queryByChild('students', 'studentId', userId);
-            if (!rows || rows.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
-            const student = rows[0];
-            if (student.password !== password) return res.status(401).json({ error: 'Invalid credentials' });
-            if (student.status === 'disabled') return res.status(403).json({ error: 'Account disabled. Contact manager.' });
-            return res.json({ success: true, role: 'student', data: { uid: student.uid, ...student } });
+        // Check students
+        const students = await db.queryByChild('students', 'studentId', userId);
+        if (students.length > 0 && students[0].password === password) {
+            const s = students[0];
+            if (s.status === 'disabled') return res.status(403).json({ error: 'Account disabled. Contact manager.' });
+            return res.json({ success: true, role: 'student', data: { uid: s.uid, ...s } });
         }
 
-        if (role === 'teacher') {
-            const rows = await db.queryByChild('teachers', 'teacherId', userId);
-            if (!rows || rows.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
-            const teacher = rows[0];
-            if (teacher.password !== password) return res.status(401).json({ error: 'Invalid credentials' });
-            return res.json({ success: true, role: 'teacher', data: { uid: teacher.uid, ...teacher } });
-        }
-
-        if (role === 'finance') {
-            if (userId === 'Saacid' && password === '@som1234') {
-                return res.json({ success: true, role: 'finance', data: { name: 'Saacid', uid: 'finance-saacid' } });
-            }
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        if (role === 'supervisor') {
-            if (userId === 'Cabaas' && password === '@som1234') {
-                return res.json({ success: true, role: 'supervisor', data: { name: 'Cabaas', uid: 'supervisor-cabaas' } });
-            }
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        if (role === 'practice-teacher') {
-            if (userId === 'Cabdalah' && password === '@som1234') {
-                return res.json({ success: true, role: 'practice-teacher', data: { name: 'Cabdalah', uid: 'practice-cabdalah' } });
-            }
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        return res.status(400).json({ error: 'Invalid role' });
+        return res.status(401).json({ error: 'Invalid credentials' });
     } catch (e) {
         console.error('Login error:', e);
         return res.status(500).json({ error: 'Server error' });
