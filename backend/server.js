@@ -263,31 +263,62 @@ app.post('/api/import', async (req, res) => {
 
 // Seed default teachers
 async function seedDefaults() {
-    const existing = await db.getAll('teachers');
-    if (existing.length > 0) return;
-    const teachers = [
-        { name: 'Try', subject: 'General', teacherId: 'TCH001', contact: '', password: '@som1234' },
-        { name: 'C.Shakuur', subject: 'General', teacherId: 'TCH002', contact: '', password: '@som1234' },
-        { name: 'Muqtaar', subject: 'General', teacherId: 'TCH003', contact: '', password: '@som1234' },
-        { name: 'Aadan', subject: 'Mathematics', teacherId: 'TCH004', contact: '', password: '@som1234' },
-        { name: 'Cabdalah', subject: 'General', teacherId: 'TCH005', contact: '', password: '@som1234', role: 'practice-teacher', disciplineOnly: true }
-    ];
-    for (const t of teachers) await db.insert('teachers', t);
-    const classes = [
-        { name: 'Class 1', grade: '1' }, { name: 'Class 2', grade: '2' },
-        { name: 'Class 3', grade: '3' }, { name: 'Class 4', grade: '4' },
-        { name: 'Class 5', grade: '5' }, { name: 'Class 6', grade: '6' },
-        { name: 'Class 7', grade: '7' }, { name: 'Class 8', grade: '8' },
-        { name: 'Class 9', grade: '9' }, { name: 'Class 10', grade: '10' }
-    ];
-    for (const c of classes) await db.insert('classes', c);
-    const subjects = [
-        { name: 'English', code: 'ENG' },
-        { name: 'Mathematics', code: 'MATH' },
-        { name: 'Science', code: 'SCI' }
-    ];
-    for (const s of subjects) await db.insert('subjects', s);
-    console.log('  ✓ Default data seeded (teachers, classes, subjects)');
+    // Teachers
+    const existingTeachers = await db.getAll('teachers');
+    if (existingTeachers.length === 0) {
+        const teachers = [
+            { name: 'Try', subject: 'General', teacherId: 'TCH001', contact: '', password: '@som1234' },
+            { name: 'C.Shakuur', subject: 'General', teacherId: 'TCH002', contact: '', password: '@som1234' },
+            { name: 'Muqtaar', subject: 'General', teacherId: 'TCH003', contact: '', password: '@som1234' },
+            { name: 'Aadan', subject: 'Mathematics', teacherId: 'TCH004', contact: '', password: '@som1234' },
+            { name: 'Cabdalah', subject: 'General', teacherId: 'TCH005', contact: '', password: '@som1234', role: 'practice-teacher', disciplineOnly: true }
+        ];
+        for (const t of teachers) await db.insert('teachers', t);
+        console.log('  ✓ Teachers seeded');
+    }
+
+    // Classes
+    const existingClasses = await db.getAll('classes');
+    if (existingClasses.length === 0) {
+        const classes = [
+            { name: 'TRY 2:00', teacherId: 'TCH001' },
+            { name: 'TRY 3:00', teacherId: 'TCH001' },
+            { name: 'TRY 4:00', teacherId: 'TCH001' },
+            { name: 'TRY 7:00', teacherId: 'TCH001' }
+        ];
+        for (const c of classes) await db.insert('classes', c);
+        console.log('  ✓ Classes seeded');
+    }
+
+    // Subjects
+    const existingSubjects = await db.getAll('subjects');
+    if (existingSubjects.length === 0) {
+        const subjects = [
+            { name: 'English', code: 'ENG' },
+            { name: 'Mathematics', code: 'MATH' },
+            { name: 'Science', code: 'SCI' }
+        ];
+        for (const s of subjects) await db.insert('subjects', s);
+        console.log('  ✓ Subjects seeded');
+    }
+
+    // Students SOMSTAR100-SOMSTAR500
+    const existingStudents = await db.getAll('students');
+    if (existingStudents.length === 0) {
+        let count = 0;
+        for (let id = 100; id <= 500; id++) {
+            await db.insert('students', {
+                studentId: 'SOMSTAR' + id,
+                fullName: '',
+                class: 'TRY 7:00',
+                phone: '',
+                password: '@som1234',
+                status: 'active'
+            });
+            count++;
+        }
+        console.log(`  ✓ ${count} students seeded (SOMSTAR100-SOMSTAR500)`);
+    }
 }
 
 // Health check
