@@ -1954,9 +1954,10 @@
                 const badge = document.getElementById('dbBadge');
                 if (!badge) return;
                 const isPg = info.type === 'postgresql';
-                badge.className = 'hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium cursor-help ' + (isPg ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 animate-pulse' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400');
-                badge.innerHTML = '<i class="fas fa-circle text-[8px] ' + (isPg ? 'text-green-500' : 'text-red-500') + '"></i> <span>' + (isPg ? 'PostgreSQL' : 'SQLITE') + '</span>';
-                badge.title = isPg ? 'Data is permanent (PostgreSQL)' : 'ERROR: ' + (info.pgError || 'PostgreSQL unavailable');
+                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                badge.className = 'hidden md:inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium cursor-help ' + (isPg ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 animate-pulse' : (isLocal ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'));
+                badge.innerHTML = '<i class="fas fa-circle text-[8px] ' + (isPg ? 'text-green-500' : (isLocal ? 'text-blue-500' : 'text-red-500')) + '"></i> <span>' + (isPg ? 'PostgreSQL' : 'SQLITE') + '</span>';
+                badge.title = isPg ? 'Data is permanent (PostgreSQL)' : (isLocal ? 'SQLite - data is persistent (local file)' : 'ERROR: ' + (info.pgError || 'PostgreSQL unavailable'));
                 if (!isPg) {
                     let warn = document.getElementById('dbWarning');
                     if (!warn) {
@@ -1964,12 +1965,15 @@
                         warn.id = 'dbWarning';
                         warn.className = 'mx-4 md:mx-6 mb-2 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm';
                         const errMsg = info.pgError || '';
-                        if (errMsg.includes('ENOTFOUND') || errMsg.includes('not found')) {
+                        if (isLocal) {
+                            warn.className = 'mx-4 md:mx-6 mb-2 px-4 py-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 text-sm';
+                            warn.innerHTML = '<i class="fas fa-check-circle"></i> <span><strong>SQLite</strong> — data saved to file. Persistent across restarts.</span>';
+                        } else if (errMsg.includes('ENOTFOUND') || errMsg.includes('not found')) {
                             warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> PostgreSQL database paused/not found. Data is in temporary SQLite — <strong>will be lost on redeploy!</strong> Check your database provider dashboard and redeploy.</span>';
                         } else if (errMsg.includes('timeout')) {
                             warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> PostgreSQL connection timed out. Check your database provider and redeploy.</span>';
                         } else {
-                            warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>CRITICAL:</strong> Database is using SQLite (temporary). Data will be lost on server restart. Error: ' + errMsg.substring(0, 100) + '</span>';
+                            warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span><strong>NOTE:</strong> Using SQLite. ' + (errMsg ? 'Error: ' + errMsg.substring(0, 100) : '') + '</span>';
                         }
                         document.querySelector('.p-4.md\\:p-6')?.prepend(warn);
                     } else {
